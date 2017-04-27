@@ -117,6 +117,7 @@ public class Doclava {
   public static boolean staticOnly = false;
   public static AuxSource auxSource = new EmptyAuxSource();
   public static Linter linter = new EmptyLinter();
+  public static boolean android = false;
 
   public static JSilver jSilver = null;
 
@@ -316,7 +317,7 @@ public class Doclava {
       } else if (a[0].equals("-yaml")) {
         yamlNavFile = a[1];
       } else if (a[0].equals("-dac_libraryroot")) {
-        libraryRoot = a[1];
+        libraryRoot = ensureSlash(a[1]);
         mHDFData.add(new String[] {"library.root", a[1]});
       } else if (a[0].equals("-dac_dataname")) {
         mHDFData.add(new String[] {"dac_dataname", a[1]});
@@ -348,6 +349,7 @@ public class Doclava {
       } else if (a[0].equals("-android")) {
         auxSource = new AndroidAuxSource();
         linter = new AndroidLinter();
+        android = true;
       }
     }
 
