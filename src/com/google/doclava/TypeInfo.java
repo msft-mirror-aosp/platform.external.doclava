@@ -24,7 +24,7 @@ public class TypeInfo implements Resolvable {
   public static final Set<String> PRIMITIVE_TYPES = Collections.unmodifiableSet(
       new HashSet<String>(Arrays.asList("boolean", "byte", "char", "double", "float", "int",
       "long", "short", "void")));
-  
+
   public TypeInfo(boolean isPrimitive, String dimension, String simpleTypeName,
       String qualifiedTypeName, ClassInfo cl) {
     mIsPrimitive = isPrimitive;
@@ -107,7 +107,7 @@ public class TypeInfo implements Resolvable {
       typeString = typeString.substring(0, extendsPos);
     }
 
-    int pos = typeString.indexOf('['); 
+    int pos = typeString.indexOf('[');
     if (pos > -1) {
       mDimension = typeString.substring(pos);
       typeString = typeString.substring(0, pos);
@@ -153,7 +153,17 @@ public class TypeInfo implements Resolvable {
     mFullName = other.fullName();
   }
 
+  /**
+   * Returns this type as a {@link ClassInfo} if it represents a class or
+   * interface.
+   */
   public ClassInfo asClassInfo() {
+    if (!mResolvedClass) {
+      mResolvedClass = true;
+      if (mClass == null && !mIsPrimitive && !mIsTypeVariable && !mIsWildcard) {
+        mClass = Converter.obtainClass(qualifiedTypeName());
+      }
+    }
     return mClass;
   }
 
@@ -524,9 +534,11 @@ public class TypeInfo implements Resolvable {
    */
   public static Map<String, TypeInfo> getTypeArgumentMapping(TypeInfo generic, TypeInfo typed) {
     Map<String, TypeInfo> map = new HashMap<String, TypeInfo>();
-    for (int i = 0; i < generic.typeArguments().size(); i++) {
-      if (typed.typeArguments() != null && typed.typeArguments().size() > i) {
-        map.put(generic.typeArguments().get(i).simpleTypeName(), typed.typeArguments().get(i));
+    if (generic != null && generic.typeArguments() != null) {
+      for (int i = 0; i < generic.typeArguments().size(); i++) {
+        if (typed.typeArguments() != null && typed.typeArguments().size() > i) {
+          map.put(generic.typeArguments().get(i).simpleTypeName(), typed.typeArguments().get(i));
+        }
       }
     }
     return map;
@@ -541,6 +553,9 @@ public class TypeInfo implements Resolvable {
   }
 
   private ArrayList<Resolution> mResolutions;
+
+  /** Whether the value of {@code mClass} has been resolved. */
+  private boolean mResolvedClass;
 
   private boolean mIsPrimitive;
   private boolean mIsTypeVariable;

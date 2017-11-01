@@ -20,7 +20,14 @@ import com.google.clearsilver.jsilver.data.Data;
 import com.google.doclava.apicheck.AbstractMethodInfo;
 import com.google.doclava.apicheck.ApiInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolvable {
   public static final Comparator<MethodInfo> comparator = new Comparator<MethodInfo>() {
@@ -221,7 +228,8 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
       // Note: We only do this for "included" classes (i.e. those we have source code for); we do
       // not have comments for classes from .class files but we do know whether a method is marked
       // as @Deprecated.
-      if (mContainingClass.isIncluded() && commentDeprecated != annotationDeprecated) {
+      if (mContainingClass.isIncluded() && !isHiddenOrRemoved()
+          && commentDeprecated != annotationDeprecated) {
         Errors.error(Errors.DEPRECATION_MISMATCH, position(), "Method "
             + mContainingClass.qualifiedName() + "." + name()
             + ": @Deprecated annotation (" + (annotationDeprecated ? "" : "not ")
@@ -504,10 +512,13 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
           }
         }
 
+        // Collect all docs requested by annotations
+        TagInfo[] auxTags = Doclava.auxSource.paramAuxTags(this, param, comment);
+
         // Okay, now add the collected parameter information to the method data
         mParamTags[i] =
             new ParamTagInfo("@param", type, name + " " + comment, parent(),
-                position);
+                position, auxTags);
 
         // while we're here, if we find any parameters that are still
         // undocumented at this point, complain. This warning is off by
@@ -517,6 +528,8 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
           Errors.error(Errors.UNDOCUMENTED_PARAMETER, position,
               "Undocumented parameter '" + name + "' on method '"
               + name() + "'");
+        } else {
+          Doclava.linter.lintParameter(this, param, position, mParamTags[i]);
         }
         i++;
       }
@@ -613,6 +626,7 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
 
     TagInfo.makeHDF(data, base + ".shortDescr", firstSentenceTags());
     TagInfo.makeHDF(data, base + ".descr", inlineTags());
+    TagInfo.makeHDF(data, base + ".descrAux", Doclava.auxSource.methodAuxTags(this));
     TagInfo.makeHDF(data, base + ".blockTags", blockTags());
     TagInfo.makeHDF(data, base + ".deprecated", deprecatedTags());
     TagInfo.makeHDF(data, base + ".seeAlso", seeTags());
@@ -631,6 +645,7 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
       data.setValue(base + ".scope", "public");
     }
     TagInfo.makeHDF(data, base + ".returns", returnTags());
+    TagInfo.makeHDF(data, base + ".returnsAux", Doclava.auxSource.returnAuxTags(this));
 
     if (mTypeParameters != null) {
       TypeInfo.makeHDF(data, base + ".generic.typeArguments", mTypeParameters, false);
@@ -647,13 +662,14 @@ public class MethodInfo extends MemberInfo implements AbstractMethodInfo, Resolv
       }
     }
 
-
     AnnotationInstanceInfo.makeLinkListHDF(
       data,
       base + ".showAnnotations",
       showAnnotations().toArray(new AnnotationInstanceInfo[showAnnotations().size()]));
 
     setFederatedReferences(data, base);
+
+    Doclava.linter.lintMethod(this);
   }
 
   public HashSet<String> typeVariables() {
