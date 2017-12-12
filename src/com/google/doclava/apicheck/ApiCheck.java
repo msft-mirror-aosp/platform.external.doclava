@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.google.doclava.Errors;
 import com.google.doclava.PackageInfo;
@@ -64,7 +65,9 @@ public class ApiCheck {
     if (originalArgs.length == 3 && "-convert".equals(originalArgs[0])) {
       System.exit(convertToApi(originalArgs[1], originalArgs[2]));
     } else if (originalArgs.length == 3 && "-convert2xml".equals(originalArgs[0])) {
-      System.exit(convertToXml(originalArgs[1], originalArgs[2]));
+      System.exit(convertToXml(originalArgs[1], originalArgs[2], true));
+    } else if (originalArgs.length == 3 && "-convert2xmlnostrip".equals(originalArgs[0])) {
+      System.exit(convertToXml(originalArgs[1], originalArgs[2], false));
     } else if (originalArgs.length == 4 && "-new_api".equals(originalArgs[0])) {
       // command syntax: -new_api oldapi.txt newapi.txt diff.xml
       // TODO: Support reading in other options for new_api, such as ignored classes/packages.
@@ -247,28 +250,12 @@ public class ApiCheck {
   }
 
   static int convertToApi(String src, String dst) {
-    ApiInfo api;
-    try {
-      api = parseApi(src);
-    } catch (ApiParseException e) {
-      e.printStackTrace();
-      System.err.println("Error parsing API: " + src);
-      return 1;
-    }
-
-    PrintStream apiWriter = null;
-    try {
-      apiWriter = new PrintStream(dst);
-    } catch (FileNotFoundException ex) {
-      System.err.println("can't open file: " + dst);
-    }
-
-    Stubs.writeApi(apiWriter, api.getPackages().values());
-
-    return 0;
+    // This was historically used to convert XML to TXT format, which was a
+    // one-time migration.
+    throw new UnsupportedOperationException();
   }
 
-  static int convertToXml(String src, String dst) {
+  static int convertToXml(String src, String dst, boolean strip) {
     ApiInfo api;
     try {
       api = parseApi(src);
@@ -285,7 +272,7 @@ public class ApiCheck {
       System.err.println("can't open file: " + dst);
     }
 
-    Stubs.writeXml(apiWriter, api.getPackages().values());
+    Stubs.writeXml(apiWriter, api.getPackages().values(), c -> true);
 
     return 0;
   }

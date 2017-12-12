@@ -18,6 +18,7 @@ package com.google.doclava;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +28,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -43,10 +47,12 @@ import java.util.stream.Collectors;
 
 public class Stubs {
   public static void writeStubsAndApi(String stubsDir, String apiFile, String keepListFile,
-      String removedApiFile, String exactApiFile, HashSet<String> stubPackages) {
+      String removedApiFile, String exactApiFile, HashSet<String> stubPackages,
+      HashSet<String> stubImportPackages,
+      boolean stubSourceOnly) {
     // figure out which classes we need
     final HashSet<ClassInfo> notStrippable = new HashSet<ClassInfo>();
-    ClassInfo[] all = Converter.allClasses();
+    Collection<ClassInfo> all = Converter.allClasses();
     PrintStream apiWriter = null;
     PrintStream keepListWriter = null;
     PrintStream removedApiWriter = null;
@@ -94,11 +100,11 @@ public class Stubs {
             "Cannot open file for write");
       }
     }
-    // If a class is public or protected, not hidden, and marked as included,
+    // If a class is public or protected, not hidden, not imported and marked as included,
     // then we can't strip it
     for (ClassInfo cl : all) {
       if (cl.checkLevel() && cl.isIncluded()) {
-        cantStripThis(cl, notStrippable, "0:0");
+        cantStripThis(cl, notStrippable, "0:0", stubImportPackages);
       }
     }
 
@@ -117,7 +123,7 @@ public class Stubs {
                 + m.name() + " is deprecated");
           }
 
-          ClassInfo hiddenClass = findHiddenClasses(m.returnType());
+          ClassInfo hiddenClass = findHiddenClasses(m.returnType(), stubImportPackages);
           if (null != hiddenClass) {
             if (hiddenClass.qualifiedName() == m.returnType().asClassInfo().qualifiedName()) {
               // Return type is hidden
@@ -134,7 +140,7 @@ public class Stubs {
           for (ParameterInfo p :  m.parameters()) {
             TypeInfo t = p.type();
             if (!t.isPrimitive()) {
-              hiddenClass = findHiddenClasses(t);
+              hiddenClass = findHiddenClasses(t, stubImportPackages);
               if (null != hiddenClass) {
                 if (hiddenClass.qualifiedName() == t.asClassInfo().qualifiedName()) {
                   // Parameter type is hidden
@@ -187,6 +193,9 @@ public class Stubs {
     final HashSet<Pattern> stubPackageWildcards = extractWildcards(stubPackages);
     for (ClassInfo cl : notStrippable) {
       if (!cl.isDocOnly()) {
+        if (stubSourceOnly && !Files.exists(Paths.get(cl.position().file))) {
+          continue;
+        }
         if (shouldWriteStub(cl.containingPackage().name(), stubPackages, stubPackageWildcards)) {
           // write out the stubs
           if (stubsDir != null) {
@@ -205,40 +214,32 @@ public class Stubs {
         }
       }
     }
-    // write out the Api
+
+    Map<PackageInfo, List<ClassInfo>> allClassesByPackage = Converter.allClasses().stream()
+        .collect(Collectors.groupingBy(ClassInfo::containingPackage));
+
+    final boolean ignoreShown = Doclava.showAnnotations.isEmpty();
+
+    // Write out the current API
     if (apiWriter != null) {
-      writeApi(apiWriter, packages, notStrippable);
+      writeApi(apiWriter, packages,
+          new ApiPredicate().setIgnoreShown(ignoreShown),
+          new ApiPredicate().setIgnoreShown(true));
       apiWriter.close();
     }
 
-    // write out the keep list
+    // Write out the keep list
     if (keepListWriter != null) {
       writeKeepList(keepListWriter, packages, notStrippable);
       keepListWriter.close();
     }
 
-    HashMap<PackageInfo, List<ClassInfo>> allPackageClassMap =
-        new HashMap<PackageInfo, List<ClassInfo>>();
-    for (ClassInfo cl : Converter.allClasses()) {
-      if (allPackageClassMap.containsKey(cl.containingPackage())) {
-        allPackageClassMap.get(cl.containingPackage()).add(cl);
-      } else {
-        ArrayList<ClassInfo> classes = new ArrayList<ClassInfo>();
-        classes.add(cl);
-        allPackageClassMap.put(cl.containingPackage(), classes);
-      }
-    }
     // Write out the removed API
     if (removedApiWriter != null) {
-      writePredicateApi(removedApiWriter, allPackageClassMap, notStrippable,
-          new RemovedPredicate());
+      writeApi(removedApiWriter, allClassesByPackage,
+          new ApiPredicate().setIgnoreShown(ignoreShown).setMatchRemoved(true),
+          new ApiPredicate().setIgnoreShown(true).setIgnoreRemoved(true));
       removedApiWriter.close();
-    }
-    // Write out the exact API
-    if (exactApiWriter != null) {
-      writePredicateApi(exactApiWriter, allPackageClassMap, notStrippable,
-          new ExactPredicate());
-      exactApiWriter.close();
     }
   }
 
@@ -282,15 +283,34 @@ public class Stubs {
     return wildcards;
   }
 
-  private static ClassInfo findHiddenClasses(TypeInfo ti) {
+  /**
+   * Find references to hidden classes.
+   *
+   * <p>This finds hidden classes that are used by public parts of the API in order to ensure the
+   * API is self consistent and does not reference classes that are not included in
+   * the stubs. Any such references cause an error to be reported.
+   *
+   * <p>A reference to an imported class is not treated as an error, even though imported classes
+   * are hidden from the stub generation. That is because imported classes are, by definition,
+   * excluded from the set of classes for which stubs are required.
+   *
+   * @param ti the type information to examine for references to hidden classes.
+   * @param stubImportPackages the possibly null set of imported package names.
+   * @return a reference to a hidden class or null if there are none
+   */
+  private static ClassInfo findHiddenClasses(TypeInfo ti, HashSet<String> stubImportPackages) {
     ClassInfo ci = ti.asClassInfo();
     if (ci == null) return null;
+    if (stubImportPackages != null
+        && stubImportPackages.contains(ci.containingPackage().qualifiedName())) {
+      return null;
+    }
     if (ci.isHiddenOrRemoved()) return ci;
     if (ti.typeArguments() != null) {
       for (TypeInfo tii : ti.typeArguments()) {
         // Avoid infinite recursion in the case of Foo<T extends Foo>
         if (tii.qualifiedTypeName() != ti.qualifiedTypeName()) {
-          ClassInfo hiddenClass = findHiddenClasses(tii);
+          ClassInfo hiddenClass = findHiddenClasses(tii, stubImportPackages);
           if (hiddenClass != null) return hiddenClass;
         }
       }
@@ -298,7 +318,14 @@ public class Stubs {
     return null;
   }
 
-  public static void cantStripThis(ClassInfo cl, HashSet<ClassInfo> notStrippable, String why) {
+  public static void cantStripThis(ClassInfo cl, HashSet<ClassInfo> notStrippable, String why,
+      HashSet<String> stubImportPackages) {
+
+    if (stubImportPackages != null
+        && stubImportPackages.contains(cl.containingPackage().qualifiedName())) {
+      // if the package is imported then it does not need stubbing.
+      return;
+    }
 
     if (!notStrippable.add(cl)) {
       // slight optimization: if it already contains cl, it already contains
@@ -318,12 +345,14 @@ public class Stubs {
       for (FieldInfo fInfo : cl.selfFields()) {
         if (fInfo.type() != null) {
           if (fInfo.type().asClassInfo() != null) {
-            cantStripThis(fInfo.type().asClassInfo(), notStrippable, "2:" + cl.qualifiedName());
+            cantStripThis(fInfo.type().asClassInfo(), notStrippable, "2:" + cl.qualifiedName(),
+                stubImportPackages);
           }
           if (fInfo.type().typeArguments() != null) {
             for (TypeInfo tTypeInfo : fInfo.type().typeArguments()) {
               if (tTypeInfo.asClassInfo() != null) {
-                cantStripThis(tTypeInfo.asClassInfo(), notStrippable, "3:" + cl.qualifiedName());
+                cantStripThis(tTypeInfo.asClassInfo(), notStrippable, "3:" + cl.qualifiedName(),
+                    stubImportPackages);
               }
             }
           }
@@ -335,7 +364,8 @@ public class Stubs {
       if (cl.asTypeInfo().typeArguments() != null) {
         for (TypeInfo tInfo : cl.asTypeInfo().typeArguments()) {
           if (tInfo.asClassInfo() != null) {
-            cantStripThis(tInfo.asClassInfo(), notStrippable, "4:" + cl.qualifiedName());
+            cantStripThis(tInfo.asClassInfo(), notStrippable, "4:" + cl.qualifiedName(),
+                stubImportPackages);
           }
         }
       }
@@ -343,11 +373,12 @@ public class Stubs {
     // cant strip any of the annotation elements
     // cantStripThis(cl.annotationElements(), notStrippable);
     // take care of methods
-    cantStripThis(cl.allSelfMethods(), notStrippable);
-    cantStripThis(cl.allConstructors(), notStrippable);
+    cantStripThis(cl.allSelfMethods(), notStrippable, stubImportPackages);
+    cantStripThis(cl.allConstructors(), notStrippable, stubImportPackages);
     // blow the outer class open if this is an inner class
     if (cl.containingClass() != null) {
-      cantStripThis(cl.containingClass(), notStrippable, "5:" + cl.qualifiedName());
+      cantStripThis(cl.containingClass(), notStrippable, "5:" + cl.qualifiedName(),
+          stubImportPackages);
     }
     // blow open super class and interfaces
     ClassInfo supr = cl.realSuperclass();
@@ -365,7 +396,8 @@ public class Stubs {
         Errors.error(Errors.HIDDEN_SUPERCLASS, cl.position(), "Public class " + cl.qualifiedName()
             + " stripped of unavailable superclass " + supr.qualifiedName());
       } else {
-        cantStripThis(supr, notStrippable, "6:" + cl.realSuperclass().name() + cl.qualifiedName());
+        cantStripThis(supr, notStrippable, "6:" + cl.realSuperclass().name() + cl.qualifiedName(),
+            stubImportPackages);
         if (supr.isPrivate()) {
           Errors.error(Errors.PRIVATE_SUPERCLASS, cl.position(), "Public class "
               + cl.qualifiedName() + " extends private class " + supr.qualifiedName());
@@ -374,7 +406,8 @@ public class Stubs {
     }
   }
 
-  private static void cantStripThis(ArrayList<MethodInfo> mInfos, HashSet<ClassInfo> notStrippable) {
+  private static void cantStripThis(ArrayList<MethodInfo> mInfos, HashSet<ClassInfo> notStrippable,
+      HashSet<String> stubImportPackages) {
     // for each method, blow open the parameters, throws and return types. also blow open their
     // generics
     if (mInfos != null) {
@@ -383,7 +416,8 @@ public class Stubs {
           for (TypeInfo tInfo : mInfo.getTypeParameters()) {
             if (tInfo.asClassInfo() != null) {
               cantStripThis(tInfo.asClassInfo(), notStrippable, "8:"
-                  + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name());
+                  + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name(),
+                  stubImportPackages);
             }
           }
         }
@@ -391,7 +425,8 @@ public class Stubs {
           for (ParameterInfo pInfo : mInfo.parameters()) {
             if (pInfo.type() != null && pInfo.type().asClassInfo() != null) {
               cantStripThis(pInfo.type().asClassInfo(), notStrippable, "9:"
-                  + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name());
+                  + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name(),
+                  stubImportPackages);
               if (pInfo.type().typeArguments() != null) {
                 for (TypeInfo tInfoType : pInfo.type().typeArguments()) {
                   if (tInfoType.asClassInfo() != null) {
@@ -404,7 +439,8 @@ public class Stubs {
                                   + "()");
                     } else {
                       cantStripThis(tcl, notStrippable, "10:"
-                          + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name());
+                          + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name(),
+                          stubImportPackages);
                     }
                   }
                 }
@@ -414,16 +450,18 @@ public class Stubs {
         }
         for (ClassInfo thrown : mInfo.thrownExceptions()) {
           cantStripThis(thrown, notStrippable, "11:" + mInfo.realContainingClass().qualifiedName()
-              + ":" + mInfo.name());
+              + ":" + mInfo.name(), stubImportPackages);
         }
         if (mInfo.returnType() != null && mInfo.returnType().asClassInfo() != null) {
           cantStripThis(mInfo.returnType().asClassInfo(), notStrippable, "12:"
-              + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name());
+              + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name(),
+              stubImportPackages);
           if (mInfo.returnType().typeArguments() != null) {
             for (TypeInfo tyInfo : mInfo.returnType().typeArguments()) {
               if (tyInfo.asClassInfo() != null) {
                 cantStripThis(tyInfo.asClassInfo(), notStrippable, "13:"
-                    + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name());
+                    + mInfo.realContainingClass().qualifiedName() + ":" + mInfo.name(),
+                    stubImportPackages);
               }
             }
           }
@@ -811,42 +849,6 @@ public class Stubs {
         || !field.type().dimension().equals("") || field.containingClass().isInterface();
   }
 
-  // Returns 'true' if the method is an @Override of a visible parent
-  // method implementation, and thus does not affect the API.
-  static boolean methodIsOverride(HashSet<ClassInfo> notStrippable, MethodInfo mi) {
-    // Abstract/static/final methods are always listed in the API description
-    if (mi.isAbstract() || mi.isStatic() || mi.isFinal()) {
-      return false;
-    }
-
-    // Find any relevant ancestor declaration and inspect it
-    MethodInfo om = mi;
-    do {
-      MethodInfo superMethod = om.findSuperclassImplementation(notStrippable);
-      if (om.equals(superMethod)) {
-        break;
-      }
-      om = superMethod;
-    } while (om != null && (om.isHiddenOrRemoved() || om.containingClass().isHiddenOrRemoved()));
-    if (om != null) {
-      // Visibility mismatch is an API change, so check for it
-      if (mi.mIsPrivate == om.mIsPrivate && mi.mIsPublic == om.mIsPublic
-          && mi.mIsProtected == om.mIsProtected) {
-        // Look only for overrides of an ancestor class implementation,
-        // not of e.g. an abstract or interface method declaration
-        if (!om.isAbstract()) {
-          // If the only "override" turns out to be in our own class
-          // (which sometimes happens in concrete subclasses of
-          // abstract base classes), it's not really an override
-          if (!mi.mContainingClass.equals(om.mContainingClass)) {
-                return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
   static boolean canCallMethod(ClassInfo from, MethodInfo m) {
     if (m.isPublic() || m.isProtected()) {
       return true;
@@ -980,30 +982,12 @@ public class Stubs {
     stream.println(";");
   }
 
-  static void writeXML(PrintStream xmlWriter, HashMap<PackageInfo, List<ClassInfo>> allClasses,
-      HashSet<ClassInfo> notStrippable) {
-    // extract the set of packages, sort them by name, and write them out in that order
-    Set<PackageInfo> allClassKeys = allClasses.keySet();
-    PackageInfo[] allPackages = allClassKeys.toArray(new PackageInfo[allClassKeys.size()]);
-    Arrays.sort(allPackages, PackageInfo.comparator);
+  public static void writeXml(PrintStream xmlWriter, Collection<PackageInfo> pkgs,
+      Predicate<ClassInfo> notStrippable) {
 
-    xmlWriter.println("<api>");
-    for (PackageInfo pack : allPackages) {
-      writePackageXML(xmlWriter, pack, allClasses.get(pack), notStrippable);
-    }
-    xmlWriter.println("</api>");
-  }
-
-  public static void writeXml(PrintStream xmlWriter, Collection<PackageInfo> pkgs) {
     final PackageInfo[] packages = pkgs.toArray(new PackageInfo[pkgs.size()]);
     Arrays.sort(packages, PackageInfo.comparator);
 
-    HashSet<ClassInfo> notStrippable = new HashSet();
-    for (PackageInfo pkg: packages) {
-      for (ClassInfo cl: pkg.allClasses().values()) {
-        notStrippable.add(cl);
-      }
-    }
     xmlWriter.println("<api>");
     for (PackageInfo pkg: packages) {
       writePackageXML(xmlWriter, pkg, pkg.allClasses().values(), notStrippable);
@@ -1011,8 +995,17 @@ public class Stubs {
     xmlWriter.println("</api>");
   }
 
+  public static void writeXml(PrintStream xmlWriter, Collection<PackageInfo> pkgs) {
+    HashSet<ClassInfo> allClasses = new HashSet<>();
+    for (PackageInfo pkg: pkgs) {
+      allClasses.addAll(pkg.allClasses().values());
+    }
+    Predicate<ClassInfo> notStrippable = allClasses::contains;
+    writeXml(xmlWriter, pkgs, notStrippable);
+  }
+
   static void writePackageXML(PrintStream xmlWriter, PackageInfo pack,
-      Collection<ClassInfo> classList, HashSet<ClassInfo> notStrippable) {
+      Collection<ClassInfo> classList, Predicate<ClassInfo> notStrippable) {
     ClassInfo[] classes = classList.toArray(new ClassInfo[classList.size()]);
     Arrays.sort(classes, ClassInfo.comparator);
     // Work around the bogus "Array" class we invent for
@@ -1031,7 +1024,7 @@ public class Stubs {
 
   }
 
-  static void writeClassXML(PrintStream xmlWriter, ClassInfo cl, HashSet<ClassInfo> notStrippable) {
+  static void writeClassXML(PrintStream xmlWriter, ClassInfo cl, Predicate<ClassInfo> notStrippable) {
     String scope = cl.scope();
     String deprecatedString = "";
     String declString = (cl.isInterface()) ? "interface" : "class";
@@ -1055,7 +1048,7 @@ public class Stubs {
     ArrayList<ClassInfo> interfaces = cl.realInterfaces();
     Collections.sort(interfaces, ClassInfo.comparator);
     for (ClassInfo iface : interfaces) {
-      if (notStrippable.contains(iface)) {
+      if (notStrippable.test(iface)) {
         xmlWriter.println("<implements name=\"" + iface.qualifiedName() + "\">");
         xmlWriter.println("</implements>");
       }
@@ -1070,9 +1063,7 @@ public class Stubs {
     ArrayList<MethodInfo> methods = cl.allSelfMethods();
     Collections.sort(methods, MethodInfo.comparator);
     for (MethodInfo mi : methods) {
-      if (!methodIsOverride(notStrippable, mi)) {
-        writeMethodXML(xmlWriter, mi);
-      }
+      writeMethodXML(xmlWriter, mi);
     }
 
     ArrayList<FieldInfo> fields = cl.selfFields();
@@ -1196,76 +1187,148 @@ public class Stubs {
     return returnString;
   }
 
-  public static class RemovedPredicate implements Predicate<MemberInfo> {
+  /**
+   * Predicate that decides if the given member should be considered part of an
+   * API surface area. To make the most accurate decision, it searches for
+   * signals on the member, all containing classes, and all containing packages.
+   */
+  public static class ApiPredicate implements Predicate<MemberInfo> {
+    public boolean ignoreShown;
+    public boolean ignoreRemoved;
+    public boolean matchRemoved;
+
+    /**
+     * Set if the value of {@link MemberInfo#hasShowAnnotation()} should be
+     * ignored. That is, this predicate will assume that all encountered members
+     * match the "shown" requirement.
+     * <p>
+     * This is typically useful when generating "current.txt", when no
+     * {@link Doclava#showAnnotations} have been defined.
+     */
+    public ApiPredicate setIgnoreShown(boolean ignoreShown) {
+      this.ignoreShown = ignoreShown;
+      return this;
+    }
+
+    /**
+     * Set if the value of {@link MemberInfo#isRemoved()} should be ignored.
+     * That is, this predicate will assume that all encountered members match
+     * the "removed" requirement.
+     * <p>
+     * This is typically useful when generating "removed.txt", when it's okay to
+     * reference both current and removed APIs.
+     */
+    public ApiPredicate setIgnoreRemoved(boolean ignoreRemoved) {
+      this.ignoreRemoved = ignoreRemoved;
+      return this;
+    }
+
+    /**
+     * Set what the value of {@link MemberInfo#isRemoved()} must be equal to in
+     * order for a member to match.
+     * <p>
+     * This is typically useful when generating "removed.txt", when you only
+     * want to match members that have actually been removed.
+     */
+    public ApiPredicate setMatchRemoved(boolean matchRemoved) {
+      this.matchRemoved = matchRemoved;
+      return this;
+    }
+
+    private static PackageInfo containingPackage(PackageInfo pkg) {
+      String name = pkg.name();
+      final int lastDot = name.lastIndexOf('.');
+      if (lastDot == -1) {
+        return null;
+      } else {
+        name = name.substring(0, lastDot);
+        return Converter.obtainPackage(name);
+      }
+    }
+
     @Override
     public boolean test(MemberInfo member) {
-      ClassInfo clazz = member.containingClass();
-
       boolean visible = member.isPublic() || member.isProtected();
+      boolean hasShowAnnotation = member.hasShowAnnotation();
+      boolean hidden = member.isHidden();
+      boolean docOnly = member.isDocOnly();
       boolean removed = member.isRemoved();
+
+      ClassInfo clazz = member.containingClass();
+      if (clazz != null) {
+        PackageInfo pkg = clazz.containingPackage();
+        while (pkg != null) {
+          hidden |= pkg.isHidden();
+          docOnly |= pkg.isDocOnly();
+          removed |= pkg.isRemoved();
+          pkg = containingPackage(pkg);
+        }
+      }
       while (clazz != null) {
         visible &= clazz.isPublic() || clazz.isProtected();
+        hasShowAnnotation |= clazz.hasShowAnnotation();
+        hidden |= clazz.isHidden();
+        docOnly |= clazz.isDocOnly();
         removed |= clazz.isRemoved();
         clazz = clazz.containingClass();
       }
 
-      if (visible && removed) {
-        if (member instanceof MethodInfo) {
-          final MethodInfo method = (MethodInfo) member;
-          return (method.findOverriddenMethod(method.name(), method.signature()) == null);
-        } else {
-          return true;
-        }
-      } else {
-        return false;
+      if (ignoreShown) {
+        hasShowAnnotation = true;
       }
+      if (ignoreRemoved) {
+        removed = matchRemoved;
+      }
+
+      return visible && hasShowAnnotation && !hidden && !docOnly && (removed == matchRemoved);
     }
   }
 
-  public static class ExactPredicate implements Predicate<MemberInfo> {
+  /**
+   * Filter that will elide exact duplicate members that are already included
+   * in another superclass/interfaces.
+   */
+  public static class ElidingPredicate implements Predicate<MemberInfo> {
+    private final Predicate<MemberInfo> wrapped;
+
+    public ElidingPredicate(Predicate<MemberInfo> wrapped) {
+      this.wrapped = wrapped;
+    }
+
     @Override
     public boolean test(MemberInfo member) {
-      ClassInfo clazz = member.containingClass();
-
-      boolean visible = member.isPublic() || member.isProtected();
-      boolean hasShowAnnotation = member.hasShowAnnotation();
-      boolean hiddenOrRemoved = member.isHiddenOrRemoved();
-      while (clazz != null) {
-        visible &= clazz.isPublic() || clazz.isProtected();
-        hasShowAnnotation |= clazz.hasShowAnnotation();
-        hiddenOrRemoved |= clazz.isHiddenOrRemoved();
-        clazz = clazz.containingClass();
-      }
-
-      if (visible && hasShowAnnotation && !hiddenOrRemoved) {
-        if (member instanceof MethodInfo) {
-          final MethodInfo method = (MethodInfo) member;
-          return (method.findOverriddenMethod(method.name(), method.signature()) == null);
-        } else {
-          return true;
-        }
+      // This member should be included, but if it's an exact duplicate
+      // override then we can elide it.
+      if (member instanceof MethodInfo) {
+        MethodInfo method = (MethodInfo) member;
+        String methodRaw = writeMethodApiWithoutDefault(method);
+        return (method.findPredicateOverriddenMethod(new Predicate<MemberInfo>() {
+          @Override
+          public boolean test(MemberInfo test) {
+            // We're looking for included and perfect signature
+            return (wrapped.test(test)
+                && writeMethodApiWithoutDefault((MethodInfo) test).equals(methodRaw));
+          }
+        }) == null);
       } else {
-        return false;
+        return true;
       }
     }
   }
 
-  static void writePredicateApi(PrintStream apiWriter,
-      HashMap<PackageInfo, List<ClassInfo>> allPackageClassMap, Set<ClassInfo> notStrippable,
-      Predicate<MemberInfo> predicate) {
-    final PackageInfo[] packages = allPackageClassMap.keySet().toArray(new PackageInfo[0]);
-    Arrays.sort(packages, PackageInfo.comparator);
-    for (PackageInfo pkg : packages) {
-      // beware that pkg.allClasses() has no class in it at the moment
-      final List<ClassInfo> classes = allPackageClassMap.get(pkg);
-      Collections.sort(classes, ClassInfo.comparator);
+  static void writeApi(PrintStream apiWriter, Map<PackageInfo, List<ClassInfo>> classesByPackage,
+      Predicate<MemberInfo> filterEmit, Predicate<MemberInfo> filterReference) {
+    for (PackageInfo pkg : classesByPackage.keySet().stream().sorted(PackageInfo.comparator)
+        .collect(Collectors.toList())) {
+      if (pkg.name().equals(PackageInfo.DEFAULT_PACKAGE)) continue;
+
       boolean hasWrittenPackageHead = false;
-      for (ClassInfo cl : classes) {
-        hasWrittenPackageHead = writeClassPredicateSelfMembers(apiWriter, cl, notStrippable,
-            predicate, hasWrittenPackageHead);
+      for (ClassInfo clazz : classesByPackage.get(pkg).stream().sorted(ClassInfo.comparator)
+          .collect(Collectors.toList())) {
+        hasWrittenPackageHead = writeClassApi(apiWriter, clazz, filterEmit, filterReference,
+            hasWrittenPackageHead);
       }
 
-      // the package contains some classes with some removed members
       if (hasWrittenPackageHead) {
         apiWriter.print("}\n\n");
       }
@@ -1275,27 +1338,37 @@ public class Stubs {
   /**
    * Write the removed members of the class to removed.txt
    */
-  private static boolean writeClassPredicateSelfMembers(PrintStream apiWriter, ClassInfo cl,
-      Set<ClassInfo> notStrippable, Predicate<MemberInfo> predicate,
+  private static boolean writeClassApi(PrintStream apiWriter, ClassInfo cl,
+      Predicate<MemberInfo> filterEmit, Predicate<MemberInfo> filterReference,
       boolean hasWrittenPackageHead) {
 
-    List<MethodInfo> constructors = cl.getExhaustiveConstructors().stream().filter(predicate)
+    List<MethodInfo> constructors = cl.getExhaustiveConstructors().stream().filter(filterEmit)
         .sorted(MethodInfo.comparator).collect(Collectors.toList());
-    List<MethodInfo> methods = cl.getExhaustiveMethods().stream().filter(predicate)
+    List<MethodInfo> methods = cl.filteredMethods(filterEmit).stream()
+        .filter(new ElidingPredicate(filterReference))
         .sorted(MethodInfo.comparator).collect(Collectors.toList());
-    List<FieldInfo> enums = cl.getExhaustiveEnumConstants().stream().filter(predicate)
+    List<FieldInfo> enums = cl.getExhaustiveEnumConstants().stream().filter(filterEmit)
         .sorted(FieldInfo.comparator).collect(Collectors.toList());
-    List<FieldInfo> fields = cl.getExhaustiveFields().stream().filter(predicate)
+    List<FieldInfo> fields = cl.filteredFields(filterEmit).stream()
         .sorted(FieldInfo.comparator).collect(Collectors.toList());
 
-    if (constructors.isEmpty() && methods.isEmpty() && enums.isEmpty() && fields.isEmpty()) {
+    final boolean classEmpty = (constructors.isEmpty() && methods.isEmpty() && enums.isEmpty()
+        && fields.isEmpty());
+    final boolean emit;
+    if (filterEmit.test(cl.asMemberInfo())) {
+      emit = true;
+    } else if (!classEmpty) {
+      emit = filterReference.test(cl.asMemberInfo());
+    } else {
+      emit = false;
+    }
+    if (!emit) {
       return hasWrittenPackageHead;
     }
 
     // Look for Android @SystemApi exposed outside the normal SDK; we require
     // that they're protected with a system permission.
-    if (Doclava.android && Doclava.showAnnotations.contains("android.annotation.SystemApi")
-        && !(predicate instanceof RemovedPredicate)) {
+    if (Doclava.android && Doclava.showAnnotations.contains("android.annotation.SystemApi")) {
       boolean systemService = "android.content.pm.PackageManager".equals(cl.qualifiedName());
       for (AnnotationInstanceInfo a : cl.annotations()) {
         if (a.type().qualifiedNameMatches("android", "annotation.SystemService")) {
@@ -1307,6 +1380,13 @@ public class Stubs {
           checkSystemPermissions(mi);
         }
       }
+    }
+
+    for (MethodInfo method : methods) {
+      checkHiddenTypes(method, filterReference);
+    }
+    for (FieldInfo field : fields) {
+      checkHiddenTypes(field, filterReference);
     }
 
     if (!hasWrittenPackageHead) {
@@ -1334,27 +1414,30 @@ public class Stubs {
     apiWriter.print(cl.isInterface() ? "interface" : "class");
     apiWriter.print(" ");
     apiWriter.print(cl.name());
-
-    if (!cl.isInterface()
-        && !"java.lang.Object".equals(cl.qualifiedName())
-        && cl.realSuperclass() != null
-        && !"java.lang.Object".equals(cl.realSuperclass().qualifiedName())) {
-      apiWriter.print(" extends ");
-      apiWriter.print(cl.realSuperclass().qualifiedName());
+    if (cl.hasTypeParameters()) {
+      apiWriter.print(TypeInfo.typeArgumentsName(cl.asTypeInfo().typeArguments(),
+          new HashSet<String>()));
     }
 
-    ArrayList<ClassInfo> interfaces = cl.realInterfaces();
-    Collections.sort(interfaces, ClassInfo.comparator);
+    if (!cl.isInterface()
+        && !"java.lang.Object".equals(cl.qualifiedName())) {
+      final ClassInfo superclass = cl.filteredSuperclass(filterReference);
+      if (superclass != null && !"java.lang.Object".equals(superclass.qualifiedName())) {
+        apiWriter.print(" extends ");
+        apiWriter.print(superclass.qualifiedName());
+      }
+    }
+
+    List<ClassInfo> interfaces = cl.filteredInterfaces(filterReference).stream()
+        .sorted(ClassInfo.comparator).collect(Collectors.toList());
     boolean first = true;
     for (ClassInfo iface : interfaces) {
-      if (notStrippable.contains(iface)) {
-        if (first) {
-          apiWriter.print(" implements");
-          first = false;
-        }
-        apiWriter.print(" ");
-        apiWriter.print(iface.qualifiedName());
+      if (first) {
+        apiWriter.print(" implements");
+        first = false;
       }
+      apiWriter.print(" ");
+      apiWriter.print(iface.qualifiedName());
     }
 
     apiWriter.print(" {\n");
@@ -1432,131 +1515,38 @@ public class Stubs {
     }
   }
 
-  public static void writeApi(PrintStream apiWriter, Collection<PackageInfo> pkgs) {
-    final PackageInfo[] packages = pkgs.toArray(new PackageInfo[pkgs.size()]);
-    Arrays.sort(packages, PackageInfo.comparator);
-
-    HashSet<ClassInfo> notStrippable = new HashSet();
-    for (PackageInfo pkg: packages) {
-      for (ClassInfo cl: pkg.allClasses().values()) {
-        notStrippable.add(cl);
+  private static void checkHiddenTypes(MethodInfo method, Predicate<MemberInfo> filterReference) {
+    checkHiddenTypes(method.returnType(), method, filterReference);
+    List<ParameterInfo> params = method.parameters();
+    if (params != null) {
+      for (ParameterInfo param : params) {
+        checkHiddenTypes(param.type(), method, filterReference);
       }
     }
-    for (PackageInfo pkg: packages) {
-      writePackageApi(apiWriter, pkg, pkg.allClasses().values(), notStrippable);
-    }
   }
 
-  static void writeApi(PrintStream apiWriter, HashMap<PackageInfo, List<ClassInfo>> allClasses,
-      HashSet<ClassInfo> notStrippable) {
-    // extract the set of packages, sort them by name, and write them out in that order
-    Set<PackageInfo> allClassKeys = allClasses.keySet();
-    PackageInfo[] allPackages = allClassKeys.toArray(new PackageInfo[allClassKeys.size()]);
-    Arrays.sort(allPackages, PackageInfo.comparator);
-
-    for (PackageInfo pack : allPackages) {
-      writePackageApi(apiWriter, pack, allClasses.get(pack), notStrippable);
-    }
+  private static void checkHiddenTypes(FieldInfo field, Predicate<MemberInfo> filterReference) {
+    checkHiddenTypes(field.type(), field, filterReference);
   }
 
-  static void writePackageApi(PrintStream apiWriter, PackageInfo pack,
-      Collection<ClassInfo> classList, HashSet<ClassInfo> notStrippable) {
-    // Work around the bogus "Array" class we invent for
-    // Arrays.copyOf's Class<? extends T[]> newType parameter. (http://b/2715505)
-    if (pack.name().equals(PackageInfo.DEFAULT_PACKAGE)) {
+  private static void checkHiddenTypes(TypeInfo type, MemberInfo member,
+      Predicate<MemberInfo> filterReference) {
+    if (type == null || type.isPrimitive()) {
       return;
     }
 
-    apiWriter.print("package ");
-    apiWriter.print(pack.qualifiedName());
-    apiWriter.print(" {\n\n");
-
-    ClassInfo[] classes = classList.toArray(new ClassInfo[classList.size()]);
-    Arrays.sort(classes, ClassInfo.comparator);
-    for (ClassInfo cl : classes) {
-      writeClassApi(apiWriter, cl, notStrippable);
+    ClassInfo clazz = type.asClassInfo();
+    if (clazz == null || !filterReference.test(clazz.asMemberInfo())) {
+      Errors.error(Errors.HIDDEN_TYPE_PARAMETER, member.position(),
+          "Member " + member + " references hidden type " + type.qualifiedTypeName() + ".");
     }
 
-    apiWriter.print("}\n\n");
-  }
-
-  static void writeClassApi(PrintStream apiWriter, ClassInfo cl, HashSet<ClassInfo> notStrippable) {
-    boolean first;
-
-    apiWriter.print("  ");
-    apiWriter.print(cl.scope());
-    if (cl.isStatic()) {
-      apiWriter.print(" static");
-    }
-    if (cl.isFinal()) {
-      apiWriter.print(" final");
-    }
-    if (cl.isAbstract()) {
-      apiWriter.print(" abstract");
-    }
-    if (cl.isDeprecated()) {
-      apiWriter.print(" deprecated");
-    }
-    apiWriter.print(" ");
-    apiWriter.print(cl.isInterface() ? "interface" : "class");
-    apiWriter.print(" ");
-    apiWriter.print(cl.name());
-    if (cl.hasTypeParameters()) {
-      apiWriter.print(TypeInfo.typeArgumentsName(cl.asTypeInfo().typeArguments(),
-          new HashSet<String>()));
-    }
-
-    if (!cl.isInterface()
-        && !"java.lang.Object".equals(cl.qualifiedName())
-        && cl.realSuperclass() != null
-        && !"java.lang.Object".equals(cl.realSuperclass().qualifiedName())) {
-      apiWriter.print(" extends ");
-      apiWriter.print(cl.realSuperclass().qualifiedName());
-    }
-
-    ArrayList<ClassInfo> interfaces = cl.realInterfaces();
-    Collections.sort(interfaces, ClassInfo.comparator);
-    first = true;
-    for (ClassInfo iface : interfaces) {
-      if (notStrippable.contains(iface)) {
-        if (first) {
-          apiWriter.print(" implements");
-          first = false;
-        }
-        apiWriter.print(" ");
-        apiWriter.print(iface.qualifiedName());
+    List<TypeInfo> args = type.typeArguments();
+    if (args != null) {
+      for (TypeInfo arg : args) {
+        checkHiddenTypes(arg, member, filterReference);
       }
     }
-
-    apiWriter.print(" {\n");
-
-    ArrayList<MethodInfo> constructors = cl.constructors();
-    Collections.sort(constructors, MethodInfo.comparator);
-    for (MethodInfo mi : constructors) {
-      writeConstructorApi(apiWriter, mi);
-    }
-
-    ArrayList<MethodInfo> methods = cl.allSelfMethods();
-    Collections.sort(methods, MethodInfo.comparator);
-    for (MethodInfo mi : methods) {
-      if (!methodIsOverride(notStrippable, mi)) {
-        writeMethodApi(apiWriter, mi);
-      }
-    }
-
-    ArrayList<FieldInfo> enums = cl.enumConstants();
-    Collections.sort(enums, FieldInfo.comparator);
-    for (FieldInfo fi : enums) {
-      writeFieldApi(apiWriter, fi, "enum_constant");
-    }
-
-    ArrayList<FieldInfo> fields = cl.selfFields();
-    Collections.sort(fields, FieldInfo.comparator);
-    for (FieldInfo fi : fields) {
-      writeFieldApi(apiWriter, fi, "field");
-    }
-
-    apiWriter.print("  }\n\n");
   }
 
   static void writeConstructorApi(PrintStream apiWriter, MethodInfo mi) {
@@ -1573,10 +1563,20 @@ public class Stubs {
     apiWriter.print(";\n");
   }
 
+  static String writeMethodApiWithoutDefault(MethodInfo mi) {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    writeMethodApi(new PrintStream(out), mi, false);
+    return out.toString();
+  }
+
   static void writeMethodApi(PrintStream apiWriter, MethodInfo mi) {
+    writeMethodApi(apiWriter, mi, true);
+  }
+
+  static void writeMethodApi(PrintStream apiWriter, MethodInfo mi, boolean withDefault) {
     apiWriter.print("    method ");
     apiWriter.print(mi.scope());
-    if (mi.isDefault()) {
+    if (mi.isDefault() && withDefault) {
       apiWriter.print(" default");
     }
     if (mi.isStatic()) {
