@@ -19,6 +19,7 @@ package com.google.doclava;
 import com.google.clearsilver.jsilver.data.Data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -63,7 +64,7 @@ public class NavTree {
    */
   public static void writeYamlTree(String dir, String fileName){
     Data data = Doclava.makeHDF();
-    ClassInfo[] classes = Converter.rootClasses();
+    Collection<ClassInfo> classes = Converter.rootClasses();
 
     SortedMap<String, Object> sorted = new TreeMap<String, Object>();
     for (ClassInfo cl : classes) {
@@ -165,7 +166,7 @@ public class NavTree {
 
     for (ClassInfo cl : classes) {
       if (cl.checkLevel()) {
-        children.add(new Node(cl.name(), cl.htmlPage(), null, cl.getSince()));
+        children.add(new Node(cl.name(), cl.htmlPage(), null, cl.getSince(), cl.getArtifact()));
       }
     }
 
@@ -179,12 +180,18 @@ public class NavTree {
     private String mLink;
     List<Node> mChildren;
     private String mSince;
+    private String mArtifact;
 
     Node(String label, String link, List<Node> children, String since) {
+      this(label, link, children, since, null);
+    }
+
+    Node(String label, String link, List<Node> children, String since, String artifact) {
       mLabel = label;
       mLink = link;
       mChildren = children;
       mSince = since;
+      mArtifact = artifact;
     }
 
     static void renderString(StringBuilder buf, String s) {
@@ -243,6 +250,8 @@ public class NavTree {
       renderChildren(buf);
       buf.append(", ");
       renderString(buf, mSince);
+      buf.append(", ");
+      renderString(buf, mArtifact);
       buf.append(" ]");
     }
   }
