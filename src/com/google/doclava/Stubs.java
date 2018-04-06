@@ -253,7 +253,8 @@ public class Stubs {
     ApiPredicate apiReference = new ApiPredicate().setIgnoreShown(true);
     Predicate<MemberInfo> apiEmit = apiFilter.and(new ElidingPredicate(apiReference));
 
-    Predicate<MemberInfo> privateEmit = apiFilter.negate();
+    Predicate<MemberInfo> memberIsNotCloned = (x -> !x.isCloned());
+    Predicate<MemberInfo> privateEmit = memberIsNotCloned.and(apiFilter.negate());
     Predicate<MemberInfo> privateReference = (x -> true);
 
     FilterPredicate removedFilter =
@@ -1563,11 +1564,16 @@ public class Stubs {
         .sorted(MethodInfo.comparator).collect(Collectors.toList());
     List<FieldInfo> enums = cl.getExhaustiveEnumConstants().stream().filter(filterEmit)
         .sorted(FieldInfo.comparator).collect(Collectors.toList());
-    List<FieldInfo> fields = cl.filteredFields(filterEmit).stream()
+    List<FieldInfo> fields = cl.getExhaustiveFields().stream().filter(filterEmit)
         .sorted(FieldInfo.comparator).collect(Collectors.toList());
 
-    for (MethodInfo mi : constructors) {
-      writeMethodDexApi(apiWriter, cl, mi);
+    // Do not generate constructors for enums. Doclava assumes they have
+    // a no-argument default constructor, but the compiler will generate
+    // synthetic private constructors instead.
+    if (!cl.isEnum()) {
+      for (MethodInfo mi : constructors) {
+        writeMethodDexApi(apiWriter, cl, mi);
+      }
     }
     for (MethodInfo mi : methods) {
       writeMethodDexApi(apiWriter, cl, mi);
@@ -1772,6 +1778,11 @@ public class Stubs {
   static void writeParametersDexApi(PrintStream apiWriter, MethodInfo method,
       ArrayList<ParameterInfo> params) {
     apiWriter.print("(");
+    if (method.returnType() == null &&
+        method.containingClass().containingClass() != null &&
+        !method.containingClass().isStatic()) {
+      apiWriter.print(toSlashFormat(method.containingClass().containingClass().type().dexName()));
+    }
     for (ParameterInfo pi : params) {
       String typeName = pi.type().dexName();
       if (method.isVarArgs() && pi == params.get(params.size() - 1)) {
