@@ -174,9 +174,9 @@
       <?cs call:federated_refs(field) ?>
     </div>
 <pre class="api-signature no-pretty-print">
-<?cs if:subcount(field.scope) ?><?cs var:field.scope
-?> <?cs /if ?><?cs if:subcount(field.static) ?><?cs var:field.static
-?> <?cs /if ?><?cs if:subcount(field.final) ?><?cs var:field.final
+<?cs if:string.length(field.scope) ?><?cs var:field.scope
+?> <?cs /if ?><?cs if:string.length(field.static) ?><?cs var:field.static
+?> <?cs /if ?><?cs if:string.length(field.final) ?><?cs var:field.final
 ?> <?cs /if ?><?cs if:subcount(field.type) ?><?cs call:type_link(field.type)
 ?> <?cs /if ?><?cs var:field.name ?></pre>
     <?cs call:show_annotations_list(field) ?>
@@ -212,10 +212,10 @@
       <?cs call:federated_refs(method) ?>
     </div>
 <pre class="api-signature no-pretty-print">
-<?cs if:subcount(method.scope) ?><?cs var:method.scope
-?> <?cs /if ?><?cs if:subcount(method.static) ?><?cs var:method.static
-?> <?cs /if ?><?cs if:subcount(method.final) ?><?cs var:method.final
-?> <?cs /if ?><?cs if:subcount(method.abstract) ?><?cs var:method.abstract
+<?cs if:string.length(method.scope) ?><?cs var:method.scope
+?> <?cs /if ?><?cs if:string.length(method.static) ?><?cs var:method.static
+?> <?cs /if ?><?cs if:string.length(method.final) ?><?cs var:method.final
+?> <?cs /if ?><?cs if:string.length(method.abstract) ?><?cs var:method.abstract
 ?> <?cs /if ?><?cs if:subcount(method.returnType) ?><?cs call:type_link(method.returnType)
 ?> <?cs /if ?><?cs var:method.name ?> (<?cs call:parameter_list(method.params, 1) ?>)</pre>
     <?cs call:show_annotations_list(method) ?>
@@ -694,31 +694,6 @@ if:subcount(class.subclasses.direct) && !class.subclasses.hidden ?>
 <!-- ========= END OF CLASS DATA ========= -->
 
 </div><!-- end jd-content -->
-
-<?cs if:devsite ?>
-
-<div class="data-reference-resources-wrapper">
-  <?cs if:subcount(class.package) ?>
-  <ul data-reference-resources>
-    <?cs call:list("Annotations", class.package.annotations) ?>
-    <?cs call:list("Interfaces", class.package.interfaces) ?>
-    <?cs call:list("Classes", class.package.classes) ?>
-    <?cs call:list("Enums", class.package.enums) ?>
-    <?cs call:list("Exceptions", class.package.exceptions) ?>
-    <?cs call:list("Errors", class.package.errors) ?>
-  </ul>
-  <?cs elif:subcount(package) ?>
-  <ul data-reference-resources>
-    <?cs call:class_link_list("Annotations", package.annotations) ?>
-    <?cs call:class_link_list("Interfaces", package.interfaces) ?>
-    <?cs call:class_link_list("Classes", package.classes) ?>
-    <?cs call:class_link_list("Enums", package.enums) ?>
-    <?cs call:class_link_list("Exceptions", package.exceptions) ?>
-    <?cs call:class_link_list("Errors", package.errors) ?>
-  </ul>
-  <?cs /if ?>
-</div>
-<?cs /if ?>
 
 <?cs if:!devsite ?>
 <?cs include:"footer.cs" ?>
