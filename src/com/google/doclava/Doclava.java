@@ -105,6 +105,7 @@ public class Doclava {
   public static ArtifactTagger artifactTagger = new ArtifactTagger();
   public static HashSet<String> knownTags = new HashSet<String>();
   public static FederationTagger federationTagger = new FederationTagger();
+  public static boolean showUnannotated = false;
   public static Set<String> showAnnotations = new HashSet<String>();
   public static Set<String> hideAnnotations = new HashSet<String>();
   public static boolean showAnnotationOverridesVisibility = false;
@@ -182,7 +183,10 @@ public class Doclava {
     boolean offlineMode = false;
     String apiFile = null;
     String removedApiFile = null;
+    String removedDexApiFile = null;
     String exactApiFile = null;
+    String privateApiFile = null;
+    String privateDexApiFile = null;
     String debugStubsFile = "";
     HashSet<String> stubPackages = null;
     HashSet<String> stubImportPackages = null;
@@ -254,6 +258,8 @@ public class Doclava {
         }
       } else if (a[0].equals("-keeplist")) {
         keepListFile = a[1];
+      } else if (a[0].equals("-showUnannotated")) {
+        showUnannotated = true;
       } else if (a[0].equals("-showAnnotation")) {
         showAnnotations.add(a[1]);
       } else if (a[0].equals("-hideAnnotation")) {
@@ -299,8 +305,14 @@ public class Doclava {
         apiFile = a[1];
       } else if (a[0].equals("-removedApi")) {
         removedApiFile = a[1];
+      } else if (a[0].equals("-removedDexApi")) {
+        removedDexApiFile = a[1];
       } else if (a[0].equals("-exactApi")) {
         exactApiFile = a[1];
+      } else if (a[0].equals("-privateApi")) {
+        privateApiFile = a[1];
+      } else if (a[0].equals("-privateDexApi")) {
+        privateDexApiFile = a[1];
       } else if (a[0].equals("-nodocs")) {
         generateDocs = false;
       } else if (a[0].equals("-noassets")) {
@@ -375,6 +387,12 @@ public class Doclava {
       } else if (a[0].equals("-manifest")) {
         manifestFile = a[1];
       }
+    }
+
+    // If the caller has not explicitly requested that unannotated classes and members should be
+    // shown in the output then only show them if no annotations were provided.
+    if (!showUnannotated && showAnnotations.isEmpty()) {
+      showUnannotated = true;
     }
 
     if (!readKnownTagsFiles(knownTags, knownTagsFiles)) {
@@ -532,10 +550,10 @@ public class Doclava {
 
     // Stubs
     if (stubsDir != null || apiFile != null || proguardFile != null || removedApiFile != null
-        || exactApiFile != null) {
-      Stubs.writeStubsAndApi(stubsDir, apiFile, proguardFile, removedApiFile, exactApiFile,
-          stubPackages,
-          stubImportPackages,
+        || removedDexApiFile != null || exactApiFile != null || privateApiFile != null
+        || privateDexApiFile != null) {
+      Stubs.writeStubsAndApi(stubsDir, apiFile, proguardFile, removedApiFile, removedDexApiFile,
+          exactApiFile, privateApiFile, privateDexApiFile, stubPackages, stubImportPackages,
           stubSourceOnly);
     }
 
@@ -771,6 +789,9 @@ public class Doclava {
     if (option.equals("-keeplist")) {
       return 2;
     }
+    if (option.equals("-showUnannotated")) {
+      return 1;
+    }
     if (option.equals("-showAnnotation")) {
       return 2;
     }
@@ -825,7 +846,16 @@ public class Doclava {
     if (option.equals("-removedApi")) {
       return 2;
     }
+    if (option.equals("-removedDexApi")) {
+      return 2;
+    }
     if (option.equals("-exactApi")) {
+      return 2;
+    }
+    if (option.equals("-privateApi")) {
+      return 2;
+    }
+    if (option.equals("-privateDexApi")) {
       return 2;
     }
     if (option.equals("-nodocs")) {
