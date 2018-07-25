@@ -46,21 +46,24 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Stubs {
-  public static void writeStubsAndApi(String stubsDir, String apiFile, String keepListFile,
-      String removedApiFile, String removedDexApiFile, String exactApiFile, String privateApiFile,
-      String privateDexApiFile, HashSet<String> stubPackages, HashSet<String> stubImportPackages,
-      boolean stubSourceOnly) {
+  public static void writeStubsAndApi(String stubsDir, String apiFile, String dexApiFile,
+      String keepListFile, String removedApiFile, String removedDexApiFile, String exactApiFile,
+      String privateApiFile, String privateDexApiFile, String apiMappingFile,
+      HashSet<String> stubPackages, HashSet<String> stubImportPackages, boolean stubSourceOnly,
+      boolean keepStubComments) {
     // figure out which classes we need
     final HashSet<ClassInfo> notStrippable = new HashSet<ClassInfo>();
     Collection<ClassInfo> all = Converter.allClasses();
     Map<PackageInfo, List<ClassInfo>> allClassesByPackage = null;
     PrintStream apiWriter = null;
+    PrintStream dexApiWriter = null;
     PrintStream keepListWriter = null;
     PrintStream removedApiWriter = null;
     PrintStream removedDexApiWriter = null;
     PrintStream exactApiWriter = null;
     PrintStream privateApiWriter = null;
     PrintStream privateDexApiWriter = null;
+    PrintStream apiMappingWriter = null;
 
     if (apiFile != null) {
       try {
@@ -69,6 +72,16 @@ public class Stubs {
         apiWriter = new PrintStream(new BufferedOutputStream(new FileOutputStream(xml)));
       } catch (FileNotFoundException e) {
         Errors.error(Errors.IO_ERROR, new SourcePositionInfo(apiFile, 0, 0),
+            "Cannot open file for write.");
+      }
+    }
+    if (dexApiFile != null) {
+      try {
+        File dexApi = new File(dexApiFile);
+        dexApi.getParentFile().mkdirs();
+        dexApiWriter = new PrintStream(new BufferedOutputStream(new FileOutputStream(dexApi)));
+      } catch (FileNotFoundException e) {
+        Errors.error(Errors.IO_ERROR, new SourcePositionInfo(dexApiFile, 0, 0),
             "Cannot open file for write.");
       }
     }
@@ -134,6 +147,17 @@ public class Stubs {
             new BufferedOutputStream(new FileOutputStream(privateDexApi)));
       } catch (FileNotFoundException e) {
         Errors.error(Errors.IO_ERROR, new SourcePositionInfo(privateDexApiFile, 0, 0),
+            "Cannot open file for write");
+      }
+    }
+    if (apiMappingFile != null) {
+      try {
+        File apiMapping = new File(apiMappingFile);
+        apiMapping.getParentFile().mkdirs();
+        apiMappingWriter = new PrintStream(
+            new BufferedOutputStream(new FileOutputStream(apiMapping)));
+      } catch (FileNotFoundException e) {
+        Errors.error(Errors.IO_ERROR, new SourcePositionInfo(apiMappingFile, 0, 0),
             "Cannot open file for write");
       }
     }
@@ -236,10 +260,10 @@ public class Stubs {
         if (shouldWriteStub(cl.containingPackage().name(), stubPackages, stubPackageWildcards)) {
           // write out the stubs
           if (stubsDir != null) {
-            writeClassFile(stubsDir, notStrippable, cl);
+            writeClassFile(stubsDir, notStrippable, cl, keepStubComments);
           }
           // build class list for api file or keep list file
-          if (apiWriter != null || keepListWriter != null) {
+          if (apiWriter != null || dexApiWriter != null || keepListWriter != null) {
             if (packages.containsKey(cl.containingPackage())) {
               packages.get(cl.containingPackage()).add(cl);
             } else {
@@ -253,7 +277,7 @@ public class Stubs {
     }
 
     if (privateApiWriter != null || privateDexApiWriter != null || removedApiWriter != null
-            || removedDexApiWriter != null) {
+            || removedDexApiWriter != null || apiMappingWriter != null) {
       allClassesByPackage = Converter.allClasses().stream()
           // Make sure that the files only contains information from the required packages.
           .filter(ci -> stubPackages == null
@@ -268,6 +292,7 @@ public class Stubs {
     FilterPredicate apiFilter = new FilterPredicate(new ApiPredicate().setIgnoreShown(ignoreShown));
     ApiPredicate apiReference = new ApiPredicate().setIgnoreShown(true);
     Predicate<MemberInfo> apiEmit = apiFilter.and(new ElidingPredicate(apiReference));
+    Predicate<MemberInfo> dexApiEmit = memberIsNotCloned.and(apiFilter);
 
     Predicate<MemberInfo> privateEmit = memberIsNotCloned.and(apiFilter.negate());
     Predicate<MemberInfo> privateReference = (x -> true);
@@ -282,6 +307,12 @@ public class Stubs {
     if (apiWriter != null) {
       writeApi(apiWriter, packages, apiEmit, apiReference);
       apiWriter.close();
+    }
+
+    // Write out the current DEX API
+    if (dexApiWriter != null) {
+      writeDexApi(dexApiWriter, packages, dexApiEmit);
+      dexApiWriter.close();
     }
 
     // Write out the keep list
@@ -300,6 +331,12 @@ public class Stubs {
     if (privateDexApiWriter != null) {
       writeDexApi(privateDexApiWriter, allClassesByPackage, privateEmit);
       privateDexApiWriter.close();
+    }
+
+    // Write out the API mapping
+    if (apiMappingWriter != null) {
+      writeApiMapping(apiMappingWriter, allClassesByPackage);
+      apiMappingWriter.close();
     }
 
     // Write out the removed API
@@ -552,7 +589,7 @@ public class Stubs {
     return dir + cl.name() + ".java";
   }
 
-  static void writeClassFile(String stubsDir, HashSet<ClassInfo> notStrippable, ClassInfo cl) {
+  static void writeClassFile(String stubsDir, HashSet<ClassInfo> notStrippable, ClassInfo cl, boolean keepStubComments) {
     // inner classes are written by their containing class
     if (cl.containingClass() != null) {
       return;
@@ -572,7 +609,7 @@ public class Stubs {
     PrintStream stream = null;
     try {
       stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(file)));
-      writeClassFile(stream, notStrippable, cl);
+      writeClassFile(stream, notStrippable, cl, keepStubComments);
     } catch (FileNotFoundException e) {
       System.err.println("error writing file: " + filename);
     } finally {
@@ -582,7 +619,7 @@ public class Stubs {
     }
   }
 
-  static void writeClassFile(PrintStream stream, HashSet<ClassInfo> notStrippable, ClassInfo cl) {
+  static void writeClassFile(PrintStream stream, HashSet<ClassInfo> notStrippable, ClassInfo cl, boolean keepStubComments) {
     PackageInfo pkg = cl.containingPackage();
     if (cl.containingClass() == null) {
         stream.print(parseLicenseHeader(cl.position()));
@@ -590,7 +627,7 @@ public class Stubs {
     if (pkg != null) {
       stream.println("package " + pkg.name() + ";");
     }
-    writeClass(stream, notStrippable, cl);
+    writeClass(stream, notStrippable, cl, keepStubComments);
   }
 
   private static String parseLicenseHeader(/* @Nonnull */ SourcePositionInfo positionInfo) {
@@ -641,7 +678,11 @@ public class Stubs {
     return builder.toString();
   }
 
-  static void writeClass(PrintStream stream, HashSet<ClassInfo> notStrippable, ClassInfo cl) {
+  static void writeClass(PrintStream stream, HashSet<ClassInfo> notStrippable, ClassInfo cl, boolean keepStubComments) {
+    if (keepStubComments) {
+      writeComment(stream, cl);
+    }
+
     writeAnnotations(stream, cl.annotations(), cl.isDeprecated());
 
     stream.print(cl.scope() + " ");
@@ -704,6 +745,7 @@ public class Stubs {
     int N = enumConstants.size();
     int i = 0;
     for (FieldInfo field : enumConstants) {
+      writeAnnotations(stream, field.annotations(), field.isDeprecated());
       if (!field.constantLiteralValue().equals("null")) {
         stream.println(field.name() + "(" + field.constantLiteralValue()
             + (i == N - 1 ? ");" : "),"));
@@ -715,14 +757,14 @@ public class Stubs {
 
     for (ClassInfo inner : cl.getRealInnerClasses()) {
       if (notStrippable.contains(inner) && !inner.isDocOnly()) {
-        writeClass(stream, notStrippable, inner);
+        writeClass(stream, notStrippable, inner, keepStubComments);
       }
     }
 
 
     for (MethodInfo method : cl.constructors()) {
       if (!method.isDocOnly()) {
-        writeMethod(stream, method, true);
+        writeMethod(stream, method, true, keepStubComments);
       }
     }
 
@@ -769,7 +811,7 @@ public class Stubs {
         }
       }
       if (!method.isDocOnly()) {
-        writeMethod(stream, method, false);
+        writeMethod(stream, method, false, keepStubComments);
       }
     }
     // Write all methods that are hidden or removed, but override abstract methods or interface methods.
@@ -786,7 +828,7 @@ public class Stubs {
           (overriddenMethod.isAbstract() || overriddenMethod.containingClass().isInterface())) {
         method.setReason("1:" + classContainingMethod.qualifiedName());
         cl.addMethod(method);
-        writeMethod(stream, method, false);
+        writeMethod(stream, method, false, keepStubComments);
       }
     }
 
@@ -798,7 +840,7 @@ public class Stubs {
 
     for (FieldInfo field : cl.selfFields()) {
       if (!field.isDocOnly()) {
-        writeField(stream, field);
+        writeField(stream, field, keepStubComments);
       }
     }
 
@@ -816,7 +858,10 @@ public class Stubs {
     stream.println("}");
   }
 
-  static void writeMethod(PrintStream stream, MethodInfo method, boolean isConstructor) {
+  static void writeMethod(PrintStream stream, MethodInfo method, boolean isConstructor, boolean keepStubComments) {
+    if (keepStubComments) {
+      writeComment(stream, method);
+    }
     String comma;
 
     writeAnnotations(stream, method.annotations(), method.isDeprecated());
@@ -887,7 +932,10 @@ public class Stubs {
     }
   }
 
-  static void writeField(PrintStream stream, FieldInfo field) {
+  static void writeField(PrintStream stream, FieldInfo field, boolean keepStubComments) {
+    if (keepStubComments) {
+      writeComment(stream, field);
+    }
     writeAnnotations(stream, field.annotations(), field.isDeprecated());
 
     stream.print(field.scope() + " ");
@@ -955,7 +1003,7 @@ public class Stubs {
       if (canCallMethod(cl, m)) {
         if (m.thrownExceptions() != null) {
           for (ClassInfo thrown : m.thrownExceptions()) {
-            if (!exceptionNames.contains(thrown.name())) {
+            if (thrownExceptions != null && !exceptionNames.contains(thrown.name())) {
               badException = true;
             }
           }
@@ -1051,6 +1099,24 @@ public class Stubs {
       stream.print(def.valueString());
     }
     stream.println(";");
+  }
+
+  static void writeComment(PrintStream stream, DocInfo doc) {
+    if (!doc.isHiddenOrRemoved() && !doc.comment().isDocOnly() && !"".equals(doc.getRawCommentText())) {
+      String newLineSeparator = System.getProperty("line.separator");
+      stream.println("/**");
+      stream.print(" * ");
+      stream.println(doc.getRawCommentText().replace(newLineSeparator, newLineSeparator + " *"));
+      stream.println(" */");
+    }
+  }
+
+  public static void writeXml(PrintStream xmlWriter, Collection<PackageInfo> pkgs, boolean strip) {
+    if (strip) {
+      Stubs.writeXml(xmlWriter, pkgs);
+    } else {
+      Stubs.writeXml(xmlWriter, pkgs, c -> true);
+    }
   }
 
   public static void writeXml(PrintStream xmlWriter, Collection<PackageInfo> pkgs,
@@ -1441,6 +1507,34 @@ public class Stubs {
     }
   }
 
+  static void writeApiMapping(PrintStream mappingWriter,
+      Map<PackageInfo, List<ClassInfo>> classesByPackage) {
+
+    for (PackageInfo pkg : classesByPackage.keySet().stream().sorted(PackageInfo.comparator)
+            .collect(Collectors.toList())) {
+      if (pkg.name().equals(PackageInfo.DEFAULT_PACKAGE)) continue;
+      for (ClassInfo cl : classesByPackage.get(pkg).stream().sorted(ClassInfo.comparator)
+              .collect(Collectors.toList())) {
+        cl.getExhaustiveConstructors().stream().sorted(MethodInfo.comparator).forEach(method -> {
+          writeMethodDexApi(mappingWriter, cl, method);
+          writeSourcePositionInfo(mappingWriter, method);
+        });
+        cl.getExhaustiveMethods().stream().sorted(MethodInfo.comparator).forEach(method -> {
+          writeMethodDexApi(mappingWriter, cl, method);
+          writeSourcePositionInfo(mappingWriter, method);
+        });
+        cl.getExhaustiveEnumConstants().stream().sorted(FieldInfo.comparator).forEach(enumInfo -> {
+          writeFieldDexApi(mappingWriter, cl, enumInfo);
+          writeSourcePositionInfo(mappingWriter, enumInfo);
+        });
+        cl.getExhaustiveFields().stream().sorted(FieldInfo.comparator).forEach(field -> {
+          writeFieldDexApi(mappingWriter, cl, field);
+          writeSourcePositionInfo(mappingWriter, field);
+        });
+      }
+    }
+  }
+
   /**
    * Write the removed members of the class to removed.txt
    */
@@ -1600,11 +1694,10 @@ public class Stubs {
       if (a.type().qualifiedNameMatches("android", "annotation.RequiresPermission")) {
         hasAnnotation = true;
         for (AnnotationValueInfo val : a.elementValues()) {
-          ArrayList<AnnotationValueInfo> values = null;
+          ArrayList<AnnotationValueInfo> values = new ArrayList<>();
           boolean any = false;
           switch (val.element().name()) {
             case "value":
-              values = new ArrayList<AnnotationValueInfo>();
               values.add(val);
               break;
             case "allOf":
@@ -1615,6 +1708,7 @@ public class Stubs {
               values = (ArrayList<AnnotationValueInfo>) val.value();
               break;
           }
+          if (values.isEmpty()) continue;
 
           ArrayList<String> system = new ArrayList<>();
           ArrayList<String> nonSystem = new ArrayList<>();
@@ -1745,6 +1839,11 @@ public class Stubs {
     writeThrowsApi(apiWriter, mi.thrownExceptions());
 
     apiWriter.print(";\n");
+  }
+
+  static void writeSourcePositionInfo(PrintStream writer, DocInfo docInfo) {
+    SourcePositionInfo pos = docInfo.position();
+    writer.println(pos);
   }
 
   static void writeMethodDexApi(PrintStream apiWriter, ClassInfo cl, MethodInfo mi) {
