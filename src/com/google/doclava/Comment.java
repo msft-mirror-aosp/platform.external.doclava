@@ -30,9 +30,14 @@ public class Comment {
   private static final Set<String> KNOWN_TAGS = new HashSet<String>(Arrays.asList(new String[] {
           "@apiNote",
           "@author",
-          "@since",
           "@version",
+          //not used by metalava for Android docs (see @apiSince)
+          "@since",
+          //value is an Android API level (set automatically by metalava)
+          "@apiSince",
           "@deprecated",
+          //value is an Android API level (set automatically by metalava)
+          "@deprecatedSince",
           "@undeprecate",
           "@docRoot",
           "@sdkCurrent",
@@ -45,8 +50,6 @@ public class Comment {
           "@implNote",
           "@implSpec",
           "@usesMathJax",
-          "@deprecatedSince",
-          "@apiSince",
       }));
 
   public Comment(String text, ContainerInfo base, SourcePositionInfo sp) {
@@ -287,8 +290,6 @@ public class Comment {
 
       for (char c = text.charAt(index);
               index < endOfBlock && !isWhitespaceChar(c); c = text.charAt(index++)) {}
-
-      //
       if (index == startOfBlock+1) {
           return;
       }
@@ -330,6 +331,10 @@ public class Comment {
       mInlineTagsList.add(new TextTagInfo("Text", "Text", text, pos));
     } else if (name.equals("@param")) {
       mParamTagsList.add(new ParamTagInfo("@param", "@param", text, mBase, pos));
+    } else if (name.equals("@apiSince")) {
+      setApiSince(text);
+    } else if (name.equals("@deprecatedSince")) {
+      setDeprecatedSince(text);
     } else if (name.equals("@see")) {
       mSeeTagsList.add(new SeeTagInfo("@see", "@see", text, mBase, pos));
     } else if (name.equals("@link")) {
@@ -387,8 +392,16 @@ public class Comment {
         known = Doclava.knownTags.contains(name);
       }
       if (!known) {
-        Errors.error(Errors.UNKNOWN_TAG, pos == null ? null : new SourcePositionInfo(pos),
-            "Unknown tag: " + name);
+          if (name.length() >= 2 && Character.isUpperCase(name.charAt(1))) {
+              // This is a workaround for b/135928616 where parsing of comments fails when there is
+              // a Java annotation and not a tag.
+              Errors.error(Errors.JAVA_TAG_IN_COMMENT,
+                      pos == null ? null : new SourcePositionInfo(pos),
+                      "Invalid tag: " + name);
+          } else {
+              Errors.error(Errors.UNKNOWN_TAG, pos == null ? null : new SourcePositionInfo(pos),
+                      "Unknown tag: " + name);
+          }
       }
       TagInfo t = new TextTagInfo(name, name, text, pos);
       if (isInline) {
@@ -526,6 +539,29 @@ public class Comment {
     return mRemoved;
   }
 
+  public void setDeprecatedSince(String since) {
+    if (since != null) {
+      since = since.trim();
+    }
+    mDeprecatedSince = since;
+  }
+
+  public String getDeprecatedSince() {
+    return mDeprecatedSince;
+  }
+
+  public void setApiSince(String since) {
+    if (since != null) {
+      since = since.trim();
+    }
+    mApiSince = since;
+  }
+
+  public String getApiSince() {
+    //return the value of @apiSince, an API level in Android
+    return mApiSince;
+  }
+
   public boolean isDocOnly() {
     if (mDocOnly == null) {
       mDocOnly = (mText != null) && (mText.indexOf("@doconly") >= 0);
@@ -601,6 +637,8 @@ public class Comment {
   Boolean mRemoved = null;
   Boolean mDocOnly = null;
   Boolean mDeprecated = null;
+  String mDeprecatedSince;
+  String mApiSince;
   String mText;
   ContainerInfo mBase;
   SourcePositionInfo mPosition;
