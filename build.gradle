@@ -78,7 +78,17 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     // tools.jar required for com.sun.javadoc
-    compile files(((URLClassLoader) ToolProvider.getSystemToolClassLoader()).getURLs())
+    def currentJvmVersion = org.gradle.api.JavaVersion.current()
+    def toolsJar;
+    if (currentJvmVersion.getMajorVersion() == "8") {
+        toolsJar = ((URLClassLoader) ToolProvider.getSystemToolClassLoader()).getURLs()
+    } else if (System.env.JAVA_TOOLS_JAR != null) {
+        toolsJar = System.env.JAVA_TOOLS_JAR
+    } else {
+        throw new Exception("If you are not using Java 8, JAVA_TOOLS_JAR env variable " +
+            "needs to be set to build Doclava")
+    }
+    compile files(toolsJar)
 }
 
 sourceSets {
@@ -110,4 +120,9 @@ task dist(type: Zip, dependsOn: uploadArchives)  {
     doLast {
         logger.lifecycle "Compressed maven artifacts to ${archivePath}"
     }
+}
+
+tasks.withType(JavaCompile) {
+    // Suppress build warnings that we're not interested in: b/154755010
+    options.warnings = false
 }
