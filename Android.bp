@@ -54,6 +54,7 @@ droiddoc_exported_dir {
 
 java_library_host {
     name: "doclava",
+    java_version: "1.8",
     srcs: [
         "src/**/*.java",
     ],
@@ -69,6 +70,7 @@ java_library_host {
 
 java_library_host {
     name: "doclava-no-guava",
+    java_version: "1.8",
     srcs: [
         "src/**/*.java",
     ],
