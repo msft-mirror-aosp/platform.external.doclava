@@ -37,7 +37,7 @@ public class Comment {
           "@apiSince",
           // value is <int> <int> (and SDK integer ID and version)
           // (set automatically by metalava)
-          "@sdkExtInfo",
+          "@sdkExtSince",
           "@deprecated",
           //value is an Android API level (set automatically by metalava)
           "@deprecatedSince",
@@ -336,8 +336,8 @@ public class Comment {
       mParamTagsList.add(new ParamTagInfo("@param", "@param", text, mBase, pos));
     } else if (name.equals("@apiSince")) {
       setApiSince(text);
-    } else if (name.equals("@sdkExtInfo")) {
-      // TODO: handle @sdkExtInfo
+    } else if (name.equals("@sdkExtSince")) {
+      // TODO: handle @sdkExtSince
     } else if (name.equals("@deprecatedSince")) {
       setDeprecatedSince(text);
     } else if (name.equals("@see")) {
