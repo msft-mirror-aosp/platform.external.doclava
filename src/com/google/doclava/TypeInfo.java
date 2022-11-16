@@ -317,6 +317,7 @@ public class TypeInfo implements Resolvable {
       if (mClass.isIncluded()) {
         data.setValue(base + ".link", mClass.htmlPage());
         data.setValue(base + ".since", mClass.getSince());
+        data.setValue(base + ".sdkextsince", mClass.getSdkExtSince());
       } else {
         Doclava.federationTagger.tag(mClass);
         if (!mClass.getFederatedReferences().isEmpty()) {
