@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
-rootProject.name = 'doclava'
+plugins {
+    // Apply the common convention plugin for shared build configuration between library and application projects.
+    id("com.google.doclava.java-common-conventions")
+
+    // Apply the application plugin to add support for building a CLI application in Java.
+    application
+}
