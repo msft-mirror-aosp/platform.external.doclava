@@ -16,6 +16,9 @@
 
 package com.google.doclava.javadoc;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.lang.model.element.TypeElement;
 import jdk.javadoc.doclet.DocletEnvironment;
 
 /**
@@ -24,6 +27,12 @@ import jdk.javadoc.doclet.DocletEnvironment;
  */
 class Context {
     public final DocletEnvironment environment;
+    public final Caches caches = new Caches();
+
+    public static class Caches {
+        public final Map<TypeElement, ClassDocImpl> classes = new HashMap<>();
+        public final Map<TypeElement, AnnotationTypeDocImpl> annotations = new HashMap<>();
+    }
 
     public Context(DocletEnvironment environment) {
         this.environment = environment;

@@ -47,6 +47,10 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         typeElement = c;
     }
 
+    static ClassDocImpl create(TypeElement e, Context context) {
+        return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(e, context));
+    }
+
     @Override
     public String name() {
         throw new UnsupportedOperationException("not yet implemented");
