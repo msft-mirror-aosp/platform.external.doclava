@@ -35,6 +35,10 @@ class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
         super(c, context);
     }
 
+    static AnnotationTypeDocImpl create(TypeElement e, Context context) {
+        return context.caches.annotations.computeIfAbsent(e, el -> new AnnotationTypeDocImpl(e, context));
+    }
+
     @Override
     public AnnotationTypeElementDoc[] elements() {
         throw new UnsupportedOperationException("not yet implemented");
