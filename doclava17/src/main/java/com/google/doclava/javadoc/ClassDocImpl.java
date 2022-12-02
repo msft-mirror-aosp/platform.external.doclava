@@ -40,9 +40,11 @@ import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.TypeElement;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
+    protected final TypeElement typeElement;
 
-    protected ClassDocImpl(TypeElement e) {
-        super(e);
+    protected ClassDocImpl(TypeElement c, Context context) {
+        super(c, context);
+        typeElement = c;
     }
 
     @Override

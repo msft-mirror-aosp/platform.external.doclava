@@ -37,10 +37,11 @@ import javax.lang.model.element.ExecutableElement;
 
 abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> implements
         ExecutableMemberDoc {
+    protected final ExecutableElement executableElement;
 
-
-    protected ExecutableMemberDocImpl(ExecutableElement e) {
-        super(e);
+    protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
+        super(e, context);
+        this.executableElement = e;
     }
 
     @Override

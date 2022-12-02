@@ -34,8 +34,8 @@ import javax.lang.model.element.Element;
 abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> implements
         ProgramElementDoc {
 
-    protected ProgramElementDocImpl(T e) {
-        super(e);
+    protected ProgramElementDocImpl(T e, Context context) {
+        super(e, context);
     }
 
     @Override

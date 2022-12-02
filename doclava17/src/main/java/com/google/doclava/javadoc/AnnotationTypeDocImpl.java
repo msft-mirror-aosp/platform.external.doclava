@@ -31,8 +31,8 @@ import javax.lang.model.element.TypeElement;
 
 class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
 
-    protected AnnotationTypeDocImpl(TypeElement e) {
-        super(e);
+    protected AnnotationTypeDocImpl(TypeElement c, Context context) {
+        super(c, context);
     }
 
     @Override
