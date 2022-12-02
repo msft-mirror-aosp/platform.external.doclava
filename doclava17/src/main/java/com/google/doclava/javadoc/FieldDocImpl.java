@@ -32,8 +32,8 @@ import javax.lang.model.element.VariableElement;
 
 class FieldDocImpl extends MemberDocImpl<VariableElement> implements FieldDoc {
 
-    protected FieldDocImpl(VariableElement e) {
-        super(e);
+    protected FieldDocImpl(VariableElement e, Context context) {
+        super(e, context);
     }
 
     @Override

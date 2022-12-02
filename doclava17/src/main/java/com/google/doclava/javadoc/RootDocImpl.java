@@ -40,7 +40,7 @@ import jdk.javadoc.doclet.DocletEnvironment;
 public class RootDocImpl extends DocImpl<Element> implements RootDoc {
 
     public RootDocImpl(DocletEnvironment environment) {
-        super(null);
+        super(null, new Context(environment));
     }
 
     @Override
