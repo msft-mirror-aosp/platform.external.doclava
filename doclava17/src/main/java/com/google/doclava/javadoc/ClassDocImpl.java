@@ -45,6 +45,10 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     protected ClassDocImpl(TypeElement c, Context context) {
         super(c, context);
         typeElement = c;
+
+        if (c.getKind().isInterface()) {
+            reflectModifiers |= java.lang.reflect.Modifier.INTERFACE;
+        }
     }
 
     static ClassDocImpl create(TypeElement e, Context context) {

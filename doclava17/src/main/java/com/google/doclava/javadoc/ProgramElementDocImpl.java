@@ -29,13 +29,55 @@ import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ProgramElementDoc;
+import java.util.Set;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 
 abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> implements
         ProgramElementDoc {
 
+    /**
+     * Direct mapping of {@link javax.lang.model.element.Modifier} to {@link
+     * java.lang.reflect.Modifier}.
+     *
+     * @implNote Can be updated by subclasses ({@link ClassDocImpl} and {@link
+     * AnnotationTypeDocImpl} to add {@link java.lang.reflect.Modifier#INTERFACE} modifier.
+     * @see javax.lang.model.element.Modifier
+     * @see java.lang.reflect.Modifier
+     * @see ClassDocImpl
+     * @see AnnotationTypeDocImpl
+     */
+    protected int reflectModifiers;
+
     protected ProgramElementDocImpl(T e, Context context) {
         super(e, context);
+
+        this.reflectModifiers = elementModifiersToReflectModifiers(e.getModifiers());
+    }
+
+    private int elementModifiersToReflectModifiers(Set<Modifier> modifiers) {
+        int mods = 0;
+        for (Modifier m : modifiers) {
+            switch (m) {
+                case ABSTRACT -> mods |= java.lang.reflect.Modifier.ABSTRACT;
+                case FINAL -> mods |= java.lang.reflect.Modifier.FINAL;
+                case PRIVATE -> mods |= java.lang.reflect.Modifier.PRIVATE;
+                case PROTECTED -> mods |= java.lang.reflect.Modifier.PROTECTED;
+                case PUBLIC -> mods |= java.lang.reflect.Modifier.PUBLIC;
+                case NATIVE -> mods |= java.lang.reflect.Modifier.NATIVE;
+                case STATIC -> mods |= java.lang.reflect.Modifier.STATIC;
+                case STRICTFP -> mods |= java.lang.reflect.Modifier.STRICT;
+                case SYNCHRONIZED -> mods |= java.lang.reflect.Modifier.SYNCHRONIZED;
+                case TRANSIENT -> mods |= java.lang.reflect.Modifier.TRANSIENT;
+                case VOLATILE -> mods |= java.lang.reflect.Modifier.VOLATILE;
+                case DEFAULT, NON_SEALED, SEALED -> {
+                    // Exhaust the remaining element modifiers that are not present in
+                    // java.lang.reflect.Modifier.
+                }
+                default -> throw new UnsupportedOperationException("Unexpected modifier: " + m);
+            }
+        }
+        return mods;
     }
 
     @Override
@@ -50,12 +92,12 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
 
     @Override
     public int modifierSpecifier() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return reflectModifiers;
     }
 
     @Override
     public String modifiers() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.toString(reflectModifiers);
     }
 
     @Override
@@ -65,32 +107,31 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
 
     @Override
     public boolean isPublic() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isPublic(reflectModifiers);
     }
 
     @Override
     public boolean isProtected() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isProtected(reflectModifiers);
     }
 
     @Override
     public boolean isPrivate() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isPrivate(reflectModifiers);
     }
 
     @Override
     public boolean isPackagePrivate() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return !(isPublic() || isPrivate() || isProtected());
     }
 
     @Override
     public boolean isStatic() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isStatic(reflectModifiers);
     }
 
     @Override
     public boolean isFinal() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isFinal(reflectModifiers);
     }
-
 }
