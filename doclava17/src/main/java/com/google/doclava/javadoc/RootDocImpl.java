@@ -47,7 +47,7 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
         for (var e : context.environment.getIncludedElements()) {
             switch (e.getKind()) {
                 case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE -> addClass((TypeElement) e);
-                case PACKAGE -> addPackage((PackageElement) e);
+                case PACKAGE -> PackageDocImpl.create((PackageElement) e, context);
                 case RECORD -> throw new UnsupportedOperationException(
                         "records are not yet supported.");
                 case MODULE -> throw new UnsupportedOperationException(
@@ -65,10 +65,6 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
             default -> throw new UnsupportedOperationException(
                     "Unexpected element kind:" + c.getKind());
         }
-    }
-
-    private void addPackage(PackageElement p) {
-        //TODO(nikitai): Handle package
     }
 
     @Override

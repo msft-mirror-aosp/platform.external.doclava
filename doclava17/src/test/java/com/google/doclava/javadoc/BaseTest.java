@@ -18,6 +18,7 @@ package com.google.doclava.javadoc;
 
 import static org.junit.Assert.assertNotNull;
 
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import jdk.javadoc.doclet.DocletEnvironment;
 import org.junit.Before;
@@ -85,8 +86,19 @@ public abstract class BaseTest {
         static final TypeElement javaLangException = initTypeElement("java.lang.Exception");
     }
 
+    static class PACKAGE {
+
+        static PackageElement comExampleClasses = initPackageElement("com.example.classes");
+    }
+
     private static TypeElement initTypeElement(String name) {
         var e = docletEnv.getElementUtils().getTypeElement(name);
+        assertNotNull(e);
+        return e;
+    }
+
+    private static PackageElement initPackageElement(String name) {
+        var e = docletEnv.getElementUtils().getPackageElement(name);
         assertNotNull(e);
         return e;
     }
