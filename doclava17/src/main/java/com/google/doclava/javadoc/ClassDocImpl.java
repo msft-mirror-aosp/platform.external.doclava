@@ -54,7 +54,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     static ClassDocImpl create(TypeElement e, Context context) {
-        return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(e, context));
+        return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(el, context));
     }
 
     private Boolean isClass;
@@ -100,6 +100,26 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
             isInterface = (typeElement.getKind() == ElementKind.INTERFACE);
         }
         return isInterface;
+    }
+
+    private Boolean isException;
+
+    @Override
+    public boolean isException() {
+        if (isException == null) {
+            isException = context.docletElementUtils.isException(typeElement);
+        }
+        return isException;
+    }
+
+    private Boolean isError;
+
+    @Override
+    public boolean isError() {
+        if (isError == null) {
+            isError = context.docletElementUtils.isError(typeElement);
+        }
+        return isError;
     }
 
     @Override
