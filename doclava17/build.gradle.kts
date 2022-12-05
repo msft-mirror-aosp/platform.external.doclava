@@ -81,9 +81,14 @@ tasks.create<Exec>("doclava17-on-itself") {
     commandLine = args
 }
 
+val addedExports = listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
+
 tasks.withType<JavaCompile> {
     sourceCompatibility = "17"
-    options.compilerArgs.addAll(
-        listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
-    )
+    options.compilerArgs.addAll(addedExports)
+}
+
+tasks.withType<Test> {
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    jvmArgs = addedExports
 }
