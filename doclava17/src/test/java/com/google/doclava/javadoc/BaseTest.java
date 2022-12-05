@@ -16,8 +16,11 @@
 
 package com.google.doclava.javadoc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import jdk.javadoc.doclet.DocletEnvironment;
@@ -91,6 +94,65 @@ public abstract class BaseTest {
         static PackageElement comExampleClasses = initPackageElement("com.example.classes");
     }
 
+    static class ANNOTATION_METHOD {
+
+        /**
+         * <pre>
+         * public @interface AllDefaultAnnotation {
+         *     boolean bool() default true;
+         *     byte byt() default (byte)1;
+         *     char ch() default 'a';
+         *     double dbl() default 3.1d;
+         *     float flt() default 4.1f;
+         *     int integer() default 5;
+         *     long lng() default 6L;
+         *     short shrt() default (short)7;
+         *     String str() default "qwe";
+         *     Class<?> cls() default PublicClass.class;
+         *     SimpleEnum enm() default SimpleEnum.A;
+         *     Class<?> annotation() default Override.class;
+         *     String[] arrayOfStrings() default { "abc", "def", "ghi" };
+         * }
+         * </pre>
+         */
+        static class WITH_DEFAULT {
+
+            static ExecutableElement returningBool = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "bool");
+            static ExecutableElement returningByte = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "byt");
+            static ExecutableElement returningChar = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "ch");
+            static ExecutableElement returningDouble = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "dbl");
+            static ExecutableElement returningFloat = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "flt");
+            static ExecutableElement returningInteger = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "integer");
+            static ExecutableElement returningLond = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "lng");
+            static ExecutableElement returningShort = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "shrt");
+            static ExecutableElement returningString = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "str");
+            static ExecutableElement returningClass = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "cls");
+            static ExecutableElement returningEnum = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "enm");
+            static ExecutableElement returningAnnotation = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "annotation");
+            static ExecutableElement returningArrayOfString = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "arrayOfStrings");
+        }
+
+        static TypeElement allDefaultAnnotation = initTypeElement(
+                "com.example.classes.AllDefaultAnnotation");
+        static ExecutableElement annotationMethod = initExecutableElement(
+                "com.example.classes.ParametrizedAnnotation", "primitiveI");
+        static ExecutableElement annotationMethodWithDefault = initExecutableElement(
+                "com.example.classes.ParametrizedAnnotation", "primitiveDefaultL");
+    }
+
     private static TypeElement initTypeElement(String name) {
         var e = docletEnv.getElementUtils().getTypeElement(name);
         assertNotNull(e);
@@ -101,5 +163,27 @@ public abstract class BaseTest {
         var e = docletEnv.getElementUtils().getPackageElement(name);
         assertNotNull(e);
         return e;
+    }
+
+    /**
+     * Finds ExecutableElement in the environment by class type and method name. Does not handle
+     * same method names and different type signatures. Fails assertion if multiple methods with the
+     * same name found.
+     *
+     * @param type fully qualified class name
+     * @param methodName method name
+     * @return ExecutableElement
+     */
+    private static ExecutableElement initExecutableElement(String type, String methodName) {
+        var t = initTypeElement(type);
+        var methods = t.getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.METHOD)
+                .map(e -> (ExecutableElement) e)
+                .filter(e -> e.getSimpleName().toString().equals(methodName))
+                .toList();
+
+        assertEquals(1, methods.size());
+        return methods.get(0);
     }
 }

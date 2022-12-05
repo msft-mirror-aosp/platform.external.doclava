@@ -32,6 +32,8 @@ val doclava17 by configurations.creating
 
 dependencies {
     doclava17(project(":doclava17"))
+
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
 
 sourceSets {
