@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.stream.Stream;
 import javax.lang.model.SourceVersion;
 import jdk.javadoc.doclet.Doclet;

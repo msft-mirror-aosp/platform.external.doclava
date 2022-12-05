@@ -16,10 +16,125 @@
 
 package com.google.doclava.javadoc;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class ClassDocImplTest extends BaseTest {
+
+    private ClassDocImpl abstractEmptyInterface;
+    private ClassDocImpl abstractEmptyClass;
+    private ClassDocImpl publicClass;
+    private ClassDocImpl publicEnum;
+    private ClassDocImpl publicAnnotation;
+    private ClassDocImpl publicInterface;
+
+    private ClassDocImpl javaLangError;
+    private ClassDocImpl javaLangException;
+    private ClassDocImpl javaLangObject;
+
+    private ClassDocImpl publicClassWithNests;
+    private ClassDocImpl emptyClassWithNests$Nest1;
+    private ClassDocImpl emptyClassWithNests$Nest1$Nest2;
+
+    @Before
+    public void setUp() {
+        super.setUp();
+        abstractEmptyClass = ClassDocImpl.create(CLASS.publicAbstractClass, context);
+        abstractEmptyInterface = ClassDocImpl.create(CLASS.publicAbstractInterface, context);
+
+        publicClass = ClassDocImpl.create(CLASS.publicClass, context);
+        publicClassWithNests = ClassDocImpl.create(CLASS.publicClassWithNests, context);
+        publicEnum = ClassDocImpl.create(CLASS.publicEnum, context);
+        // note that it is created using AnnotationTypeDocImpl ctor.
+        publicAnnotation = AnnotationTypeDocImpl.create(CLASS.publicAnnotation, context);
+        publicInterface = ClassDocImpl.create(CLASS.publicInterface, context);
+
+        javaLangError = ClassDocImpl.create(INSTANCE.javaLangError, context);
+        javaLangException = ClassDocImpl.create(INSTANCE.javaLangException, context);
+        javaLangObject = ClassDocImpl.create(INSTANCE.javaLangObject, context);
+
+        publicClassWithNests = ClassDocImpl.create(CLASS.publicClassWithNests, context);
+        emptyClassWithNests$Nest1 = ClassDocImpl.create(CLASS.publicClassWithNests$Nest1, context);
+        emptyClassWithNests$Nest1$Nest2 = ClassDocImpl.create(
+                CLASS.publicClassWithNests$Nest1$Nest2, context);
+    }
+
+    @Test
+    public void isClass() {
+        assertFalse(publicAnnotation.isClass());
+        assertFalse(publicInterface.isClass());
+
+        assertTrue(publicClass.isClass());
+        assertTrue(publicEnum.isClass());
+        assertTrue(javaLangObject.isClass());
+        assertTrue(javaLangError.isClass());
+        assertTrue(javaLangException.isClass());
+    }
+
+    @Test
+    public void isOrdinaryClass() {
+        // not an enumeration, interface, annotation, exception, or an error.
+        assertFalse(publicAnnotation.isOrdinaryClass());
+        assertFalse(publicEnum.isOrdinaryClass());
+        assertFalse(publicInterface.isOrdinaryClass());
+        assertFalse(javaLangError.isOrdinaryClass());
+        assertFalse(javaLangException.isOrdinaryClass());
+
+        assertTrue(publicClass.isOrdinaryClass());
+        assertTrue(javaLangObject.isOrdinaryClass());
+    }
+
+    @Test
+    public void isEnum() {
+        assertTrue(publicEnum.isEnum());
+
+        assertFalse(publicAnnotation.isEnum());
+        assertFalse(publicClass.isEnum());
+        assertFalse(publicInterface.isEnum());
+        assertFalse(javaLangError.isEnum());
+        assertFalse(javaLangException.isEnum());
+        assertFalse(javaLangObject.isEnum());
+    }
+
+    @Test
+    public void isInterface() {
+        assertTrue(publicInterface.isInterface());
+
+        assertFalse(publicAnnotation.isInterface());
+        assertFalse(publicClass.isInterface());
+        assertFalse(publicEnum.isInterface());
+        assertFalse(javaLangError.isInterface());
+        assertFalse(javaLangException.isInterface());
+        assertFalse(javaLangObject.isInterface());
+    }
+
+    @Test
+    public void isException() {
+        assertTrue(javaLangException.isException());
+
+        assertFalse(publicAnnotation.isException());
+        assertFalse(publicClass.isException());
+        assertFalse(publicEnum.isException());
+        assertFalse(publicInterface.isException());
+        assertFalse(javaLangError.isException());
+        assertFalse(javaLangObject.isException());
+    }
+
+    @Test
+    public void isError() {
+        assertTrue(javaLangError.isError());
+
+        assertFalse(publicAnnotation.isError());
+        assertFalse(publicClass.isError());
+        assertFalse(publicEnum.isError());
+        assertFalse(publicInterface.isError());
+        assertFalse(javaLangException.isError());
+        assertFalse(javaLangObject.isError());
+    }
 
     @Ignore("Not yet implemented")
     @Test
@@ -36,9 +151,18 @@ public class ClassDocImplTest extends BaseTest {
     public void isIncluded() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isAbstract() {
+        assertTrue(abstractEmptyClass.isAbstract());
+        assertTrue(abstractEmptyInterface.isAbstract());
+        assertTrue(publicInterface.isAbstract());
+        assertTrue(publicAnnotation.isAbstract());
+
+        assertFalse(publicClass.isAbstract());
+        assertFalse(publicEnum.isAbstract());
+        assertFalse(javaLangError.isAbstract());
+        assertFalse(javaLangException.isAbstract());
+        assertFalse(javaLangObject.isAbstract());
     }
 
     @Ignore("Not yet implemented")
@@ -215,4 +339,5 @@ public class ClassDocImplTest extends BaseTest {
     @Test
     public void getElementType() {
     }
+
 }
