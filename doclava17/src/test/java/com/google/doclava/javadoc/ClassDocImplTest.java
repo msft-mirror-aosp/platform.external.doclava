@@ -16,7 +16,9 @@
 
 package com.google.doclava.javadoc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -295,44 +297,58 @@ public class ClassDocImplTest extends BaseTest {
     public void simpleTypeName() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void dimension() {
+        assertEquals("", publicClass.dimension());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isPrimitive() {
+        assertFalse(publicClass.isPrimitive());
+        assertFalse(publicInterface.isPrimitive());
+        assertFalse(publicEnum.isPrimitive());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asClassDoc() {
+        assertEquals(publicClass, publicClass.asClassDoc());
+        assertEquals(publicInterface, publicInterface.asClassDoc());
+        assertEquals(publicEnum, publicEnum.asClassDoc());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asParameterizedType() {
+        assertNull(publicClass.asParameterizedType());
+        assertNull(publicInterface.asParameterizedType());
+        assertNull(publicEnum.asParameterizedType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asTypeVariable() {
+        assertNull(publicClass.asTypeVariable());
+        assertNull(publicInterface.asTypeVariable());
+        assertNull(publicEnum.asTypeVariable());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asWildcardType() {
+        assertNull(publicClass.asWildcardType());
+        assertNull(publicInterface.asWildcardType());
+        assertNull(publicEnum.asWildcardType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asAnnotatedType() {
+        assertNull(publicClass.asAnnotatedType());
+        assertNull(publicInterface.asAnnotatedType());
+        assertNull(publicEnum.asAnnotatedType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asAnnotationTypeDoc() {
+        assertNull(publicClass.asAnnotationTypeDoc());
+        assertNull(publicInterface.asAnnotationTypeDoc());
+        assertNull(publicEnum.asAnnotationTypeDoc());
     }
 
     @Ignore("Not yet implemented")
