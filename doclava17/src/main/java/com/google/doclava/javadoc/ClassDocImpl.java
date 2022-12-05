@@ -57,6 +57,19 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(el, context));
     }
 
+    @Override
+    public String modifiers() {
+        return java.lang.reflect.Modifier.toString(modifierSpecifier());
+    }
+
+    @Override
+    public int modifierSpecifier() {
+        if (isInterface() || isAnnotationType()) {
+            return reflectModifiers & ~java.lang.reflect.Modifier.ABSTRACT;
+        }
+        return reflectModifiers;
+    }
+
     private Boolean isClass;
 
     @Override
