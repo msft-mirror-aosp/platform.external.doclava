@@ -33,8 +33,15 @@ import javax.lang.model.element.PackageElement;
 
 class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
 
+    private final PackageElement packageElement;
+
     protected PackageDocImpl(PackageElement e, Context context) {
         super(e, context);
+        this.packageElement = e;
+    }
+
+    static PackageDocImpl create(PackageElement e, Context context) {
+        return context.caches.packages.computeIfAbsent(e, el -> new PackageDocImpl(e, context));
     }
 
     @Override
@@ -92,13 +99,23 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
+    private String name;
+
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (name == null) {
+            name = packageElement.getSimpleName().toString();
+        }
+        return name;
     }
+
+    private String qualifiedName;
 
     @Override
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (qualifiedName == null) {
+            qualifiedName = packageElement.getQualifiedName().toString();
+        }
+        return qualifiedName;
     }
 }
