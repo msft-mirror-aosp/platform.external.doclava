@@ -28,6 +28,7 @@ import jdk.javadoc.doclet.DocletEnvironment;
 class Context {
     public final DocletEnvironment environment;
     public final Caches caches = new Caches();
+    public final DocletElementUtils docletElementUtils;
 
     public static class Caches {
         public final Map<TypeElement, ClassDocImpl> classes = new HashMap<>();
@@ -36,5 +37,6 @@ class Context {
 
     public Context(DocletEnvironment environment) {
         this.environment = environment;
+        this.docletElementUtils = new DocletElementUtils(environment);
     }
 }

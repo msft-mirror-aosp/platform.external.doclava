@@ -27,6 +27,7 @@ package com.google.doclava.javadoc;
 
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.AnnotationTypeElementDoc;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
@@ -36,11 +37,26 @@ class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
     }
 
     static AnnotationTypeDocImpl create(TypeElement e, Context context) {
-        return context.caches.annotations.computeIfAbsent(e, el -> new AnnotationTypeDocImpl(e, context));
+        if (e.getKind() != ElementKind.ANNOTATION_TYPE) {
+            throw new IllegalArgumentException("Expected ElementKind.ANNOTATION_TYPE as first "
+                    + "argument, but got " + e.getKind());
+        }
+        return context.caches.annotations.computeIfAbsent(e, el -> new AnnotationTypeDocImpl(el,
+                context));
     }
 
     @Override
     public AnnotationTypeElementDoc[] elements() {
         throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public boolean isAnnotationType() {
+        return true;
+    }
+
+    @Override
+    public boolean isInterface() {
+        return false;
     }
 }

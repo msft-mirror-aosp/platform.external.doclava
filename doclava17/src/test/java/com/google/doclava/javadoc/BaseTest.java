@@ -73,9 +73,13 @@ public abstract class BaseTest {
                 "com.example.classes.PublicClassWithNests.Nest1");
         static final TypeElement publicClassWithNests$Nest1$Nest2 = initTypeElement(
                 "com.example.classes.PublicClassWithNests.Nest1.Nest2");
+
+        static final TypeElement parametrizedAnnotation = initTypeElement(
+                "com.example.classes.ParametrizedAnnotation");
     }
 
     static class INSTANCE {
+
         static final TypeElement javaLangObject = initTypeElement("java.lang.Object");
         static final TypeElement javaLangError  = initTypeElement("java.lang.Error");
         static final TypeElement javaLangException = initTypeElement("java.lang.Exception");
