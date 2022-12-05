@@ -16,7 +16,11 @@
 
 package com.google.doclava.javadoc;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -103,5 +107,64 @@ class DocletElementUtils {
         }
         typeMirrorsCache.put(name, mirror);
         return mirror;
+    }
+
+    /**
+     * Return the class name without package qualifier but with enclosing class qualifier, e.g. for
+     * {@code java.lang.String} return {@code String} (public class); and for {@code
+     * java.util.Map.Entry} return {@code Map.Entry} (nested class).
+     *
+     * @param e class
+     * @return class name without package qualifier but with enclosing class qualifier
+     */
+    public String getClassNameUntilNotNested(TypeElement e) {
+        Deque<String> acc = new ArrayDeque<>();
+        var it = new EnclosingUntilNotNestedIterator(e, this);
+        it.forEachRemaining(nestedElement -> acc.addFirst(nestedElement.getSimpleName().toString()));
+        return String.join(".", acc);
+    }
+
+    public TypeElement getEnclosingTypeElement(Element e) {
+        if (isPackage(e)) {
+            return null;
+        }
+        Element encl = e.getEnclosingElement();
+        if (isPackage(encl)) {
+            return null;
+        }
+        while (!(isClass(encl) || isEnum(encl) || isInterface(encl) || isAnnotation(encl))) {
+            encl = encl.getEnclosingElement();
+        }
+        return (TypeElement) encl;
+    }
+
+    /**
+     * Iterates over the immediately lexically enclosing elements for a nested type up until type
+     * is no longer nested.
+     */
+    private static class EnclosingUntilNotNestedIterator implements Iterator<TypeElement> {
+
+        private TypeElement current;
+        private final DocletElementUtils utils;
+
+        public EnclosingUntilNotNestedIterator(TypeElement typeElement, DocletElementUtils utils) {
+            this.current = typeElement;
+            this.utils = utils;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (current != null);
+        }
+
+        @Override
+        public TypeElement next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            TypeElement ret = current;
+            current = utils.getEnclosingTypeElement(current);
+            return ret;
+        }
     }
 }
