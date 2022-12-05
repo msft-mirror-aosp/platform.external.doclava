@@ -122,14 +122,24 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         return isError;
     }
 
+    private String name;
+
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (name == null) {
+            name = context.docletElementUtils.getClassNameUntilNotNested(typeElement);
+        }
+        return name;
     }
+
+    private String qualifiedName;
 
     @Override
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (qualifiedName == null) {
+            qualifiedName = typeElement.getQualifiedName().toString();
+        }
+        return qualifiedName;
     }
 
     @Override
@@ -264,17 +274,22 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public String typeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return name();
     }
 
     @Override
     public String qualifiedTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return qualifiedName();
     }
+
+    private String simpleTypeName;
 
     @Override
     public String simpleTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (simpleTypeName == null) {
+            simpleTypeName = typeElement.getSimpleName().toString();
+        }
+        return simpleTypeName;
     }
 
     @Override
