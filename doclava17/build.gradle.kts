@@ -46,10 +46,6 @@ sourceSets {
             srcDirs("${project.rootDir}/res")
         }
     }
-    test {
-        java {
-        }
-    }
     create("for javadoc") {
         java {
             srcDir("${projectDir}/src/main/java")
@@ -83,4 +79,11 @@ tasks.create<Exec>("doclava17-on-itself") {
     args.addAll(files)
 
     commandLine = args
+}
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "17"
+    options.compilerArgs.addAll(
+        listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
+    )
 }
