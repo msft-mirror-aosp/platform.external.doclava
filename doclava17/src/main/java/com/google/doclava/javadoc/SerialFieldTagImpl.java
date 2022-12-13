@@ -27,8 +27,23 @@ package com.google.doclava.javadoc;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.SerialFieldTag;
+import com.sun.source.doctree.SerialFieldTree;
+import java.util.HashMap;
+import javax.lang.model.element.Element;
 
 class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<Object> {
+
+    protected SerialFieldTagImpl(SerialFieldTree serialFieldTree, Element owner, Context context) {
+        super(serialFieldTree, owner, context);
+    }
+
+    static SerialFieldTagImpl create(SerialFieldTree serialFieldTree, Element owner,
+            Context context) {
+        var tagsOfElement = context.caches.tags.serialField
+                .computeIfAbsent(owner, el -> new HashMap<>());
+        return tagsOfElement.computeIfAbsent(serialFieldTree,
+                el -> new SerialFieldTagImpl(serialFieldTree, owner, context));
+    }
 
     /**
      * Return the serialziable field name.

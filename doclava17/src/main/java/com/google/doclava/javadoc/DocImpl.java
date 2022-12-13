@@ -29,9 +29,24 @@ import com.sun.javadoc.Doc;
 import com.sun.javadoc.SeeTag;
 import com.sun.javadoc.SourcePosition;
 import com.sun.javadoc.Tag;
+import com.sun.source.doctree.BlockTagTree;
+import com.sun.source.doctree.DocCommentTree;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.DocTree.Kind;
+import com.sun.source.doctree.InlineTagTree;
+import com.sun.source.doctree.ParamTree;
+import com.sun.source.doctree.SeeTree;
+import com.sun.source.doctree.SerialFieldTree;
+import com.sun.source.doctree.ThrowsTree;
+import com.sun.source.util.SimpleDocTreeVisitor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 
 abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
+
     protected final T element;
     protected final Context context;
 
@@ -40,39 +55,99 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
         this.context = context;
     }
 
+    private String commentText;
+
     @Override
     public String commentText() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (commentText == null) {
+            var dt = context.environment.getDocTrees().getDocCommentTree(element);
+            commentText = dt.getFullBody().stream()
+                    .map(DocTree::toString)
+                    .collect(Collectors.joining())
+                    .trim();
+        }
+        return commentText;
     }
+
+    private Tag[] tags;
 
     @Override
     public Tag[] tags() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (tags == null) {
+            DocCommentTree tree = context.environment.getDocTrees().getDocCommentTree(element);
+            List<? extends DocTree> blockTags = tree.getBlockTags();
+
+            tags = blockTags
+                    .stream()
+                    .map(docTree -> TagImpl.create(docTree, element, context))
+                    .toArray(Tag[]::new);
+        }
+        return tags;
     }
 
     @Override
-    public Tag[] tags(String tagname) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public Tag[] tags(String kind) {
+        return Arrays.stream(tags())
+                .filter(t -> t.kind().equals(kind))
+                .toArray(Tag[]::new);
     }
+
+    private SeeTag[] seeTags;
 
     @Override
     public SeeTag[] seeTags() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (seeTags == null) {
+            seeTags = Arrays.stream(tags())
+                    .filter(t -> t instanceof SeeTagImpl)
+                    .toArray(SeeTag[]::new);
+        }
+        return seeTags;
     }
+
+    private Tag[] inlineTags;
 
     @Override
     public Tag[] inlineTags() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (inlineTags == null) {
+            var dt = context.environment.getDocTrees().getDocCommentTree(element);
+            List<DocTree> tags = new ArrayList<>(dt.getFullBody());
+            inlineTags = tags.stream()
+                    .map(tag -> TagImpl.create(tag, element, context))
+                    .toArray(Tag[]::new);
+        }
+        return inlineTags;
     }
+
+    private Tag[] firstSentenceTags;
 
     @Override
     public Tag[] firstSentenceTags() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (firstSentenceTags == null) {
+            var dt = context.environment.getDocTrees().getDocCommentTree(element);
+            firstSentenceTags = dt.getFirstSentence().stream()
+                    .map(tag -> TagImpl.create(tag, element, context))
+                    .toArray(Tag[]::new);
+        }
+        return firstSentenceTags;
     }
 
+    private String getRawCommentText;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote this implementation prettifies javadoc a bit; previous implementation returned
+     * javadoc as-is without any modifications.
+     *
+     */
     @Override
     public String getRawCommentText() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (getRawCommentText == null) {
+            var dt = context.environment.getDocTrees().getDocCommentTree(element);
+            //TODO: this implementation is slightly different, consider reimplementing.
+            getRawCommentText = dt.toString();
+        }
+        return getRawCommentText;
     }
 
     @Override

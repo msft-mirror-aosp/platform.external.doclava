@@ -25,31 +25,96 @@
 
 package com.google.doclava.javadoc;
 
-import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MemberDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.SeeTag;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.DocTree.Kind;
+import com.sun.source.doctree.ReferenceTree;
+import com.sun.source.doctree.SeeTree;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 
 class SeeTagImpl extends TagImpl implements SeeTag {
 
+    private final SeeTree seeTree;
+
+    protected SeeTagImpl(SeeTree seeTree, Element owner, Context context) {
+        super(seeTree, owner, context);
+
+        this.seeTree = seeTree;
+    }
+
+    static SeeTagImpl create(SeeTree docTree, Element owner, Context context) {
+        var tagsOfElement = context.caches.tags.see.computeIfAbsent(owner,
+                el -> new HashMap<>());
+        return tagsOfElement.computeIfAbsent(docTree,
+                el -> new SeeTagImpl(docTree, owner, context));
+    }
+
+    private String label;
+
     @Override
     public String label() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (label == null) {
+            var children = seeTree.getReference();
+            label = children
+                    .stream()
+                    .map(DocTree::toString)
+                    .collect(Collectors.joining(" "));
+        }
+        return label;
     }
+
+    private boolean referencedPackageInitialised;
+    private PackageDocImpl referencedPackage;
 
     @Override
     public PackageDoc referencedPackage() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (!referencedPackageInitialised) {
+            String signature = getReferenceSignature(seeTree);
+            if (signature != null) {
+                PackageElement pe =
+                        context.environment.getElementUtils().getPackageElement(signature);
+                if (pe != null) {
+                    referencedPackage = PackageDocImpl.create(pe, context);
+                }
+            }
+            referencedPackageInitialised = true;
+        }
+        return referencedPackage;
     }
 
     @Override
     public String referencedClassName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        var rc = referencedClass();
+        return rc.qualifiedName();
     }
 
+    private boolean referencedClassInitialised;
+    private ClassDocImpl referencedClass;
+
     @Override
-    public ClassDoc referencedClass() {
-        throw new UnsupportedOperationException("not yet implemented");
+    public ClassDocImpl referencedClass() {
+        if (!referencedClassInitialised) {
+            String signature = getReferenceSignature(seeTree);
+            if (signature != null) {
+                TypeElement te = context.environment.getElementUtils().getTypeElement(signature);
+                if (te != null) {
+                    referencedClass = switch (te.getKind()) {
+                        case CLASS, ENUM, INTERFACE -> ClassDocImpl.create(te, context);
+                        case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(te, context);
+                        default -> throw new UnsupportedOperationException(te.getKind() +
+                                " is not yet supported");
+                    };
+                }
+            }
+            referencedClassInitialised = true;
+        }
+        return referencedClass;
     }
 
     @Override
@@ -60,5 +125,26 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     @Override
     public MemberDoc referencedMember() {
         throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    /**
+     * Get the signature of a reference to a Java language element (which is in a form of {@link
+     * ReferenceTree}) of a given {@link SeeTree}. For cases when reference is anything but {@link
+     * ReferenceTree} (e.g. it could be quoted-string or HTML) – return {@code null}.
+     *
+     * @param seeTree tag
+     * @return signature of a reference, or {@code null} if it's not referencing to a Java language
+     * element.
+     */
+    private String getReferenceSignature(SeeTree seeTree) {
+        var children = seeTree.getReference();
+        if (children.size() >= 1) {
+            DocTree ref = children.get(0);
+            if (ref.getKind() == Kind.REFERENCE) {
+                var asReference = (ReferenceTree) ref;
+                return asReference.getSignature();
+            }
+        }
+        return null;
     }
 }
