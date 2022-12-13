@@ -80,6 +80,11 @@ public abstract class BaseTest {
 
         static final TypeElement parametrizedAnnotation = initTypeElement(
                 "com.example.classes.ParametrizedAnnotation");
+
+        static TypeElement tags = initTypeElement("com.example.classes.Tags");
+        static TypeElement tags$See = initTypeElement("com.example.classes.Tags.See");
+        static TypeElement tags$Throws = initTypeElement("com.example.classes.Tags.Throws");
+        static TypeElement tags$Various = initTypeElement("com.example.classes.Tags.Various");
     }
 
     static class INSTANCE {

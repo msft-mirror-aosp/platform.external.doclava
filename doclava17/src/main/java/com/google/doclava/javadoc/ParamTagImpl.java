@@ -26,8 +26,22 @@
 package com.google.doclava.javadoc;
 
 import com.sun.javadoc.ParamTag;
+import com.sun.source.doctree.ParamTree;
+import java.util.HashMap;
+import javax.lang.model.element.Element;
 
 class ParamTagImpl extends TagImpl implements ParamTag {
+
+    protected ParamTagImpl(ParamTree paramTree, Element owner, Context context) {
+        super(paramTree, owner, context);
+    }
+
+    static ParamTagImpl create(ParamTree paramTree, Element owner, Context context) {
+        var tagsOfElement = context.caches.tags.param.computeIfAbsent(owner,
+                el -> new HashMap<>());
+        return tagsOfElement.computeIfAbsent(paramTree,
+                el -> new ParamTagImpl(paramTree, owner, context));
+    }
 
     @Override
     public String parameterName() {
