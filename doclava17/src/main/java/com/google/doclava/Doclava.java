@@ -22,22 +22,48 @@ import com.google.clearsilver.jsilver.resourceloader.ClassResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.CompositeResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.FileSystemResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.ResourceLoader;
-
-import com.sun.javadoc.*;
-
-import java.util.*;
-import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.io.*;
-import java.lang.reflect.Proxy;
+import com.google.doclava.javadoc.RootDocImpl;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.Doc;
+import com.sun.javadoc.MemberDoc;
+import com.sun.javadoc.RootDoc;
+import com.sun.javadoc.Type;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.lang.model.SourceVersion;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
@@ -144,9 +170,49 @@ public class Doclava implements Doclet {
   private static boolean samplesRef = false;
   private static boolean sac = false;
 
+    private static ArrayList<String> knownTagsFiles = new ArrayList<>();
+    private static String keepListFile;
+    private static String proguardFile;
+    private static String proofreadFile;
+    private static String todoFile;
+    private static String stubsDir;
+    private static HashSet<String> stubPackages;
+    private static HashSet<String> stubImportPackages;
+    private static boolean stubSourceOnly;
+    private static boolean keepStubComments;
+    private static String sdkValuePath;
+    private static String apiFile;
+    private static String dexApiFile;
+    private static String removedApiFile;
+    private static String removedDexApiFile;
+    private static String exactApiFile;
+    private static String privateApiFile;
+    private static String privateDexApiFile;
+    private static String apiMappingFile;
+    private static boolean offlineMode;
+
     @Override
     public void init(Locale locale, Reporter reporter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        keepListFile = null;
+        proguardFile = null;
+        proofreadFile = null;
+        todoFile = null;
+        sdkValuePath = null;
+        stubsDir = null;
+        // Create the dependency graph for the stubs  directory
+        offlineMode = false;
+        apiFile = null;
+        dexApiFile = null;
+        removedApiFile = null;
+        removedDexApiFile = null;
+        exactApiFile = null;
+        privateApiFile = null;
+        privateDexApiFile = null;
+        apiMappingFile = null;
+        stubPackages = null;
+        stubImportPackages = null;
+        stubSourceOnly = false;
+        keepStubComments = false;
     }
 
     @Override
@@ -1443,7 +1509,7 @@ public class Doclava implements Doclet {
 
     @Override
     public boolean run(DocletEnvironment environment) {
-        throw new UnsupportedOperationException("not yet implemented");
+        return start(environment);
     }
 
     public static boolean checkLevel(int level) {
@@ -1482,239 +1548,8 @@ public class Doclava implements Doclet {
     throw new UnsupportedOperationException("Not yet implemented");
   }
 
-  public static boolean start(RootDoc r) {
-    String keepListFile = null;
-    String proguardFile = null;
-    String proofreadFile = null;
-    String todoFile = null;
-    String sdkValuePath = null;
-    String stubsDir = null;
-    // Create the dependency graph for the stubs  directory
-    boolean offlineMode = false;
-    String apiFile = null;
-    String dexApiFile = null;
-    String removedApiFile = null;
-    String removedDexApiFile = null;
-    String exactApiFile = null;
-    String privateApiFile = null;
-    String privateDexApiFile = null;
-    String debugStubsFile = "";
-    String apiMappingFile = null;
-    HashSet<String> stubPackages = null;
-    HashSet<String> stubImportPackages = null;
-    boolean stubSourceOnly = false;
-    boolean keepStubComments = false;
-    ArrayList<String> knownTagsFiles = new ArrayList<String>();
-
-    root = r;
-
-    String[][] options = r.options();
-    for (String[] a : options) {
-      if (a[0].equals("-d")) {
-        outputPathBase = outputPathHtmlDirs = ClearPage.outputDir = a[1];
-      } else if (a[0].equals("-templatedir")) {
-        ClearPage.addTemplateDir(a[1]);
-      } else if (a[0].equals("-hdf")) {
-        mHDFData.add(new String[] {a[1], a[2]});
-      } else if (a[0].equals("-knowntags")) {
-        knownTagsFiles.add(a[1]);
-      } else if (a[0].equals("-apidocsdir")) {
-        javadocDir = a[1];
-      } else if (a[0].equals("-toroot")) {
-        ClearPage.toroot = a[1];
-      } else if (a[0].equals("-samplecode")) {
-        sampleCodes.add(new SampleCode(a[1], a[2], a[3]));
-      } else if (a[0].equals("-samplegroup")) {
-        sampleCodeGroups.add(new SampleCode(null, null, a[1]));
-      } else if (a[0].equals("-samplesdir")) {
-        getSampleProjects(new File(a[1]));
-      //the destination output path for main htmldir
-      } else if (a[0].equals("-htmldir")) {
-        inputPathHtmlDirs.add(a[1]);
-        ClearPage.htmlDirs = inputPathHtmlDirs;
-      //the destination output path for additional htmldir
-      } else if (a[0].equals("-htmldir2")) {
-        if (a[2].equals("default")) {
-          inputPathHtmlDir2.add(a[1]);
-        } else {
-          inputPathHtmlDir2.add(a[1]);
-          outputPathHtmlDir2 = a[2];
-        }
-      //the destination output path for additional resources (images)
-      } else if (a[0].equals("-resourcesdir")) {
-        inputPathResourcesDir = a[1];
-      } else if (a[0].equals("-resourcesoutdir")) {
-        outputPathResourcesDir = a[1];
-      } else if (a[0].equals("-title")) {
-        Doclava.title = a[1];
-      } else if (a[0].equals("-werror")) {
-        Errors.setWarningsAreErrors(true);
-      } else if (a[0].equals("-lerror")) {
-        Errors.setLintsAreErrors(true);
-      } else if (a[0].equals("-error") || a[0].equals("-warning") || a[0].equals("-lint")
-          || a[0].equals("-hide")) {
-        try {
-          int level = -1;
-          if (a[0].equals("-error")) {
-            level = Errors.ERROR;
-          } else if (a[0].equals("-warning")) {
-            level = Errors.WARNING;
-          } else if (a[0].equals("-lint")) {
-            level = Errors.LINT;
-          } else if (a[0].equals("-hide")) {
-            level = Errors.HIDDEN;
-          }
-          Errors.setErrorLevel(Integer.parseInt(a[1]), level);
-        } catch (NumberFormatException e) {
-          // already printed below
-          return false;
-        }
-      } else if (a[0].equals("-keeplist")) {
-        keepListFile = a[1];
-      } else if (a[0].equals("-showUnannotated")) {
-        showUnannotated = true;
-      } else if (a[0].equals("-showAnnotation")) {
-        showAnnotations.add(a[1]);
-      } else if (a[0].equals("-hideAnnotation")) {
-        hideAnnotations.add(a[1]);
-      } else if (a[0].equals("-showAnnotationOverridesVisibility")) {
-        showAnnotationOverridesVisibility = true;
-      } else if (a[0].equals("-hidePackage")) {
-        hiddenPackages.add(a[1]);
-      } else if (a[0].equals("-proguard")) {
-        proguardFile = a[1];
-      } else if (a[0].equals("-proofread")) {
-        proofreadFile = a[1];
-      } else if (a[0].equals("-todo")) {
-        todoFile = a[1];
-      } else if (a[0].equals("-public")) {
-        showLevel = SHOW_PUBLIC;
-      } else if (a[0].equals("-protected")) {
-        showLevel = SHOW_PROTECTED;
-      } else if (a[0].equals("-package")) {
-        showLevel = SHOW_PACKAGE;
-      } else if (a[0].equals("-private")) {
-        showLevel = SHOW_PRIVATE;
-      } else if (a[0].equals("-hidden")) {
-        showLevel = SHOW_HIDDEN;
-      } else if (a[0].equals("-stubs")) {
-        stubsDir = a[1];
-      } else if (a[0].equals("-stubpackages")) {
-        stubPackages = new HashSet<String>();
-        for (String pkg : a[1].split(":")) {
-          stubPackages.add(pkg);
-        }
-      } else if (a[0].equals("-stubimportpackages")) {
-        stubImportPackages = new HashSet<String>();
-        for (String pkg : a[1].split(":")) {
-          stubImportPackages.add(pkg);
-          hiddenPackages.add(pkg);
-        }
-      } else if (a[0].equals("-stubsourceonly")) {
-        stubSourceOnly = true;
-      } else if (a[0].equals("-keepstubcomments")) {
-        keepStubComments = true;
-      } else if (a[0].equals("-sdkvalues")) {
-        sdkValuePath = a[1];
-      } else if (a[0].equals("-api")) {
-        apiFile = a[1];
-      } else if (a[0].equals("-dexApi")) {
-        dexApiFile = a[1];
-      } else if (a[0].equals("-removedApi")) {
-        removedApiFile = a[1];
-      } else if (a[0].equals("-removedDexApi")) {
-        removedDexApiFile = a[1];
-      } else if (a[0].equals("-exactApi")) {
-        exactApiFile = a[1];
-      } else if (a[0].equals("-privateApi")) {
-        privateApiFile = a[1];
-      } else if (a[0].equals("-privateDexApi")) {
-        privateDexApiFile = a[1];
-      } else if (a[0].equals("-apiMapping")) {
-        apiMappingFile = a[1];
-      } else if (a[0].equals("-nodocs")) {
-        generateDocs = false;
-      } else if (a[0].equals("-noassets")) {
-        includeAssets = false;
-      } else if (a[0].equals("-nodefaultassets")) {
-        includeDefaultAssets = false;
-      } else if (a[0].equals("-parsecomments")) {
-        parseComments = true;
-      } else if (a[0].equals("-metalavaApiSince")) {
-        METALAVA_API_SINCE = true;
-      } else if (a[0].equals("-since")) {
-        sinceTagger.addVersion(a[1], a[2]);
-      } else if (a[0].equals("-artifact")) {
-        artifactTagger.addArtifact(a[1], a[2]);
-      } else if (a[0].equals("-offlinemode")) {
-        offlineMode = true;
-      } else if (a[0].equals("-metadataDebug")) {
-        META_DBG = true;
-      } else if (a[0].equals("-includePreview")) {
-        INCLUDE_PREVIEW = true;
-      } else if (a[0].equals("-ignoreJdLinks")) {
-        if (DEVSITE_STATIC_ONLY) {
-          DEVSITE_IGNORE_JDLINKS = true;
-        }
-      } else if (a[0].equals("-federate")) {
-        try {
-          String name = a[1];
-          URL federationURL = new URL(a[2]);
-          federationTagger.addSiteUrl(name, federationURL);
-        } catch (MalformedURLException e) {
-          System.err.println("Could not parse URL for federation: " + a[1]);
-          return false;
-        }
-      } else if (a[0].equals("-federationapi")) {
-        String name = a[1];
-        String file = a[2];
-        federationTagger.addSiteApi(name, file);
-      } else if (a[0].equals("-yaml")) {
-        yamlNavFile = a[1];
-      } else if (a[0].equals("-dac_libraryroot")) {
-        libraryRoot = ensureSlash(a[1]);
-        mHDFData.add(new String[] {"library.root", a[1]});
-      } else if (a[0].equals("-dac_dataname")) {
-        mHDFData.add(new String[] {"dac_dataname", a[1]});
-      } else if (a[0].equals("-documentannotations")) {
-        documentAnnotations = true;
-        documentAnnotationsPath = a[1];
-      } else if (a[0].equals("-referenceonly")) {
-        referenceOnly = true;
-        mHDFData.add(new String[] {"referenceonly", "1"});
-      } else if (a[0].equals("-staticonly")) {
-        staticOnly = true;
-        mHDFData.add(new String[] {"staticonly", "1"});
-      } else if (a[0].equals("-navtreeonly")) {
-        NAVTREE_ONLY = true;
-      } else if (a[0].equals("-atLinksNavtree")) {
-        AT_LINKS_NAVTREE = true;
-      } else if (a[0].equals("-yamlV2")) {
-        yamlV2 = true;
-      } else if (a[0].equals("-devsite")) {
-        devsite = true;
-        // Don't copy any assets to devsite output
-        includeAssets = false;
-        USE_DEVSITE_LOCALE_OUTPUT_PATHS = true;
-        mHDFData.add(new String[] {"devsite", "1"});
-        if (staticOnly) {
-          DEVSITE_STATIC_ONLY = true;
-          System.out.println("  ... Generating static html only for devsite");
-        }
-        if (yamlNavFile == null) {
-          // Use _toc.yaml as default to avoid clobbering possible manual _book.yaml files
-          yamlNavFile = "_toc.yaml";
-        }
-      } else if (a[0].equals("-android")) {
-        auxSource = new AndroidAuxSource();
-        linter = new AndroidLinter();
-        android = true;
-      } else if (a[0].equals("-manifest")) {
-        manifestFile = a[1];
-      } else if (a[0].equals("-compatconfig")) {
-        compatConfig = a[1];
-      }
-    }
+  public static boolean start(DocletEnvironment environment) {
+    root = new RootDocImpl(environment);
 
     // If the caller has not explicitly requested that unannotated classes and members should be
     // shown in the output then only show them if no annotations were provided.
@@ -1730,7 +1565,7 @@ public class Doclava implements Doclet {
     }
 
     // Set up the data structures
-    Converter.makeInfo(r);
+    Converter.makeInfo(root);
 
     if (generateDocs) {
       ClearPage.addBundledTemplateDir("assets/customizations");
@@ -2041,256 +1876,6 @@ public class Doclava implements Doclet {
       s += " - " + Doclava.title;
     }
     data.setValue("page.title", s);
-  }
-
-
-  public static LanguageVersion languageVersion() {
-    return LanguageVersion.JAVA_1_5;
-  }
-
-
-  public static int optionLength(String option) {
-    if (option.equals("-d")) {
-      return 2;
-    }
-    if (option.equals("-templatedir")) {
-      return 2;
-    }
-    if (option.equals("-hdf")) {
-      return 3;
-    }
-    if (option.equals("-knowntags")) {
-      return 2;
-    }
-    if (option.equals("-apidocsdir")) {
-      return 2;
-    }
-    if (option.equals("-toroot")) {
-      return 2;
-    }
-    if (option.equals("-samplecode")) {
-      samplesRef = true;
-      return 4;
-    }
-    if (option.equals("-samplegroup")) {
-      return 2;
-    }
-    if (option.equals("-samplesdir")) {
-      samplesRef = true;
-      return 2;
-    }
-    if (option.equals("-devsite")) {
-      return 1;
-    }
-    if (option.equals("-yamlV2")) {
-      return 1;
-    }
-    if (option.equals("-dac_libraryroot")) {
-      return 2;
-    }
-    if (option.equals("-dac_dataname")) {
-      return 2;
-    }
-    if (option.equals("-ignoreJdLinks")) {
-      return 1;
-    }
-    if (option.equals("-htmldir")) {
-      return 2;
-    }
-    if (option.equals("-htmldir2")) {
-      return 3;
-    }
-    if (option.equals("-resourcesdir")) {
-      return 2;
-    }
-    if (option.equals("-resourcesoutdir")) {
-      return 2;
-    }
-    if (option.equals("-title")) {
-      return 2;
-    }
-    if (option.equals("-werror")) {
-      return 1;
-    }
-    if (option.equals("-lerror")) {
-      return 1;
-    }
-    if (option.equals("-hide")) {
-      return 2;
-    }
-    if (option.equals("-warning")) {
-      return 2;
-    }
-    if (option.equals("-error")) {
-      return 2;
-    }
-    if (option.equals("-keeplist")) {
-      return 2;
-    }
-    if (option.equals("-showUnannotated")) {
-      return 1;
-    }
-    if (option.equals("-showAnnotation")) {
-      return 2;
-    }
-    if (option.equals("-hideAnnotation")) {
-      return 2;
-    }
-    if (option.equals("-showAnnotationOverridesVisibility")) {
-      return 1;
-    }
-    if (option.equals("-hidePackage")) {
-      return 2;
-    }
-    if (option.equals("-proguard")) {
-      return 2;
-    }
-    if (option.equals("-proofread")) {
-      return 2;
-    }
-    if (option.equals("-todo")) {
-      return 2;
-    }
-    if (option.equals("-public")) {
-      return 1;
-    }
-    if (option.equals("-protected")) {
-      return 1;
-    }
-    if (option.equals("-package")) {
-      return 1;
-    }
-    if (option.equals("-private")) {
-      return 1;
-    }
-    if (option.equals("-hidden")) {
-      return 1;
-    }
-    if (option.equals("-stubs")) {
-      return 2;
-    }
-    if (option.equals("-stubpackages")) {
-      return 2;
-    }
-    if (option.equals("-stubimportpackages")) {
-      return 2;
-    }
-    if (option.equals("-stubsourceonly")) {
-      return 1;
-    }
-    if (option.equals("-keepstubcomments")) {
-      return 1;
-    }
-    if (option.equals("-sdkvalues")) {
-      return 2;
-    }
-    if (option.equals("-api")) {
-      return 2;
-    }
-    if (option.equals("-dexApi")) {
-      return 2;
-    }
-    if (option.equals("-removedApi")) {
-      return 2;
-    }
-    if (option.equals("-removedDexApi")) {
-      return 2;
-    }
-    if (option.equals("-exactApi")) {
-      return 2;
-    }
-    if (option.equals("-privateApi")) {
-      return 2;
-    }
-    if (option.equals("-privateDexApi")) {
-      return 2;
-    }
-    if (option.equals("-apiMapping")) {
-      return 2;
-    }
-    if (option.equals("-nodocs")) {
-      return 1;
-    }
-    if (option.equals("-nodefaultassets")) {
-      return 1;
-    }
-    if (option.equals("-parsecomments")) {
-      return 1;
-    }
-    if (option.equals("-metalavaApiSince")) {
-      return 1;
-    }
-    if (option.equals("-since")) {
-      return 3;
-    }
-    if (option.equals("-artifact")) {
-      return 3;
-    }
-    if (option.equals("-offlinemode")) {
-      return 1;
-    }
-    if (option.equals("-federate")) {
-      return 3;
-    }
-    if (option.equals("-federationapi")) {
-      return 3;
-    }
-    if (option.equals("-yaml")) {
-      return 2;
-    }
-    if (option.equals("-gmsref")) {
-      gmsRef = true;
-      return 1;
-    }
-    if (option.equals("-gcmref")) {
-      gcmRef = true;
-      return 1;
-    }
-    if (option.equals("-metadataDebug")) {
-      return 1;
-    }
-    if (option.equals("-includePreview")) {
-      return 1;
-    }
-    if (option.equals("-documentannotations")) {
-      return 2;
-    }
-    if (option.equals("-referenceonly")) {
-      return 1;
-    }
-    if (option.equals("-staticonly")) {
-      return 1;
-    }
-    if (option.equals("-navtreeonly")) {
-      return 1;
-    }
-    if (option.equals("-atLinksNavtree")) {
-      return 1;
-    }
-    if (option.equals("-android")) {
-      return 1;
-    }
-    if (option.equals("-manifest")) {
-      return 2;
-    }
-    if (option.equals("-compatconfig")) {
-      return 2;
-    }
-    return 0;
-  }
-  public static boolean validOptions(String[][] options, DocErrorReporter r) {
-    for (String[] a : options) {
-      if (a[0].equals("-error") || a[0].equals("-warning") || a[0].equals("-hide")) {
-        try {
-          Integer.parseInt(a[1]);
-        } catch (NumberFormatException e) {
-          r.printError("bad -" + a[0] + " value must be a number: " + a[1]);
-          return false;
-        }
-      }
-    }
-
-    return true;
   }
 
   public static Data makeHDF() {
