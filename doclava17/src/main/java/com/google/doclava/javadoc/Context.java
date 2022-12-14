@@ -55,6 +55,7 @@ class Context {
         public final Map<ExecutableElement, AnnotationMethodDocImpl> annotationMethods =
                 new HashMap<>();
         public final Map<AnnotationValue, AnnotationValueImpl> annotationValues = new HashMap<>();
+        public final Map<ExecutableElement, ConstructorDocImpl> constructors = new HashMap<>();
 
         public final Tags tags = new Tags();
 
