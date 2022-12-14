@@ -43,6 +43,8 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl emptyClassWithNests$Nest1;
     private ClassDocImpl emptyClassWithNests$Nest1$Nest2;
 
+    private ClassDocImpl constructors;
+
     @Before
     public void setUp() {
         super.setUp();
@@ -64,6 +66,8 @@ public class ClassDocImplTest extends BaseTest {
         emptyClassWithNests$Nest1 = ClassDocImpl.create(CLASS.publicClassWithNests$Nest1, context);
         emptyClassWithNests$Nest1$Nest2 = ClassDocImpl.create(
                 CLASS.publicClassWithNests$Nest1$Nest2, context);
+
+        constructors = ClassDocImpl.create(CLASS.constructors, context);
     }
 
     @Test
@@ -283,14 +287,58 @@ public class ClassDocImplTest extends BaseTest {
     public void testMethods() {
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @implNote This (and {@link #constructors_filter_false()} and
+     * {@link #constructors_filter_true()}) tests do not cover cases when Doclet is supplied with
+     * a non-default <b>selection control</b> flag (default is {@code -protected}), i.e.
+     * {@code -public}, {@code -package} or {@code private}. It also does not currently cover
+     * selection control options from new Doclet API (e.g. {@code --show-members}.
+     *
+     * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
+     * @see jdk.javadoc.doclet new options in "Options" section
+     */
     @Test
     public void constructors() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include only public and protected.
+        var ctors = constructors.constructors();
+        assertEquals(2, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors();
+        assertEquals(0, enumConstructors.length);
+
+        //TODO: Handle all selection control variants.
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @see #constructors
+     */
     @Test
-    public void testConstructors() {
+    public void constructors_filter_true() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include only public and protected.
+        var ctors = constructors.constructors(true);
+        assertEquals(2, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors(true);
+        assertEquals(0, enumConstructors.length);
+    }
+
+    /**
+     * @see #constructors
+     */
+    @Test
+    public void constructors_filter_false() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include all four.
+        var ctors = constructors.constructors(false);
+        assertEquals(4, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors(false);
+        assertEquals(1, enumConstructors.length);
     }
 
     @Ignore("Not yet implemented")

@@ -38,6 +38,7 @@ import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
@@ -252,12 +253,37 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public ConstructorDoc[] constructors() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (constructorsFiltered == null) {
+            constructorsFiltered = getConstructors(true);
+        }
+        return constructorsFiltered;
     }
+
+    private ConstructorDoc[] constructorsFiltered;
+    private ConstructorDoc[] constructorsAll;
 
     @Override
     public ConstructorDoc[] constructors(boolean filter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (filter) {
+            if (constructorsFiltered == null) {
+                constructorsFiltered = getConstructors(true);
+            }
+            return constructorsFiltered;
+        } else {
+            if (constructorsAll == null) {
+                constructorsAll = getConstructors(false);
+            }
+            return constructorsAll;
+        }
+    }
+
+    private ConstructorDoc[] getConstructors(boolean filter) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
+                .filter(ctor -> !filter || context.environment.isSelected(ctor))
+                .map(e -> ConstructorDocImpl.create((ExecutableElement) e, context))
+                .toArray(ConstructorDoc[]::new);
     }
 
     @Override
