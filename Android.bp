@@ -39,6 +39,7 @@ license {
         "SPDX-license-identifier-CC-BY",
         "SPDX-license-identifier-GPL",
         "SPDX-license-identifier-GPL-2.0",
+        "SPDX-license-identifier-GPL-2.0-with-classpath-exception",
         "SPDX-license-identifier-LGPL",
         "SPDX-license-identifier-MIT",
     ],
