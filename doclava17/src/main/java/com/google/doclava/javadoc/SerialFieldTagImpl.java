@@ -42,7 +42,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
         var tagsOfElement = context.caches.tags.serialField
                 .computeIfAbsent(owner, el -> new HashMap<>());
         return tagsOfElement.computeIfAbsent(serialFieldTree,
-                el -> new SerialFieldTagImpl(serialFieldTree, owner, context));
+                el -> new SerialFieldTagImpl(el, owner, context));
     }
 
     /**

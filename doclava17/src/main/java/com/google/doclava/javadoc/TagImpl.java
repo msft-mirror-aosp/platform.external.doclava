@@ -63,7 +63,7 @@ class TagImpl implements Tag {
             default -> {
                 var tagsOfElement = context.caches.tags.generic.computeIfAbsent(owner,
                         el -> new HashMap<>());
-                yield tagsOfElement.computeIfAbsent(docTree, el -> new TagImpl(docTree, owner,
+                yield tagsOfElement.computeIfAbsent(docTree, el -> new TagImpl(el, owner,
                         context));
             }
         };
