@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Externalizable;
 import java.lang.reflect.Modifier;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -34,6 +35,10 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl publicEnum;
     private ClassDocImpl publicAnnotation;
     private ClassDocImpl publicInterface;
+    private ClassDocImpl extendsSerializable;
+    private ClassDocImpl extendsExternalizable;
+    private ClassDocImpl implementsSerializable;
+    private ClassDocImpl implementsExternalizable;
 
     private ClassDocImpl javaLangError;
     private ClassDocImpl javaLangException;
@@ -44,6 +49,8 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl emptyClassWithNests$Nest1$Nest2;
 
     private ClassDocImpl constructors;
+
+    private ClassDocImpl packagePrivateClass;
 
     @Before
     public void setUp() {
@@ -57,6 +64,7 @@ public class ClassDocImplTest extends BaseTest {
         // note that it is created using AnnotationTypeDocImpl ctor.
         publicAnnotation = AnnotationTypeDocImpl.create(CLASS.publicAnnotation, context);
         publicInterface = ClassDocImpl.create(CLASS.publicInterface, context);
+        packagePrivateClass = ClassDocImpl.create(CLASS.packagePrivateClass, context);
 
         javaLangError = ClassDocImpl.create(INSTANCE.javaLangError, context);
         javaLangException = ClassDocImpl.create(INSTANCE.javaLangException, context);
@@ -68,6 +76,11 @@ public class ClassDocImplTest extends BaseTest {
                 CLASS.publicClassWithNests$Nest1$Nest2, context);
 
         constructors = ClassDocImpl.create(CLASS.constructors, context);
+
+        implementsSerializable = ClassDocImpl.create(CLASS.implementsSerializable, context);
+        implementsExternalizable = ClassDocImpl.create(CLASS.implementsExternalizable, context);
+        extendsSerializable = ClassDocImpl.create(INTERFACE.extendsSerializable, context);
+        extendsExternalizable = ClassDocImpl.create(INTERFACE.extendsExternalizable, context);
     }
 
     @Test
@@ -183,9 +196,14 @@ public class ClassDocImplTest extends BaseTest {
                 emptyClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @see #constructors()
+     */
     @Test
     public void isIncluded() {
+        assertTrue(publicClass.isIncluded());
+
+        assertFalse(packagePrivateClass.isIncluded());
     }
 
     @Test
@@ -202,14 +220,31 @@ public class ClassDocImplTest extends BaseTest {
         assertFalse(javaLangObject.isAbstract());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isSerializable() {
+        // Classes
+        assertTrue(implementsSerializable.isSerializable());
+        assertTrue(implementsExternalizable.isSerializable());
+
+        assertFalse(javaLangObject.isSerializable());
+
+        // Interfaces
+        assertTrue(extendsSerializable.isSerializable());
+        assertTrue(extendsExternalizable.isSerializable());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isExternalizable() {
+        // Classes
+        assertTrue(implementsExternalizable.isExternalizable());
+
+        assertFalse(implementsSerializable.isExternalizable());
+        assertFalse(javaLangObject.isExternalizable());
+
+        // Interfaces
+        assertTrue(extendsExternalizable.isExternalizable());
+
+        assertFalse(extendsSerializable.isExternalizable());
     }
 
     @Ignore("Not yet implemented")
@@ -237,9 +272,21 @@ public class ClassDocImplTest extends BaseTest {
     public void superclassType() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void subclassOf() {
+        // 1. Class is subclass of itself
+        assertTrue(javaLangObject.subclassOf(javaLangObject));
+        assertTrue(javaLangError.subclassOf(javaLangError));
+        assertTrue(publicClass.subclassOf(publicClass));
+
+        // 2. Class is subclass of java.lang.Object
+        assertTrue(javaLangError.subclassOf(javaLangObject));
+        assertTrue(publicClass.subclassOf(javaLangObject));
+
+        // 3. Interface is subclass of java.lang.Object *only*
+        assertTrue(publicInterface.subclassOf(javaLangObject));
+        assertFalse(publicInterface.subclassOf(publicInterface));
+        assertFalse(extendsExternalizable.subclassOf(extendsSerializable));
     }
 
     @Ignore("Not yet implemented")
@@ -288,8 +335,9 @@ public class ClassDocImplTest extends BaseTest {
     }
 
     /**
-     * @implNote This (and {@link #constructors_filter_false()} and
-     * {@link #constructors_filter_true()}) tests do not cover cases when Doclet is supplied with
+     * @implNote This (and also {@link #constructors_filter_false()},
+     * {@link #constructors_filter_true()} and
+     * {@link #isIncluded()}) tests do not cover cases when Doclet is supplied with
      * a non-default <b>selection control</b> flag (default is {@code -protected}), i.e.
      * {@code -public}, {@code -package} or {@code private}. It also does not currently cover
      * selection control options from new Doclet API (e.g. {@code --show-members}.
@@ -312,7 +360,7 @@ public class ClassDocImplTest extends BaseTest {
     }
 
     /**
-     * @see #constructors
+     * @see #constructors()
      */
     @Test
     public void constructors_filter_true() {
@@ -327,7 +375,7 @@ public class ClassDocImplTest extends BaseTest {
     }
 
     /**
-     * @see #constructors
+     * @see #constructors()
      */
     @Test
     public void constructors_filter_false() {

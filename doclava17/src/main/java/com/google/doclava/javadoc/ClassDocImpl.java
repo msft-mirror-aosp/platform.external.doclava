@@ -40,6 +40,8 @@ import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ReferenceType;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
@@ -158,7 +160,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(typeElement);
     }
 
     @Override
@@ -166,14 +168,30 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         return java.lang.reflect.Modifier.isAbstract(reflectModifiers);
     }
 
+    private Boolean isSerializable;
+
     @Override
     public boolean isSerializable() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isSerializable == null) {
+            var serializable = context.environment.getElementUtils()
+                    .getTypeElement("java.io.Serializable").asType();
+            isSerializable = context.environment.getTypeUtils()
+                    .isSubtype(typeElement.asType(), serializable);
+        }
+        return isSerializable;
     }
+
+    private Boolean isExternalizable;
 
     @Override
     public boolean isExternalizable() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isExternalizable == null) {
+            var externalizable = context.environment.getElementUtils()
+                    .getTypeElement("java.io.Externalizable").asType();
+            isExternalizable = context.environment.getTypeUtils()
+                    .isSubtype(typeElement.asType(), externalizable);
+        }
+        return isExternalizable;
     }
 
     @Override
@@ -203,7 +221,12 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public boolean subclassOf(ClassDoc cd) {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeElement other = context.environment.getElementUtils()
+                .getTypeElement(cd.qualifiedName());
+        if (isInterface()) {
+            return other.getQualifiedName().contentEquals("java.lang.Object");
+        }
+        return context.environment.getTypeUtils().isSubtype(typeElement.asType(), other.asType());
     }
 
     @Override
