@@ -37,7 +37,7 @@ class ConstructorDocImpl extends ExecutableMemberDocImpl implements ConstructorD
 
     static ConstructorDocImpl create(ExecutableElement e, Context context) {
         return context.caches.constructors.computeIfAbsent(e,
-                el -> new ConstructorDocImpl(e, context));
+                el -> new ConstructorDocImpl(el, context));
     }
 
     @Override
