@@ -49,7 +49,7 @@ class ThrowsTagImpl extends TagImpl implements ThrowsTag {
         var tagsOfElement = context.caches.tags.throwz.computeIfAbsent(owner,
                 el -> new HashMap<>());
         return tagsOfElement.computeIfAbsent(throwsTree,
-                el -> new ThrowsTagImpl(throwsTree, owner, context));
+                el -> new ThrowsTagImpl(el, owner, context));
     }
 
     private boolean exceptionNameInitialised;

@@ -52,7 +52,7 @@ class SeeTagImpl extends TagImpl implements SeeTag {
         var tagsOfElement = context.caches.tags.see.computeIfAbsent(owner,
                 el -> new HashMap<>());
         return tagsOfElement.computeIfAbsent(docTree,
-                el -> new SeeTagImpl(docTree, owner, context));
+                el -> new SeeTagImpl(el, owner, context));
     }
 
     private String label;

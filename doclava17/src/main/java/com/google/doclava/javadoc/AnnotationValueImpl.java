@@ -54,7 +54,7 @@ class AnnotationValueImpl implements AnnotationValue {
             return null;
         }
         return context.caches.annotationValues.computeIfAbsent(av,
-                el -> new AnnotationValueImpl(av, context));
+                el -> new AnnotationValueImpl(el, context));
     }
 
     private Object value;

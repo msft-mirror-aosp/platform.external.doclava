@@ -39,8 +39,7 @@ class ParamTagImpl extends TagImpl implements ParamTag {
     static ParamTagImpl create(ParamTree paramTree, Element owner, Context context) {
         var tagsOfElement = context.caches.tags.param.computeIfAbsent(owner,
                 el -> new HashMap<>());
-        return tagsOfElement.computeIfAbsent(paramTree,
-                el -> new ParamTagImpl(paramTree, owner, context));
+        return tagsOfElement.computeIfAbsent(paramTree, el -> new ParamTagImpl(el, owner, context));
     }
 
     @Override
