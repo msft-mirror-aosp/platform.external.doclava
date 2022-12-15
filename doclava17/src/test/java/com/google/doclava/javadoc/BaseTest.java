@@ -19,7 +19,6 @@ package com.google.doclava.javadoc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -89,6 +88,20 @@ public abstract class BaseTest {
 
         static final TypeElement constructors = initTypeElement(
                 "com.example.constructors.Constructors");
+
+        static final TypeElement packagePrivateClass = initTypeElement("com.example.classes.PackagePrivateClass");
+
+        static final TypeElement implementsSerializable = initTypeElement(
+                "com.example.classes.ImplementsSerializable");
+        static final TypeElement implementsExternalizable = initTypeElement(
+                "com.example.classes.ImplementsExternalizable");
+    }
+    
+    static class INTERFACE {
+        static final TypeElement extendsSerializable = initTypeElement(
+                "com.example.classes.ExtendsSerializable");
+        static final TypeElement extendsExternalizable = initTypeElement(
+                "com.example.classes.ExtendsExternalizable");
     }
 
     static class INSTANCE {
