@@ -17,7 +17,6 @@
 package com.google.doclava.javadoc;
 
 import com.sun.javadoc.Doc;
-import com.sun.source.doctree.BlockTagTree;
 import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.ParamTree;
 import com.sun.source.doctree.SeeTree;
@@ -56,6 +55,7 @@ class Context {
                 new HashMap<>();
         public final Map<AnnotationValue, AnnotationValueImpl> annotationValues = new HashMap<>();
         public final Map<ExecutableElement, ConstructorDocImpl> constructors = new HashMap<>();
+        public final Map<ExecutableElement, MethodDocImpl> methods = new HashMap<>();
 
         public final Tags tags = new Tags();
 

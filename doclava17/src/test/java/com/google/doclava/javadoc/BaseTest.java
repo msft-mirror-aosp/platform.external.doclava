@@ -187,6 +187,32 @@ public abstract class BaseTest {
                 "com.example.constructors.Constructors", "Constructors(int,java.lang.String)");
     }
 
+    static class METHOD {
+
+        static class OF_CLASS {
+
+            static final ExecutableElement public_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "public_void_arg0()");
+            static final ExecutableElement private_int_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "private_int_arg0()");
+            static final ExecutableElement packagePrivate_String_arg2_int_String = initExecutableElement(
+                    "com.example.methods.OfClass",
+                    "packagePrivate_String_arg2_int_String(int,java.lang.String)");
+            static final ExecutableElement public_abstract_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "public_abstract_void_arg0()");
+            static final ExecutableElement override_public_String_toString0 = initExecutableElement(
+                    "com.example.methods.OfClass", "toString()");
+        }
+
+        static class OF_INTERFACE {
+
+            static final ExecutableElement public_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfInterface", "public_void_arg0()");
+            static final ExecutableElement public_default_String_arg0 = initExecutableElement(
+                    "com.example.methods.OfInterface", "public_default_String_arg0()");
+        }
+    }
+
     private static TypeElement initTypeElement(String name) {
         var e = docletEnv.getElementUtils().getTypeElement(name);
         assertNotNull(e);
