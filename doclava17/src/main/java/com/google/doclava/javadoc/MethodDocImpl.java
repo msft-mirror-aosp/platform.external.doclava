@@ -32,8 +32,8 @@ import javax.lang.model.element.ExecutableElement;
 
 class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
 
-    protected MethodDocImpl(ExecutableElement e) {
-        super(e);
+    protected MethodDocImpl(ExecutableElement e, Context context) {
+        super(e, context);
     }
 
     @Override

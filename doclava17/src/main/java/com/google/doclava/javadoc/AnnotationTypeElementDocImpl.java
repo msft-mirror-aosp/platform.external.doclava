@@ -31,8 +31,8 @@ import javax.lang.model.element.ExecutableElement;
 
 class AnnotationTypeElementDocImpl extends MethodDocImpl implements AnnotationTypeElementDoc {
 
-    protected AnnotationTypeElementDocImpl(ExecutableElement e) {
-        super(e);
+    protected AnnotationTypeElementDocImpl(ExecutableElement e, Context context) {
+        super(e, context);
     }
 
     @Override

@@ -31,8 +31,8 @@ import javax.lang.model.element.Element;
 abstract class MemberDocImpl<T extends Element> extends ProgramElementDocImpl<T> implements
         MemberDoc {
 
-    protected MemberDocImpl(T e) {
-        super(e);
+    protected MemberDocImpl(T e, Context context) {
+        super(e, context);
     }
 
     @Override
