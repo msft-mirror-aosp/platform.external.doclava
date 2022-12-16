@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
 import com.sun.javadoc.MemberDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.SeeTag;
@@ -58,6 +59,7 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     private String label;
 
     @Override
+    @Unused(implemented = true)
     public String label() {
         if (label == null) {
             var children = seeTree.getReference();
@@ -73,6 +75,7 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     private PackageDocImpl referencedPackage;
 
     @Override
+    @Unused(implemented = true)
     public PackageDoc referencedPackage() {
         if (!referencedPackageInitialised) {
             String signature = getReferenceSignature(seeTree);
@@ -89,6 +92,7 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     }
 
     @Override
+    @Unused(implemented = true)
     public String referencedClassName() {
         var rc = referencedClass();
         return rc.qualifiedName();
@@ -98,6 +102,7 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     private ClassDocImpl referencedClass;
 
     @Override
+    @Unused(implemented = true)
     public ClassDocImpl referencedClass() {
         if (!referencedClassInitialised) {
             String signature = getReferenceSignature(seeTree);
@@ -118,11 +123,13 @@ class SeeTagImpl extends TagImpl implements SeeTag {
     }
 
     @Override
+    @Unused(implemented = true)
     public String referencedMemberName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public MemberDoc referencedMember() {
         throw new UnsupportedOperationException("not yet implemented");
     }

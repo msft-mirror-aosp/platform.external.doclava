@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents the root of the program structure information
  * for one run of javadoc.  From this root all other program
@@ -54,6 +57,7 @@ public interface RootDoc extends Doc, DocErrorReporter {
      *
      * @return an array of arrays of String.
      */
+    @Unused
     String[][] options();
 
     /**
@@ -65,6 +69,7 @@ public interface RootDoc extends Doc, DocErrorReporter {
      *
      * @return packages specified on the command line.
      */
+    @Unused
     PackageDoc[] specifiedPackages();
 
     /**
@@ -74,6 +79,7 @@ public interface RootDoc extends Doc, DocErrorReporter {
      *
      * @return classes and interfaces specified on the command line.
      */
+    @Unused
     ClassDoc[] specifiedClasses();
 
     /**
@@ -83,6 +89,7 @@ public interface RootDoc extends Doc, DocErrorReporter {
      *
      * @return included classes and interfaces in all packages.
      */
+    @Used
     ClassDoc[] classes();
 
     /**
@@ -93,6 +100,7 @@ public interface RootDoc extends Doc, DocErrorReporter {
      * @return a PackageDoc holding the specified package, null if
      * this package is not referenced.
      */
+    @Used
     PackageDoc packageNamed(String name);
 
     /**
@@ -105,5 +113,6 @@ public interface RootDoc extends Doc, DocErrorReporter {
      * @return a ClassDoc holding the specified class, null if
      * this class is not referenced.
      */
+    @Used
     ClassDoc classNamed(String qualifiedName);
 }

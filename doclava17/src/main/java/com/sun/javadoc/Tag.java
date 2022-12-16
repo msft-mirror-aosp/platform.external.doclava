@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import java.text.BreakIterator;
 import java.util.Locale;
 
@@ -57,6 +59,7 @@ public interface Tag {
      *
      * @return the name of this tag
      */
+    @Used
     String name();
 
     /**
@@ -64,6 +67,7 @@ public interface Tag {
      *
      * @return the containing {@link Doc} of this Tag element
      */
+    @Unused
     Doc holder();
 
     /**
@@ -86,6 +90,7 @@ public interface Tag {
      *
      * @return the kind of this tag.
      */
+    @Used
     String kind();
 
     /**
@@ -93,11 +98,13 @@ public interface Tag {
      *
      * @return the text of this tag
      */
+    @Used
     String text();
 
     /**
      * Convert this object to a string.
      */
+    @Unused
     String toString();
 
     /**
@@ -130,6 +137,7 @@ public interface Tag {
      * @see ParamTag
      * @see ThrowsTag
      */
+    @Unused
     Tag[] inlineTags();
 
     /**
@@ -156,11 +164,13 @@ public interface Tag {
      * @return an array of {@link Tag} objects representing the
      *         first sentence of the comment
      */
+    @Unused
     Tag[] firstSentenceTags();
 
     /**
      * Return the source position of this tag.
      * @return the source position of this tag.
      */
+    @Used
     SourcePosition position();
 }

@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+
 /**
  * Documents a Serializable field defined by an ObjectStreamField.
  * <pre>
@@ -48,11 +50,13 @@ public interface SerialFieldTag extends Tag, Comparable<Object> {
     /**
      * Return the serializable field name.
      */
+    @Unused
     String fieldName();
 
     /**
      * Return the field type string.
      */
+    @Unused
     String fieldType();
 
     /**
@@ -61,12 +65,14 @@ public interface SerialFieldTag extends Tag, Comparable<Object> {
      * @return null if no ClassDoc for field type is visible from
      *         containingClass context.
      */
+    @Unused
     ClassDoc fieldTypeDoc();
 
     /**
      * Return the field comment. If there is no serialField comment, return
      * javadoc comment of corresponding FieldDoc.
      */
+    @Unused
     String description();
 
     /**

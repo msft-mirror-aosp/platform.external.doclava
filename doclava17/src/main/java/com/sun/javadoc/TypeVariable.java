@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a type variable.
  * For example, the generic interface {@code List<E>} has a single
@@ -45,6 +48,7 @@ public interface TypeVariable extends Type {
      *
      * @return the bounds of this type variable.
      */
+    @Used
     Type[] bounds();
 
     /**
@@ -54,12 +58,14 @@ public interface TypeVariable extends Type {
      * @return the class, interface, method, or constructor within
      *         which this type variable is declared.
      */
+    @Unused
     ProgramElementDoc owner();
 
     /**
      * Get the annotations of this program element.
      * Return an empty array if there are none.
      */
+    @Unused
     AnnotationDesc[] annotations();
 
 }

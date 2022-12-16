@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
@@ -40,8 +42,6 @@ import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ReferenceType;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
@@ -61,11 +61,13 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Unused(implemented = true)
     public String modifiers() {
         return java.lang.reflect.Modifier.toString(modifierSpecifier());
     }
 
     @Override
+    @Unused(implemented = true)
     public int modifierSpecifier() {
         if (isInterface() || isAnnotationType()) {
             return reflectModifiers & ~java.lang.reflect.Modifier.ABSTRACT;
@@ -76,6 +78,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isClass;
 
     @Override
+    @Unused(implemented = true)
     public boolean isClass() {
         if (isClass == null) {
             isClass = typeElement.getKind().isClass();
@@ -86,6 +89,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isOrdinaryClass;
 
     @Override
+    @Used(implemented = true)
     public boolean isOrdinaryClass() {
         if (isOrdinaryClass == null) {
             isOrdinaryClass = (!isEnum() &&
@@ -101,6 +105,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isEnum;
 
     @Override
+    @Used(implemented = true)
     public boolean isEnum() {
         if (isEnum == null) {
             isEnum = (typeElement.getKind() == ElementKind.ENUM);
@@ -111,6 +116,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isInterface;
 
     @Override
+    @Used(implemented = true)
     public boolean isInterface() {
         if (isInterface == null) {
             isInterface = (typeElement.getKind() == ElementKind.INTERFACE);
@@ -121,6 +127,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isException;
 
     @Override
+    @Used(implemented = true)
     public boolean isException() {
         if (isException == null) {
             isException = context.docletElementUtils.isException(typeElement);
@@ -131,6 +138,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isError;
 
     @Override
+    @Used(implemented = true)
     public boolean isError() {
         if (isError == null) {
             isError = context.docletElementUtils.isError(typeElement);
@@ -141,6 +149,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private String name;
 
     @Override
+    @Used(implemented = true)
     public String name() {
         if (name == null) {
             name = context.docletElementUtils.getClassNameUntilNotNested(typeElement);
@@ -151,6 +160,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private String qualifiedName;
 
     @Override
+    @Used(implemented = true)
     public String qualifiedName() {
         if (qualifiedName == null) {
             qualifiedName = typeElement.getQualifiedName().toString();
@@ -159,11 +169,13 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isIncluded() {
         return context.environment.isIncluded(typeElement);
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isAbstract() {
         return java.lang.reflect.Modifier.isAbstract(reflectModifiers);
     }
@@ -171,6 +183,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isSerializable;
 
     @Override
+    @Used(implemented = true)
     public boolean isSerializable() {
         if (isSerializable == null) {
             var serializable = context.environment.getElementUtils()
@@ -184,6 +197,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private Boolean isExternalizable;
 
     @Override
+    @Unused(implemented = true)
     public boolean isExternalizable() {
         if (isExternalizable == null) {
             var externalizable = context.environment.getElementUtils()
@@ -195,31 +209,37 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Unused
     public MethodDoc[] serializationMethods() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public FieldDoc[] serializableFields() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public boolean definesSerializableFields() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc superclass() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Type superclassType() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean subclassOf(ClassDoc cd) {
         TypeElement other = context.environment.getElementUtils()
                 .getTypeElement(cd.qualifiedName());
@@ -230,51 +250,61 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Unused
     public ClassDoc[] interfaces() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Type[] interfaceTypes() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public TypeVariable[] typeParameters() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ParamTag[] typeParamTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public FieldDoc[] fields() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public FieldDoc[] fields(boolean filter) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public FieldDoc[] enumConstants() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public MethodDoc[] methods() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public MethodDoc[] methods(boolean filter) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public ConstructorDoc[] constructors() {
         if (constructorsFiltered == null) {
             constructorsFiltered = getConstructors(true);
@@ -286,6 +316,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private ConstructorDoc[] constructorsAll;
 
     @Override
+    @Used(implemented = true)
     public ConstructorDoc[] constructors(boolean filter) {
         if (filter) {
             if (constructorsFiltered == null) {
@@ -310,36 +341,43 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Used
     public ClassDoc[] innerClasses() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] innerClasses(boolean filter) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc findClass(String className) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc[] importedClasses() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public PackageDoc[] importedPackages() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public String typeName() {
         return name();
     }
 
     @Override
+    @Used(implemented = true)
     public String qualifiedTypeName() {
         return qualifiedName();
     }
@@ -347,6 +385,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private String simpleTypeName;
 
     @Override
+    @Used(implemented = true)
     public String simpleTypeName() {
         if (simpleTypeName == null) {
             simpleTypeName = typeElement.getSimpleName().toString();
@@ -355,46 +394,55 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
+    @Used(implemented = true)
     public String dimension() {
         return "";
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isPrimitive() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc asClassDoc() {
         return this;
     }
 
     @Override
+    @Used(implemented = true)
     public ParameterizedType asParameterizedType() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public TypeVariable asTypeVariable() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public WildcardType asWildcardType() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public AnnotatedType asAnnotatedType() {
         return null;
     }
 
     @Override
+    @Unused(implemented = true)
     public AnnotationTypeDoc asAnnotationTypeDoc() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public Type getElementType() {
         return null;
     }

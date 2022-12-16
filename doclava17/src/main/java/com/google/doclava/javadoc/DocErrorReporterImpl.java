@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.SourcePosition;
 
@@ -36,6 +37,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @param msg message to print
      */
     @Override
+    @Unused
     public void printError(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printError(...).
@@ -49,6 +51,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @since 1.4
      */
     @Override
+    @Unused
     public void printError(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printError(...).
@@ -60,6 +63,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @param msg message to print
      */
     @Override
+    @Unused
     public void printWarning(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printWarning(...).
@@ -73,6 +77,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @since 1.4
      */
     @Override
+    @Unused
     public void printWarning(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printWarning(...).
@@ -84,6 +89,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @param msg message to print
      */
     @Override
+    @Unused
     public void printNotice(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printNotice(...).
@@ -97,6 +103,7 @@ class DocErrorReporterImpl implements DocErrorReporter {
      * @since 1.4
      */
     @Override
+    @Unused
     public void printNotice(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
         // TODO(nikitai): implement this printNotice(...).

@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
@@ -36,61 +38,73 @@ import com.sun.javadoc.WildcardType;
 abstract class TypeImpl implements Type {
 
     @Override
+    @Unused
     public String typeName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String qualifiedTypeName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public Type getElementType() {
         return null;
     }
 
     @Override
+    @Used
     public String simpleTypeName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public String dimension() {
         return "";
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isPrimitive() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc asClassDoc() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public TypeVariable asTypeVariable() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public WildcardType asWildcardType() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public ParameterizedType asParameterizedType() {
         return null;
     }
 
     @Override
+    @Unused(implemented = true)
     public AnnotationTypeDoc asAnnotationTypeDoc() {
         return null;
     }
 
     @Override
+    @Used(implemented = true)
     public AnnotatedType asAnnotatedType() {
         return null;
     }

@@ -25,20 +25,14 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.SeeTag;
 import com.sun.javadoc.SourcePosition;
 import com.sun.javadoc.Tag;
-import com.sun.source.doctree.BlockTagTree;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
-import com.sun.source.doctree.DocTree.Kind;
-import com.sun.source.doctree.InlineTagTree;
-import com.sun.source.doctree.ParamTree;
-import com.sun.source.doctree.SeeTree;
-import com.sun.source.doctree.SerialFieldTree;
-import com.sun.source.doctree.ThrowsTree;
-import com.sun.source.util.SimpleDocTreeVisitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +52,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     private String commentText;
 
     @Override
+    @Unused(implemented = true)
     public String commentText() {
         if (commentText == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
@@ -72,6 +67,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     private Tag[] tags;
 
     @Override
+    @Unused(implemented = true)
     public Tag[] tags() {
         if (tags == null) {
             DocCommentTree tree = context.environment.getDocTrees().getDocCommentTree(element);
@@ -86,6 +82,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     }
 
     @Override
+    @Unused(implemented = true)
     public Tag[] tags(String kind) {
         return Arrays.stream(tags())
                 .filter(t -> t.kind().equals(kind))
@@ -95,6 +92,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     private SeeTag[] seeTags;
 
     @Override
+    @Unused(implemented = true)
     public SeeTag[] seeTags() {
         if (seeTags == null) {
             seeTags = Arrays.stream(tags())
@@ -107,6 +105,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     private Tag[] inlineTags;
 
     @Override
+    @Used(implemented = true)
     public Tag[] inlineTags() {
         if (inlineTags == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
@@ -121,6 +120,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     private Tag[] firstSentenceTags;
 
     @Override
+    @Unused(implemented = true)
     public Tag[] firstSentenceTags() {
         if (firstSentenceTags == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
@@ -141,6 +141,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
      *
      */
     @Override
+    @Used(implemented = true)
     public String getRawCommentText() {
         if (getRawCommentText == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
@@ -151,11 +152,13 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     }
 
     @Override
+    @Unused
     public void setRawCommentText(String rawDocumentation) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public String toString() {
         return qualifiedName();
     }
@@ -171,61 +174,73 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isField() {
         return false;
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isEnumConstant() {
         return false;
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isConstructor() {
         return false;
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isMethod() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isAnnotationTypeElement() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isInterface() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isException() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isError() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isEnum() {
         return false;
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isAnnotationType() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isOrdinaryClass() {
         return false;
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isClass() {
         return false;
     }
@@ -234,6 +249,7 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     public abstract boolean isIncluded();
 
     @Override
+    @Used(implemented = true)
     public SourcePosition position() {
         return null;
     }
