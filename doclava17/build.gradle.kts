@@ -28,6 +28,12 @@ application {
     mainClass.set("com.google.doclava.Doclava")
 }
 
+val doclava17 by configurations.creating
+
+dependencies {
+    doclava17(project(":doclava17"))
+}
+
 sourceSets {
     main {
         java {
@@ -40,8 +46,49 @@ sourceSets {
             srcDirs("${project.rootDir}/res")
         }
     }
-    test {
+    create("for javadoc") {
         java {
+            srcDir("${projectDir}/src/main/java")
         }
     }
+}
+
+tasks.create<Exec>("doclava17-on-itself") {
+    dependsOn(":doclava17:jar")
+
+    group = "run"
+    workingDir = projectDir
+
+    val javadocTool = javaToolchains.javadocToolFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }.get().executablePath.toString()
+
+    val files = project.sourceSets["for javadoc"]
+        .allJava
+        .filter { !it.endsWith("Doclava.java") }
+        .map { it.path }
+        .toList()
+
+    val args = mutableListOf(
+        javadocTool,
+        "-d", "out/doclava-outputs/on-self",
+        "-doclet", "com.google.doclava.Doclava",
+        "-docletpath", doclava17.files.toList().joinToString(separator = ":") { it.path },
+        "-encoding", "UTF-8",
+    )
+    args.addAll(files)
+
+    commandLine = args
+}
+
+val addedExports = listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "17"
+    options.compilerArgs.addAll(addedExports)
+}
+
+tasks.withType<Test> {
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    jvmArgs = addedExports
 }

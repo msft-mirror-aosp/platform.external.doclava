@@ -30,8 +30,8 @@ import javax.lang.model.element.ExecutableElement;
 
 class ConstructorDocImpl extends ExecutableMemberDocImpl implements ConstructorDoc {
 
-    protected ConstructorDocImpl(ExecutableElement e) {
-        super(e);
+    protected ConstructorDocImpl(ExecutableElement e, Context context) {
+        super(e, context);
     }
 
     @Override

@@ -32,11 +32,12 @@ import com.sun.javadoc.Tag;
 import javax.lang.model.element.Element;
 
 abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
-
     protected final T element;
+    protected final Context context;
 
-    protected DocImpl(T e) {
+    protected DocImpl(T e, Context context) {
         this.element = e;
+        this.context = context;
     }
 
     @Override

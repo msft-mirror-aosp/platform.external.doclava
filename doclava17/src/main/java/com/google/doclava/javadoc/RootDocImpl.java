@@ -30,6 +30,8 @@ import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.SourcePosition;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import jdk.javadoc.doclet.DocletEnvironment;
 
 /**
@@ -40,7 +42,33 @@ import jdk.javadoc.doclet.DocletEnvironment;
 public class RootDocImpl extends DocImpl<Element> implements RootDoc {
 
     public RootDocImpl(DocletEnvironment environment) {
-        super(null);
+        super(null, new Context(environment));
+
+        for (var e : context.environment.getIncludedElements()) {
+            switch (e.getKind()) {
+                case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE -> addClass((TypeElement) e);
+                case PACKAGE -> addPackage((PackageElement) e);
+                case RECORD -> throw new UnsupportedOperationException(
+                        "records are not yet supported.");
+                case MODULE -> throw new UnsupportedOperationException(
+                        "modules are not yet supported.");
+                default -> throw new UnsupportedOperationException(
+                        "Not yet supported top-level TypeElement kind:" + e.getKind());
+            }
+        }
+    }
+
+    private void addClass(TypeElement c) {
+        switch (c.getKind()) {
+            case CLASS, ENUM, INTERFACE -> ClassDocImpl.create(c, context);
+            case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(c, context);
+            default -> throw new UnsupportedOperationException(
+                    "Unexpected element kind:" + c.getKind());
+        }
+    }
+
+    private void addPackage(PackageElement p) {
+        //TODO(nikitai): Handle package
     }
 
     @Override

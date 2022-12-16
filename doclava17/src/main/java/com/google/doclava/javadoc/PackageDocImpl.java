@@ -33,8 +33,8 @@ import javax.lang.model.element.PackageElement;
 
 class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
 
-    protected PackageDocImpl(PackageElement e) {
-        super(e);
+    protected PackageDocImpl(PackageElement e, Context context) {
+        super(e, context);
     }
 
     @Override
