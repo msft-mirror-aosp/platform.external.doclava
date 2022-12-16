@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a java package.  Provides access to information
  * about the package, the package's comment and tags, and the
@@ -51,6 +54,7 @@ public interface PackageDoc extends Doc {
      *               regardless of access modifier option.
      * @since 1.4
      */
+    @Unused
     ClassDoc[] allClasses(boolean filter);
 
     /**
@@ -60,6 +64,7 @@ public interface PackageDoc extends Doc {
      *
      * @return all included classes and interfaces in this package.
      */
+    @Unused
     ClassDoc[] allClasses();
 
     /**
@@ -71,6 +76,7 @@ public interface PackageDoc extends Doc {
      *
      * @return included ordinary classes in this package.
      */
+    @Used
     ClassDoc[] ordinaryClasses();
 
     /**
@@ -78,6 +84,7 @@ public interface PackageDoc extends Doc {
      *
      * @return included Exceptions in this package.
      */
+    @Used
     ClassDoc[] exceptions();
 
     /**
@@ -85,6 +92,7 @@ public interface PackageDoc extends Doc {
      *
      * @return included Errors in this package.
      */
+    @Used
     ClassDoc[] errors();
 
     /**
@@ -93,6 +101,7 @@ public interface PackageDoc extends Doc {
      * @return included enum types in this package.
      * @since 1.5
      */
+    @Used
     ClassDoc[] enums();
 
     /**
@@ -100,6 +109,7 @@ public interface PackageDoc extends Doc {
      *
      * @return included interfaces in this package.
      */
+    @Used
     ClassDoc[] interfaces();
 
     /**
@@ -108,6 +118,7 @@ public interface PackageDoc extends Doc {
      * @return included annotation types in this package.
      * @since 1.5
      */
+    @Used
     AnnotationTypeDoc[] annotationTypes();
 
     /**
@@ -117,6 +128,7 @@ public interface PackageDoc extends Doc {
      * @return the annotations of this package.
      * @since 1.5
      */
+    @Unused
     AnnotationDesc[] annotations();
 
     /**
@@ -125,5 +137,6 @@ public interface PackageDoc extends Doc {
      * @return ClassDoc of found class or interface,
      * or null if not found.
      */
+    @Unused
     ClassDoc findClass(String className);
 }

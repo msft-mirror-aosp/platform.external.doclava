@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationTypeElementDoc;
 import com.sun.javadoc.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -47,21 +48,25 @@ class AnnotationMethodDocImpl extends MethodDocImpl implements AnnotationTypeEle
     }
 
     @Override
+    @Used(implemented = true)
     public AnnotationValue defaultValue() {
         return defaultValue;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isAnnotationTypeElement() {
         return true;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isMethod() {
         return false;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isAbstract() {
         return false;
     }

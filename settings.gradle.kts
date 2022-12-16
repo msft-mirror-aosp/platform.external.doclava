@@ -15,4 +15,4 @@
  */
 
 rootProject.name = "doclava"
-include( "doclava", "doclava17")
+include("doclava17")

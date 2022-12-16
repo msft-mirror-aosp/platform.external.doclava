@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a member of a java class: field, constructor, or method.
  * This is an abstract class dealing with information common to
@@ -43,5 +45,6 @@ public interface MemberDoc extends ProgramElementDoc {
     /**
      * Returns true if this member was synthesized by the compiler.
      */
+    @Used
     boolean isSynthetic();
 }

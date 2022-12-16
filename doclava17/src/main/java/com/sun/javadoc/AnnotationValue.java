@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a value of an annotation type element.
  *
@@ -47,6 +50,7 @@ public interface AnnotationValue {
      *
      * @return the value.
      */
+    @Used
     Object value();
 
     /**
@@ -55,5 +59,6 @@ public interface AnnotationValue {
      * @return the text of a Java language annotation value expression
      *          whose value is the value of this element.
      */
+    @Unused
     String toString();
 }

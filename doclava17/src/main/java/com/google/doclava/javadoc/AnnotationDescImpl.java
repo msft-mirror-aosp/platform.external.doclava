@@ -25,22 +25,27 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationTypeDoc;
 
 class AnnotationDescImpl implements AnnotationDesc {
 
     @Override
+    @Used
     public AnnotationTypeDoc annotationType() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ElementValuePair[] elementValues() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public boolean isSynthesized() {
         throw new UnsupportedOperationException("not yet implemented");
     }

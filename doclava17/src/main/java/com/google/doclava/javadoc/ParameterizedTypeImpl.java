@@ -25,32 +25,39 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 
 class ParameterizedTypeImpl extends TypeImpl implements ParameterizedType {
 
     @Override
+    @Used
     public ParameterizedType asParameterizedType() {
         return this;
     }
 
     @Override
+    @Used
     public Type[] typeArguments() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public Type superclassType() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public Type[] interfaceTypes() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public Type containingType() {
         throw new UnsupportedOperationException("not yet implemented");
     }

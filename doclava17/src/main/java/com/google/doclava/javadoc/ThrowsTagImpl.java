@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
@@ -56,6 +58,7 @@ class ThrowsTagImpl extends TagImpl implements ThrowsTag {
     private String exceptionName;
 
     @Override
+    @Used(implemented = true)
     public String exceptionName() {
         if (!exceptionNameInitialised) {
             var ref = throwsTree.getExceptionName();
@@ -73,6 +76,7 @@ class ThrowsTagImpl extends TagImpl implements ThrowsTag {
     private String exceptionComment;
 
     @Override
+    @Used(implemented = true)
     public String exceptionComment() {
         if (!exceptionCommentInitialised) {
             var desc = throwsTree.getDescription();
@@ -90,6 +94,7 @@ class ThrowsTagImpl extends TagImpl implements ThrowsTag {
     private ClassDocImpl exception;
 
     @Override
+    @Used(implemented = true)
     public ClassDoc exception() {
         if (!exceptionInitialised) {
             var ref = throwsTree.getExceptionName();
@@ -109,6 +114,7 @@ class ThrowsTagImpl extends TagImpl implements ThrowsTag {
     }
 
     @Override
+    @Unused
     public Type exceptionType() {
         throw new UnsupportedOperationException("not yet implemented");
     }

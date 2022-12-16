@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.Parameter;
 import com.sun.javadoc.Type;
@@ -32,21 +33,25 @@ import com.sun.javadoc.Type;
 class ParameterImpl implements Parameter {
 
     @Override
+    @Used
     public Type type() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String name() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String typeName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }
