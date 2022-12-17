@@ -16,9 +16,12 @@
 
 package com.google.doclava.javadoc;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Modifier;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -136,14 +139,44 @@ public class ClassDocImplTest extends BaseTest {
         assertFalse(javaLangObject.isError());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void name() {
+        assertEquals("AbstractEmptyClass", abstractEmptyClass.name());
+        assertEquals("AbstractEmptyInterface", abstractEmptyInterface.name());
+        assertEquals("PublicInterface", publicInterface.name());
+        assertEquals("PublicAnnotation", publicAnnotation.name());
+        assertEquals("PublicClass", publicClass.name());
+        assertEquals("PublicEnum", publicEnum.name());
+
+        assertEquals("Error", javaLangError.name());
+        assertEquals("Exception", javaLangException.name());
+        assertEquals("Object", javaLangObject.name());
+
+        assertEquals("PublicClassWithNests", publicClassWithNests.name());
+        assertEquals("PublicClassWithNests.Nest1", emptyClassWithNests$Nest1.name());
+        assertEquals("PublicClassWithNests.Nest1.Nest2", emptyClassWithNests$Nest1$Nest2.name());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void qualifiedName() {
+        assertEquals("com.example.classes.AbstractEmptyClass", abstractEmptyClass.qualifiedName());
+        assertEquals("com.example.classes.AbstractEmptyInterface",
+                abstractEmptyInterface.qualifiedName());
+        assertEquals("com.example.classes.PublicInterface", publicInterface.qualifiedName());
+        assertEquals("com.example.classes.PublicAnnotation", publicAnnotation.qualifiedName());
+        assertEquals("com.example.classes.PublicClass", publicClass.qualifiedName());
+        assertEquals("com.example.classes.PublicEnum", publicEnum.qualifiedName());
+
+        assertEquals("java.lang.Error", javaLangError.qualifiedName());
+        assertEquals("java.lang.Exception", javaLangException.qualifiedName());
+        assertEquals("java.lang.Object", javaLangObject.qualifiedName());
+
+        assertEquals("com.example.classes.PublicClassWithNests",
+                publicClassWithNests.qualifiedName());
+        assertEquals("com.example.classes.PublicClassWithNests.Nest1",
+                emptyClassWithNests$Nest1.qualifiedName());
+        assertEquals("com.example.classes.PublicClassWithNests.Nest1.Nest2",
+                emptyClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
     @Ignore("Not yet implemented")
@@ -280,59 +313,118 @@ public class ClassDocImplTest extends BaseTest {
     public void importedPackages() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void typeName() {
+        assertEquals("AbstractEmptyClass", abstractEmptyClass.typeName());
+        assertEquals("AbstractEmptyInterface", abstractEmptyInterface.typeName());
+        assertEquals("PublicInterface", publicInterface.typeName());
+        assertEquals("PublicAnnotation", publicAnnotation.typeName());
+        assertEquals("PublicClass", publicClass.typeName());
+        assertEquals("PublicEnum", publicEnum.typeName());
+
+        assertEquals("Error", javaLangError.typeName());
+        assertEquals("Exception", javaLangException.typeName());
+        assertEquals("Object", javaLangObject.typeName());
+
+        assertEquals("PublicClassWithNests", publicClassWithNests.typeName());
+        assertEquals("PublicClassWithNests.Nest1", emptyClassWithNests$Nest1.typeName());
+        assertEquals("PublicClassWithNests.Nest1.Nest2",
+                emptyClassWithNests$Nest1$Nest2.typeName());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void qualifiedTypeName() {
+        assertEquals("com.example.classes.AbstractEmptyClass",
+                abstractEmptyClass.qualifiedTypeName());
+        assertEquals("com.example.classes.AbstractEmptyInterface",
+                abstractEmptyInterface.qualifiedName());
+        assertEquals("com.example.classes.PublicInterface", publicInterface.qualifiedName());
+        assertEquals("com.example.classes.PublicAnnotation", publicAnnotation.qualifiedName());
+        assertEquals("com.example.classes.PublicClass", publicClass.qualifiedName());
+        assertEquals("com.example.classes.PublicEnum", publicEnum.qualifiedName());
+
+        assertEquals("java.lang.Error", javaLangError.qualifiedName());
+        assertEquals("java.lang.Exception", javaLangException.qualifiedName());
+        assertEquals("java.lang.Object", javaLangObject.qualifiedName());
+
+        assertEquals("com.example.classes.PublicClassWithNests",
+                publicClassWithNests.qualifiedName());
+        assertEquals("com.example.classes.PublicClassWithNests.Nest1",
+                emptyClassWithNests$Nest1.qualifiedName());
+        assertEquals("com.example.classes.PublicClassWithNests.Nest1.Nest2",
+                emptyClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void simpleTypeName() {
+        assertEquals("AbstractEmptyClass", abstractEmptyClass.simpleTypeName());
+        assertEquals("AbstractEmptyInterface", abstractEmptyInterface.simpleTypeName());
+        assertEquals("PublicInterface", publicInterface.simpleTypeName());
+        assertEquals("PublicAnnotation", publicAnnotation.simpleTypeName());
+        assertEquals("PublicClass", publicClass.simpleTypeName());
+        assertEquals("PublicEnum", publicEnum.simpleTypeName());
+
+        assertEquals("Error", javaLangError.simpleTypeName());
+        assertEquals("Exception", javaLangException.simpleTypeName());
+        assertEquals("Object", javaLangObject.simpleTypeName());
+
+        assertEquals("PublicClassWithNests", publicClassWithNests.simpleTypeName());
+        assertEquals("Nest1", emptyClassWithNests$Nest1.simpleTypeName());
+        assertEquals("Nest2", emptyClassWithNests$Nest1$Nest2.simpleTypeName());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void dimension() {
+        assertEquals("", publicClass.dimension());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isPrimitive() {
+        assertFalse(publicClass.isPrimitive());
+        assertFalse(publicInterface.isPrimitive());
+        assertFalse(publicEnum.isPrimitive());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asClassDoc() {
+        assertEquals(publicClass, publicClass.asClassDoc());
+        assertEquals(publicInterface, publicInterface.asClassDoc());
+        assertEquals(publicEnum, publicEnum.asClassDoc());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asParameterizedType() {
+        assertNull(publicClass.asParameterizedType());
+        assertNull(publicInterface.asParameterizedType());
+        assertNull(publicEnum.asParameterizedType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asTypeVariable() {
+        assertNull(publicClass.asTypeVariable());
+        assertNull(publicInterface.asTypeVariable());
+        assertNull(publicEnum.asTypeVariable());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asWildcardType() {
+        assertNull(publicClass.asWildcardType());
+        assertNull(publicInterface.asWildcardType());
+        assertNull(publicEnum.asWildcardType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asAnnotatedType() {
+        assertNull(publicClass.asAnnotatedType());
+        assertNull(publicInterface.asAnnotatedType());
+        assertNull(publicEnum.asAnnotatedType());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void asAnnotationTypeDoc() {
+        assertNull(publicClass.asAnnotationTypeDoc());
+        assertNull(publicInterface.asAnnotationTypeDoc());
+        assertNull(publicEnum.asAnnotationTypeDoc());
     }
 
     @Ignore("Not yet implemented")
@@ -340,4 +432,26 @@ public class ClassDocImplTest extends BaseTest {
     public void getElementType() {
     }
 
+    @Test
+    public void modifiers() {
+        assertEquals("public abstract", abstractEmptyClass.modifiers());
+        assertEquals("public", publicClass.modifiers());
+        assertEquals("public final", publicEnum.modifiers());
+
+        // interfaces and annotations should not have 'abstract' modifier
+        assertEquals("public interface", publicInterface.modifiers());
+        assertEquals("public interface", publicAnnotation.modifiers());
+    }
+
+    @Test
+    public void modifierSpecifier() {
+        assertEquals(Modifier.PUBLIC | Modifier.ABSTRACT,
+                abstractEmptyClass.modifierSpecifier());
+        assertEquals(Modifier.PUBLIC, publicClass.modifierSpecifier());
+        assertEquals(Modifier.PUBLIC | Modifier.FINAL, publicEnum.modifierSpecifier());
+
+        // interfaces and annotations should not have 'abstract' modifier
+        assertEquals(Modifier.PUBLIC | Modifier.INTERFACE, publicInterface.modifierSpecifier());
+        assertEquals(Modifier.PUBLIC | Modifier.INTERFACE, publicAnnotation.modifierSpecifier());
+    }
 }

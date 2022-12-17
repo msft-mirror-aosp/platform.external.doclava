@@ -18,6 +18,9 @@ package com.google.doclava.javadoc;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import jdk.javadoc.doclet.DocletEnvironment;
 
@@ -31,8 +34,13 @@ class Context {
     public final DocletElementUtils docletElementUtils;
 
     public static class Caches {
+
         public final Map<TypeElement, ClassDocImpl> classes = new HashMap<>();
         public final Map<TypeElement, AnnotationTypeDocImpl> annotations = new HashMap<>();
+        public final Map<PackageElement, PackageDocImpl> packages = new HashMap<>();
+        public final Map<ExecutableElement, AnnotationMethodDocImpl> annotationMethods =
+                new HashMap<>();
+        public final Map<AnnotationValue, AnnotationValueImpl> annotationValues = new HashMap<>();
     }
 
     public Context(DocletEnvironment environment) {
