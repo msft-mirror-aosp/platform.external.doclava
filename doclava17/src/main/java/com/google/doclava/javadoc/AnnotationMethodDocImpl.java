@@ -29,14 +29,40 @@ import com.sun.javadoc.AnnotationTypeElementDoc;
 import com.sun.javadoc.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 
-class AnnotationTypeElementDocImpl extends MethodDocImpl implements AnnotationTypeElementDoc {
+/**
+ * In a nutshell, represents a method of an annotation.
+ */
+class AnnotationMethodDocImpl extends MethodDocImpl implements AnnotationTypeElementDoc {
 
-    protected AnnotationTypeElementDocImpl(ExecutableElement e, Context context) {
+    protected AnnotationValueImpl defaultValue;
+
+    protected AnnotationMethodDocImpl(ExecutableElement e, Context context) {
         super(e, context);
+        defaultValue = AnnotationValueImpl.create(e.getDefaultValue(), context);
+    }
+
+    static AnnotationMethodDocImpl create(ExecutableElement e, Context context) {
+        return context.caches.annotationMethods.computeIfAbsent(e,
+                el -> new AnnotationMethodDocImpl(el, context));
     }
 
     @Override
     public AnnotationValue defaultValue() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return defaultValue;
+    }
+
+    @Override
+    public boolean isAnnotationTypeElement() {
+        return true;
+    }
+
+    @Override
+    public boolean isMethod() {
+        return false;
+    }
+
+    @Override
+    public boolean isAbstract() {
+        return false;
     }
 }
