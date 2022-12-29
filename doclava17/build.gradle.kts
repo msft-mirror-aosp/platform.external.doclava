@@ -32,6 +32,8 @@ val doclava17 by configurations.creating
 
 dependencies {
     doclava17(project(":doclava17"))
+
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
 
 sourceSets {
@@ -44,10 +46,6 @@ sourceSets {
         }
         resources {
             srcDirs("${project.rootDir}/res")
-        }
-    }
-    test {
-        java {
         }
     }
     create("for javadoc") {
@@ -83,4 +81,16 @@ tasks.create<Exec>("doclava17-on-itself") {
     args.addAll(files)
 
     commandLine = args
+}
+
+val addedExports = listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "17"
+    options.compilerArgs.addAll(addedExports)
+}
+
+tasks.withType<Test> {
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    jvmArgs = addedExports
 }

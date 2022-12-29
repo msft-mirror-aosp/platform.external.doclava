@@ -37,9 +37,11 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
+
     protected final TypeElement typeElement;
 
     protected ClassDocImpl(TypeElement c, Context context) {
@@ -52,17 +54,105 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     static ClassDocImpl create(TypeElement e, Context context) {
-        return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(e, context));
+        return context.caches.classes.computeIfAbsent(e, el -> new ClassDocImpl(el, context));
     }
+
+    @Override
+    public String modifiers() {
+        return java.lang.reflect.Modifier.toString(modifierSpecifier());
+    }
+
+    @Override
+    public int modifierSpecifier() {
+        if (isInterface() || isAnnotationType()) {
+            return reflectModifiers & ~java.lang.reflect.Modifier.ABSTRACT;
+        }
+        return reflectModifiers;
+    }
+
+    private Boolean isClass;
+
+    @Override
+    public boolean isClass() {
+        if (isClass == null) {
+            isClass = typeElement.getKind().isClass();
+        }
+        return isClass;
+    }
+
+    private Boolean isOrdinaryClass;
+
+    @Override
+    public boolean isOrdinaryClass() {
+        if (isOrdinaryClass == null) {
+            isOrdinaryClass = (!isEnum() &&
+                    !isInterface() &&
+                    !isAnnotationType() &&
+                    !isError() &&
+                    !isException()
+            );
+        }
+        return isOrdinaryClass;
+    }
+
+    private Boolean isEnum;
+
+    @Override
+    public boolean isEnum() {
+        if (isEnum == null) {
+            isEnum = (typeElement.getKind() == ElementKind.ENUM);
+        }
+        return isEnum;
+    }
+
+    private Boolean isInterface;
+
+    @Override
+    public boolean isInterface() {
+        if (isInterface == null) {
+            isInterface = (typeElement.getKind() == ElementKind.INTERFACE);
+        }
+        return isInterface;
+    }
+
+    private Boolean isException;
+
+    @Override
+    public boolean isException() {
+        if (isException == null) {
+            isException = context.docletElementUtils.isException(typeElement);
+        }
+        return isException;
+    }
+
+    private Boolean isError;
+
+    @Override
+    public boolean isError() {
+        if (isError == null) {
+            isError = context.docletElementUtils.isError(typeElement);
+        }
+        return isError;
+    }
+
+    private String name;
 
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (name == null) {
+            name = context.docletElementUtils.getClassNameUntilNotNested(typeElement);
+        }
+        return name;
     }
+
+    private String qualifiedName;
 
     @Override
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (qualifiedName == null) {
+            qualifiedName = typeElement.getQualifiedName().toString();
+        }
+        return qualifiedName;
     }
 
     @Override
@@ -72,7 +162,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public boolean isAbstract() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isAbstract(reflectModifiers);
     }
 
     @Override
@@ -197,61 +287,66 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public String typeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return name();
     }
 
     @Override
     public String qualifiedTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return qualifiedName();
     }
+
+    private String simpleTypeName;
 
     @Override
     public String simpleTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (simpleTypeName == null) {
+            simpleTypeName = typeElement.getSimpleName().toString();
+        }
+        return simpleTypeName;
     }
 
     @Override
     public String dimension() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return "";
     }
 
     @Override
     public boolean isPrimitive() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return false;
     }
 
     @Override
     public ClassDoc asClassDoc() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return this;
     }
 
     @Override
     public ParameterizedType asParameterizedType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
     public TypeVariable asTypeVariable() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
     public WildcardType asWildcardType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
     public AnnotatedType asAnnotatedType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
     public AnnotationTypeDoc asAnnotationTypeDoc() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
     public Type getElementType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 }
