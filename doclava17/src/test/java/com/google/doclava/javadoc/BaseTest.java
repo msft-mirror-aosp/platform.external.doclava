@@ -89,12 +89,16 @@ public abstract class BaseTest {
         static final TypeElement constructors = initTypeElement(
                 "com.example.constructors.Constructors");
 
-        static final TypeElement packagePrivateClass = initTypeElement("com.example.classes.PackagePrivateClass");
+        static final TypeElement packagePrivateClass = initTypeElement(
+                "com.example.classes.PackagePrivateClass");
 
         static final TypeElement implementsSerializable = initTypeElement(
                 "com.example.classes.ImplementsSerializable");
         static final TypeElement implementsExternalizable = initTypeElement(
                 "com.example.classes.ImplementsExternalizable");
+
+        static final TypeElement annotatedClass = initTypeElement(
+                "com.example.classes.AnnotatedClass");
     }
     
     static class INTERFACE {

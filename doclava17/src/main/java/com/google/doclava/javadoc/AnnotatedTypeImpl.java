@@ -31,12 +31,16 @@ import com.sun.javadoc.AnnotatedType;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.Type;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
 
-    protected AnnotatedTypeImpl(TypeMirror typeMirror, Context context) {
-        super(typeMirror, context);
+    private final DeclaredType declaredType;
+
+    private Type underlyingType;
+
+    protected AnnotatedTypeImpl(DeclaredType declaredType, Context context) {
+        super(declaredType, context);
+        this.declaredType = declaredType;
     }
 
     static AnnotatedTypeImpl create(DeclaredType declaredType, Context context) {
@@ -51,8 +55,11 @@ class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type underlyingType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (underlyingType == null) {
+            underlyingType = TypeImpl.create(declaredType, context);
+        }
+        return underlyingType;
     }
 }

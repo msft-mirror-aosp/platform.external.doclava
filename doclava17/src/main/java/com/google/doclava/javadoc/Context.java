@@ -77,7 +77,7 @@ class Context {
         public static class Types {
 
             public final Map<TypeMirror, TypeImpl> common = new HashMap<>();
-            public final Map<TypeMirror, AnnotatedTypeImpl> annotated = new HashMap<>();
+            public final Map<DeclaredType, AnnotatedTypeImpl> annotated = new HashMap<DeclaredType, AnnotatedTypeImpl>();
             public final Map<WildcardType, WildcardTypeImpl> wildcard = new HashMap<>();
             public final Map<DeclaredType, ParameterizedTypeImpl> parameterized = new HashMap<>();
             public final Map<TypeVariable, TypeVariableImpl> typevar = new HashMap<>();
