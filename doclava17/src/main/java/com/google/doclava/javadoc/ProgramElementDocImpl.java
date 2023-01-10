@@ -113,37 +113,37 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPublic() {
         return java.lang.reflect.Modifier.isPublic(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isProtected() {
         return java.lang.reflect.Modifier.isProtected(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPrivate() {
         return java.lang.reflect.Modifier.isPrivate(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPackagePrivate() {
         return !(isPublic() || isPrivate() || isProtected());
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isStatic() {
         return java.lang.reflect.Modifier.isStatic(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isFinal() {
         return java.lang.reflect.Modifier.isFinal(reflectModifiers);
     }
