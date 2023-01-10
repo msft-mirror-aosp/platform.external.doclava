@@ -117,7 +117,7 @@ public abstract class BaseTest {
 
     static class PACKAGE {
 
-        static PackageElement comExampleClasses = initPackageElement("com.example.classes");
+        static PackageElement comExamplePackages = initPackageElement("com.example.packages");
     }
 
     static class ANNOTATION_METHOD {
