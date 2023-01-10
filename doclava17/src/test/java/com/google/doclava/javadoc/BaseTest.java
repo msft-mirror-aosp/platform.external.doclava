@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import jdk.javadoc.doclet.DocletEnvironment;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -100,8 +101,9 @@ public abstract class BaseTest {
         static final TypeElement annotatedClass = initTypeElement(
                 "com.example.classes.AnnotatedClass");
     }
-    
+
     static class INTERFACE {
+
         static final TypeElement extendsSerializable = initTypeElement(
                 "com.example.classes.ExtendsSerializable");
         static final TypeElement extendsExternalizable = initTypeElement(
@@ -217,7 +219,19 @@ public abstract class BaseTest {
         }
     }
 
-    private static TypeElement initTypeElement(String name) {
+    static class FIELD {
+
+        static final VariableElement public_int = initVariableElement(
+                "com.example.fields.Fields", "public_int");
+        static final VariableElement public_transient_volatile_Object = initVariableElement(
+                "com.example.fields.Fields", "public_transient_volatile_Object");
+        static final VariableElement public_final_int = initVariableElement(
+                "com.example.fields.Fields", "public_final_int");
+        static final VariableElement public_final_String = initVariableElement(
+                "com.example.fields.Fields", "public_final_String");
+    }
+
+    protected static TypeElement initTypeElement(String name) {
         var e = docletEnv.getElementUtils().getTypeElement(name);
         assertNotNull(e);
         return e;
@@ -229,10 +243,23 @@ public abstract class BaseTest {
         return e;
     }
 
+    private static VariableElement initVariableElement(String containingType, String name) {
+        var t = initTypeElement(containingType);
+        var fields = t.getEnclosedElements()
+                .stream()
+                .filter(e -> e instanceof VariableElement)
+                .map(e -> (VariableElement) e)
+                .filter(ve -> name.equals(ve.getSimpleName().toString()))
+                .toList();
+
+        assertEquals(1, fields.size());
+        return fields.get(0);
+    }
+
     /**
-     * Finds ExecutableElement in the environment by class type and element signature.
-     * Signature should be in the following format: {@code methodName(type1[,type2...])}, types
-     * are specified in a fully qualified form. For example:
+     * Finds ExecutableElement in the environment by class type and element signature. Signature
+     * should be in the following format: {@code methodName(type1[,type2...])}, types are specified
+     * in a fully qualified form. For example:
      *
      * <ul>
      *     <li>{@code Constructor()}</li>
