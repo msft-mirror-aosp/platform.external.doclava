@@ -33,6 +33,11 @@ import com.sun.javadoc.Type;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
 
@@ -92,9 +97,9 @@ class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type returnType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return TypeImpl.create(executableElement.getReturnType(), context);
     }
 
     @Override
@@ -110,9 +115,39 @@ class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public MethodDoc overriddenMethod() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isStatic()) {
+            return null;
+        }
+
+        var enclosingElement = executableElement.getEnclosingElement();
+
+        final Types typeUtils = context.environment.getTypeUtils();
+        final Elements elemUtils = context.environment.getElementUtils();
+
+        return switch (enclosingElement.getKind()) {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM -> {
+                var owningClass = ((TypeElement) enclosingElement);
+                for (TypeMirror superclass = owningClass.getSuperclass();
+                        superclass.getKind() != TypeKind.NONE;
+                        superclass = ((TypeElement) typeUtils.asElement(superclass)).getSuperclass()
+                ) {
+                    TypeElement superclassElem =
+                            (TypeElement) typeUtils.asElement(superclass);
+                    var overriden = ElementFilter.methodsIn(superclassElem.getEnclosedElements())
+                            .stream()
+                            .filter(exe -> elemUtils.overrides(executableElement, exe, owningClass))
+                            .findFirst();
+                    if (overriden.isPresent()) {
+                        yield MethodDocImpl.create(overriden.get(), context);
+                    }
+                }
+                yield null;
+            }
+            default -> throw new UnsupportedOperationException("Expected CLASS, INTERFACE, "
+                    + "ANNOTATION_TYPE or ENUM, but got " + enclosingElement.getKind());
+        };
     }
 
     @Override

@@ -115,6 +115,7 @@ public abstract class BaseTest {
         static final TypeElement javaLangObject = initTypeElement("java.lang.Object");
         static final TypeElement javaLangError = initTypeElement("java.lang.Error");
         static final TypeElement javaLangException = initTypeElement("java.lang.Exception");
+        static final TypeElement javaLangString = initTypeElement("java.lang.String");
     }
 
     static class PACKAGE {
@@ -216,6 +217,18 @@ public abstract class BaseTest {
                     "com.example.methods.OfInterface", "public_void_arg0()");
             static final ExecutableElement public_default_String_arg0 = initExecutableElement(
                     "com.example.methods.OfInterface", "public_default_String_arg0()");
+        }
+
+        static class OVERRIDES {
+
+            static final ExecutableElement A_name = initExecutableElement(
+                    "com.example.methods.override.A", "name()");
+            static final ExecutableElement B_name = initExecutableElement(
+                    "com.example.methods.override.B", "name()");
+            static final ExecutableElement C_name = initExecutableElement(
+                    "com.example.methods.override.C", "name()");
+            static final ExecutableElement D_name = initExecutableElement(
+                    "com.example.methods.override.D", "name()");
         }
     }
 

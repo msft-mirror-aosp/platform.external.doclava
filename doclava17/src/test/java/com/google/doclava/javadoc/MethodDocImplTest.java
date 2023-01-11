@@ -18,10 +18,14 @@ package com.google.doclava.javadoc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.doclava.javadoc.BaseTest.METHOD.OF_CLASS;
 import com.google.doclava.javadoc.BaseTest.METHOD.OF_INTERFACE;
+import com.google.doclava.javadoc.BaseTest.METHOD.OVERRIDES;
+import com.sun.javadoc.MethodDoc;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,6 +46,16 @@ public class MethodDocImplTest extends BaseTest {
         public static MethodDocImpl public_default_String_arg0;
     }
 
+    private static class OVERRIDE {
+
+        public static MethodDocImpl A;
+        public static MethodDocImpl B;
+        public static MethodDocImpl C;
+        public static MethodDocImpl D;
+    }
+
+    private ClassDocImpl javaLangString;
+
     @Override
     public void setUp() {
         super.setUp();
@@ -58,6 +72,13 @@ public class MethodDocImplTest extends BaseTest {
                 context);
         INTERFACE_METHOD.public_default_String_arg0 =
                 MethodDocImpl.create(OF_INTERFACE.public_default_String_arg0, context);
+
+        OVERRIDE.A = MethodDocImpl.create(OVERRIDES.A_name, context);
+        OVERRIDE.B = MethodDocImpl.create(OVERRIDES.B_name, context);
+        OVERRIDE.C = MethodDocImpl.create(OVERRIDES.C_name, context);
+        OVERRIDE.D = MethodDocImpl.create(OVERRIDES.D_name, context);
+
+        javaLangString = ClassDocImpl.create(INSTANCE.javaLangString, context);
     }
 
     @Test
@@ -100,9 +121,14 @@ public class MethodDocImplTest extends BaseTest {
         assertTrue(INTERFACE_METHOD.public_default_String_arg0.isDefault());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void returnType() {
+        assertEquals(PrimitiveTypeImpl.VOID, CLASS_METHOD.public_void_arg0.returnType());
+        assertEquals(PrimitiveTypeImpl.INT, CLASS_METHOD.private_int_arg0.returnType());
+        assertEquals(javaLangString, CLASS_METHOD.override_public_String_toString0.returnType());
+
+        assertEquals(javaLangString, INTERFACE_METHOD.public_default_String_arg0.returnType());
+        assertEquals(PrimitiveTypeImpl.VOID, INTERFACE_METHOD.public_void_arg0.returnType());
     }
 
     @Ignore("Not yet implemented")
@@ -115,9 +141,60 @@ public class MethodDocImplTest extends BaseTest {
     public void overriddenType() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void overriddenMethod() {
+        assertNull(CLASS_METHOD.public_void_arg0.overriddenMethod());
+
+        MethodDoc overrides_String_toString =
+                CLASS_METHOD.override_public_String_toString0.overriddenMethod();
+        assertEquals("java.lang.Object.toString", overrides_String_toString.qualifiedName());
+
+        // Fixtures from com.example.methods.override
+        // A <- B <- C
+        // ^
+        // |
+        // D
+
+        var a = OVERRIDE.A;
+        var b = OVERRIDE.B;
+        var c = OVERRIDE.C;
+        var d = OVERRIDE.D;
+
+        // Positive cases (A <- B; B <- C; A <- D)
+        assertEquals(a, b.overriddenMethod());
+        assertEquals(b, c.overriddenMethod());
+        assertEquals(a, d.overriddenMethod());
+
+        // Negative cases
+        // 1. Top-level class is not extending (and overriding) anything.
+        assertNull(a.overriddenMethod());
+
+        // 2. Method never overrides itself.
+        assertNotEquals(a, a.overriddenMethod());
+        assertNotEquals(b, b.overriddenMethod());
+        assertNotEquals(c, c.overriddenMethod());
+        assertNotEquals(d, d.overriddenMethod());
+
+        // 3. Indirect overrides.
+        // *A* <- B <- *C* – A overrides C but *not* directly, there's B in between.
+        assertNotEquals(a, c.overriddenMethod());
+
+        // 4. Non-related methods (different classes).
+        assertNotEquals(a, CLASS_METHOD.override_public_String_toString0.overriddenMethod());
+
+        // 5. "Parent" does not override "child", i.e. method upper in hierarchy does not
+        //    override anything below.
+        assertNotEquals(b, a.overriddenMethod());
+        assertNotEquals(c, a.overriddenMethod());
+        assertNotEquals(d, a.overriddenMethod());
+
+        assertNotEquals(c, b.overriddenMethod());
+
+        // 6. Exhaust the rest of negative test cases
+        assertNotEquals(b, d.overriddenMethod());
+        assertNotEquals(c, d.overriddenMethod());
+        assertNotEquals(d, b.overriddenMethod());
+        assertNotEquals(d, c.overriddenMethod());
     }
 
     @Ignore("Not yet implemented")
