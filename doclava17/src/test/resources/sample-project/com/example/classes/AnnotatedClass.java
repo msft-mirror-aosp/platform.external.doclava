@@ -17,6 +17,7 @@
 package com.example.classes;
 
 @UniversalAnnotation
+@AllDefaultAnnotation(str = "abc", integer = 123)
 public class AnnotatedClass {
 
 }

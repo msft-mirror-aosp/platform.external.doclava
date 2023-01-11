@@ -56,6 +56,8 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
 
     protected T element;
 
+    private AnnotationDescImpl[] annotations;
+
     protected ProgramElementDocImpl(T e, Context context) {
         super(e, context);
 
@@ -130,9 +132,15 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public AnnotationDesc[] annotations() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (annotations == null) {
+            annotations = element.getAnnotationMirrors()
+                    .stream()
+                    .map(am -> new AnnotationDescImpl(am, context))
+                    .toArray(AnnotationDescImpl[]::new);
+        }
+        return annotations;
     }
 
     @Override
