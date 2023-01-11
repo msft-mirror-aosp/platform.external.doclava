@@ -29,24 +29,69 @@ import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationTypeDoc;
+import com.sun.javadoc.AnnotationTypeElementDoc;
+import com.sun.javadoc.AnnotationValue;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 
 class AnnotationDescImpl implements AnnotationDesc {
 
-    @Override
-    @Used
-    public AnnotationTypeDoc annotationType() {
-        throw new UnsupportedOperationException("not yet implemented");
+    private final AnnotationTypeDocImpl annotationType;
+    private final ElementValuePairImpl[] elementValues;
+
+    public <T extends Element> AnnotationDescImpl(AnnotationMirror mirror, Context context) {
+        this.annotationType = AnnotationTypeDocImpl.create(
+                (TypeElement) mirror.getAnnotationType().asElement(), context);
+        this.elementValues = mirror.getElementValues()
+                .entrySet()
+                .stream()
+                .map(kv -> {
+                    var element = AnnotationMethodDocImpl.create(kv.getKey(), context);
+                    var value = AnnotationValueImpl.create(kv.getValue(), context);
+                    return new ElementValuePairImpl(element, value);
+                })
+                .toArray(ElementValuePairImpl[]::new);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
+    public AnnotationTypeDoc annotationType() {
+        return annotationType;
+    }
+
+    @Override
+    @Used(implemented = true)
     public ElementValuePair[] elementValues() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return elementValues;
     }
 
     @Override
     @Unused
     public boolean isSynthesized() {
         throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    static class ElementValuePairImpl implements ElementValuePair {
+
+        private final AnnotationMethodDocImpl element;
+        private final AnnotationValueImpl value;
+
+        public ElementValuePairImpl(AnnotationMethodDocImpl element, AnnotationValueImpl value) {
+            this.element = element;
+            this.value = value;
+        }
+
+        @Override
+        @Used(implemented = true)
+        public AnnotationTypeElementDoc element() {
+            return element;
+        }
+
+        @Override
+        @Used(implemented = true)
+        public AnnotationValue value() {
+            return value;
+        }
     }
 }
