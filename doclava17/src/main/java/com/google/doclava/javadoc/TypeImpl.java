@@ -90,6 +90,10 @@ abstract class TypeImpl implements Type {
                 var el = (TypeElement) dt.asElement();
                 yield ClassDocImpl.create(el, context);
             }
+            case NONE -> {
+                // e.g. Object.superclass()
+                yield null;
+            }
             default -> throw new IllegalArgumentException(
                     "Unexpected type of kind: " + m.getKind());
         };
