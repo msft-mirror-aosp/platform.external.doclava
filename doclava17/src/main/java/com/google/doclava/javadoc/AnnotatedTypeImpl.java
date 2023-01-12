@@ -38,6 +38,8 @@ class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
 
     private Type underlyingType;
 
+    private AnnotationDesc[] annotations;
+
     protected AnnotatedTypeImpl(DeclaredType declaredType, Context context) {
         super(declaredType, context);
         this.declaredType = declaredType;
@@ -48,10 +50,20 @@ class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
                 el -> new AnnotatedTypeImpl(el, context));
     }
 
+    /**
+     * @return annotations
+     * @implNote Implemented as used in {@code ParameterImplTests#annotations()}.
+     */
     @Override
-    @Unused
+    @Unused(implemented = true)
     public AnnotationDesc[] annotations() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (annotations == null) {
+            annotations = declaredType.getAnnotationMirrors()
+                    .stream()
+                    .map(am -> new AnnotationDescImpl(am, context))
+                    .toArray(AnnotationDescImpl[]::new);
+        }
+        return annotations;
     }
 
     @Override

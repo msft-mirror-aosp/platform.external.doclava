@@ -209,6 +209,9 @@ public abstract class BaseTest {
                     "com.example.methods.OfClass", "public_abstract_void_arg0()");
             static final ExecutableElement override_public_String_toString0 = initExecutableElement(
                     "com.example.methods.OfClass", "toString()");
+            static final ExecutableElement void_arg1_annotatedObject = initExecutableElement(
+                    "com.example.methods.OfClass",
+                    "void_arg1_annotatedObject(@com.example.classes.UniversalAnnotation java.lang.Object)");
         }
 
         static class OF_INTERFACE {
@@ -229,6 +232,14 @@ public abstract class BaseTest {
                     "com.example.methods.override.C", "name()");
             static final ExecutableElement D_name = initExecutableElement(
                     "com.example.methods.override.D", "name()");
+        }
+
+        static class PARAMETER {
+
+            static final VariableElement Object_annotatedWith_UniversalAnnotation = initMethodParam(
+                    "com.example.methods.OfClass",
+                    "void_arg1_annotatedObject(@com.example.classes.UniversalAnnotation java.lang.Object)",
+                    "obj");
         }
     }
 
@@ -254,6 +265,18 @@ public abstract class BaseTest {
         var e = docletEnv.getElementUtils().getPackageElement(name);
         assertNotNull(e);
         return e;
+    }
+
+    private static VariableElement initMethodParam(String containingType, String methodSignature,
+            String parameterName) {
+        ExecutableElement method = initExecutableElement(containingType, methodSignature);
+        var params = method.getParameters()
+                .stream()
+                .filter(param -> param.getSimpleName().toString().equals(parameterName))
+                .toList();
+
+        assertEquals(1, params.size());
+        return params.get(0);
     }
 
     private static VariableElement initVariableElement(String containingType, String name) {

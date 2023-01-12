@@ -62,6 +62,7 @@ class Context {
         public final Map<ExecutableElement, ConstructorDocImpl> constructors = new HashMap<>();
         public final Map<ExecutableElement, MethodDocImpl> methods = new HashMap<>();
         public final Map<VariableElement, FieldDocImpl> fields = new HashMap<>();
+        public final Map<VariableElement, ParameterImpl> parameters = new HashMap<>();
 
         public final Tags tags = new Tags();
         public final Types types = new Types();

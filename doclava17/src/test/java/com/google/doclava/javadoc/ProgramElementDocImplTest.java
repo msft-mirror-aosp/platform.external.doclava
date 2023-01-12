@@ -87,7 +87,7 @@ public class ProgramElementDocImplTest extends BaseTest {
         var annotations = annotatedClass.annotations();
         assertEquals(2, annotations.length);
 
-        // 1. @UniversalAnnotation (with no parameters).
+        // 1. @UniversalAnnotation (with no expectedParameters).
         var values = annotations[0].elementValues();
         assertEquals(0, values.length);
 
