@@ -32,7 +32,6 @@ import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.AnnotationTypeElementDoc;
 import com.sun.javadoc.AnnotationValue;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 class AnnotationDescImpl implements AnnotationDesc {
@@ -40,7 +39,7 @@ class AnnotationDescImpl implements AnnotationDesc {
     private final AnnotationTypeDocImpl annotationType;
     private final ElementValuePairImpl[] elementValues;
 
-    public <T extends Element> AnnotationDescImpl(AnnotationMirror mirror, Context context) {
+    public AnnotationDescImpl(AnnotationMirror mirror, Context context) {
         this.annotationType = AnnotationTypeDocImpl.create(
                 (TypeElement) mirror.getAnnotationType().asElement(), context);
         this.elementValues = mirror.getElementValues()

@@ -46,6 +46,10 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
 
     protected final ExecutableElement executableElement;
 
+    // Cached fields
+    private ClassDoc[] thrownExceptions;
+    private Parameter[] parameters;
+
     protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
         super(e, context);
         this.executableElement = e;
@@ -99,8 +103,6 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    private ClassDoc[] thrownExceptions;
-
     @Override
     @Used(implemented = true)
     public ClassDoc[] thrownExceptions() {
@@ -133,9 +135,15 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Parameter[] parameters() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (parameters == null) {
+            parameters = executableElement.getParameters()
+                    .stream()
+                    .map(variableElement -> ParameterImpl.create(variableElement, context))
+                    .toArray(ParameterImpl[]::new);
+        }
+        return parameters;
     }
 
     @Override
