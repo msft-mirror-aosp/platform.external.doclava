@@ -42,10 +42,22 @@ import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
     protected final TypeElement typeElement;
+
+    // Cached fields
+    private ConstructorDoc[] constructorsFiltered;
+    private ConstructorDoc[] constructorsAll;
+    private Type[] interfaceTypes;
+    private TypeVariable[] typeParameters;
+    private MethodDoc[] methodsFiltered;
+    private MethodDoc[] methodsAll;
+    private FieldDoc[] fieldsFiltered;
+    private FieldDoc[] fieldsAll;
+    private FieldDoc[] enumConstants;
 
     protected ClassDocImpl(TypeElement c, Context context) {
         super(c, context);
@@ -227,15 +239,33 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc superclass() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isInterface()) {
+            return null;
+        }
+        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        if (t instanceof ClassDoc cls) {
+            return cls;
+        } else {
+            return null;
+        }
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type superclassType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isInterface()) {
+            return null;
+        }
+        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        if (t instanceof ClassDoc cls) {
+            return cls;
+        } else if (t instanceof ParameterizedType pt) {
+            return pt;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -256,15 +286,34 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] interfaceTypes() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (interfaceTypes == null) {
+            interfaceTypes = typeElement.getInterfaces()
+                    .stream()
+                    .map(typeMirror -> {
+                        TypeElement asElement = (TypeElement) context.environment.getTypeUtils()
+                                .asElement(typeMirror);
+                        return ClassDocImpl.create(asElement, context);
+                    })
+                    .toArray(Type[]::new);
+        }
+        return interfaceTypes;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public TypeVariable[] typeParameters() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (typeParameters == null) {
+            typeParameters = typeElement.getTypeParameters()
+                    .stream()
+                    .map(tp -> {
+                        javax.lang.model.type.TypeVariable tv = (javax.lang.model.type.TypeVariable) tp.asType();
+                        return TypeVariableImpl.create(tv, context);
+                    })
+                    .toArray(TypeVariable[]::new);
+        }
+        return typeParameters;
     }
 
     @Override
@@ -274,33 +323,85 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Unused
+    @Unused(implemented = true)
     public FieldDoc[] fields() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (fieldsAll == null) {
+            fieldsAll = getFields(true);
+        }
+        return fieldsAll;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public FieldDoc[] fields(boolean filter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (filter) {
+            if (fieldsFiltered == null) {
+                fieldsFiltered = getFields(true);
+            }
+            return fieldsFiltered;
+        } else {
+            if (fieldsAll == null) {
+                fieldsAll = getFields(false);
+            }
+            return fieldsAll;
+        }
+    }
+
+    private FieldDoc[] getFields(boolean filter) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.FIELD)
+                .filter(field -> !filter || context.environment.isSelected(field))
+                .map(field -> FieldDocImpl.create((VariableElement) field, context))
+                .toArray(FieldDoc[]::new);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public FieldDoc[] enumConstants() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (enumConstants == null) {
+            enumConstants = typeElement.getEnclosedElements()
+                    .stream()
+                    .filter(e -> e.getKind() == ElementKind.ENUM_CONSTANT)
+                    .map(enumConstant -> FieldDocImpl.create((VariableElement) enumConstant,
+                            context))
+                    .toArray(FieldDoc[]::new);
+        }
+        return enumConstants;
     }
 
     @Override
-    @Unused
+    @Unused(implemented = true)
     public MethodDoc[] methods() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (methodsAll == null) {
+            methodsAll = getMethods(true);
+        }
+        return methodsAll;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public MethodDoc[] methods(boolean filter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (filter) {
+            if (methodsFiltered == null) {
+                methodsFiltered = getMethods(true);
+            }
+            return methodsFiltered;
+        } else {
+            if (methodsAll == null) {
+                methodsAll = getMethods(false);
+            }
+            return methodsAll;
+        }
+    }
+
+    private MethodDoc[] getMethods(boolean filter) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.METHOD)
+                .filter(method -> !filter || context.environment.isSelected(method))
+                .map(method -> MethodDocImpl.create((ExecutableElement) method, context))
+                .toArray(MethodDoc[]::new);
     }
 
     @Override
@@ -311,9 +412,6 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         }
         return constructorsFiltered;
     }
-
-    private ConstructorDoc[] constructorsFiltered;
-    private ConstructorDoc[] constructorsAll;
 
     @Override
     @Used(implemented = true)

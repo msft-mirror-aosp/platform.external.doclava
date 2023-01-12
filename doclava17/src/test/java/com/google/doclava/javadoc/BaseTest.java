@@ -72,6 +72,8 @@ public abstract class BaseTest {
         static final TypeElement publicInterface = initTypeElement(
                 "com.example.classes.PublicInterface");
 
+        static final TypeElement simpleEnum = initTypeElement("com.example.classes.SimpleEnum");
+
         static final TypeElement publicClassWithNests = initTypeElement(
                 "com.example.classes.PublicClassWithNests");
         static final TypeElement publicClassWithNests$Nest1 = initTypeElement(
@@ -100,10 +102,18 @@ public abstract class BaseTest {
 
         static final TypeElement annotatedClass = initTypeElement(
                 "com.example.classes.AnnotatedClass");
+
+        static final TypeElement javaUtilMap = initTypeElement("java.util.Map");
+
+        static final TypeElement fieldsAccessModifiers = initTypeElement(
+                "com.example.classes.FieldsAccessModifiers");
+        static final TypeElement methodsAccessModifiers = initTypeElement(
+                "com.example.classes.MethodsAccessModifiers");
     }
 
     static class INTERFACE {
 
+        static final TypeElement serializable = initTypeElement("java.io.Serializable");
         static final TypeElement extendsSerializable = initTypeElement(
                 "com.example.classes.ExtendsSerializable");
         static final TypeElement extendsExternalizable = initTypeElement(
@@ -116,6 +126,7 @@ public abstract class BaseTest {
         static final TypeElement javaLangError = initTypeElement("java.lang.Error");
         static final TypeElement javaLangException = initTypeElement("java.lang.Exception");
         static final TypeElement javaLangString = initTypeElement("java.lang.String");
+        static final TypeElement javaLangThrowable = initTypeElement("java.lang.Throwable");
     }
 
     static class PACKAGE {
@@ -253,6 +264,18 @@ public abstract class BaseTest {
                 "com.example.fields.Fields", "public_final_int");
         static final VariableElement public_final_String = initVariableElement(
                 "com.example.fields.Fields", "public_final_String");
+
+        static class ACCESS_MODIFIERS {
+
+            static final VariableElement public_int = initVariableElement(
+                    "com.example.fields.FieldsAccessModifiers", "public_int");
+            static final VariableElement private_int = initVariableElement(
+                    "com.example.fields.FieldsAccessModifiers", "private_int");
+            static final VariableElement protected_float = initVariableElement(
+                    "com.example.fields.FieldsAccessModifiers", "protected_float");
+            static final VariableElement packagePrivate_long = initVariableElement(
+                    "com.example.fields.FieldsAccessModifiers", "packagePrivate_long");
+        }
     }
 
     protected static TypeElement initTypeElement(String name) {
