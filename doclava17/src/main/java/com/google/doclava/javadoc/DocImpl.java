@@ -149,8 +149,12 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     public String getRawCommentText() {
         if (getRawCommentText == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
-            //TODO: this implementation is slightly different, consider reimplementing.
-            getRawCommentText = dt.toString();
+            if (dt == null) {
+                getRawCommentText = "";
+            } else {
+                //TODO: this implementation is slightly different, consider reimplementing.
+                getRawCommentText = dt.toString();
+            }
         }
         return getRawCommentText;
     }

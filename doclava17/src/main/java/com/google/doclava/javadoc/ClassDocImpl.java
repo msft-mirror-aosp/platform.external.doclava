@@ -44,6 +44,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
@@ -249,7 +251,11 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (isInterface()) {
             return null;
         }
-        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        TypeMirror superclassMirror = typeElement.getSuperclass();
+        if (superclassMirror.getKind() == TypeKind.NONE) {
+            return null;
+        }
+        Type t = TypeImpl.create(superclassMirror, context);
         if (t instanceof ClassDoc cls) {
             return cls;
         } else {
@@ -263,7 +269,11 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (isInterface()) {
             return null;
         }
-        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        TypeMirror superclassMirror = typeElement.getSuperclass();
+        if (superclassMirror.getKind() == TypeKind.NONE) {
+            return null;
+        }
+        Type t = TypeImpl.create(superclassMirror, context);
         if (t instanceof ClassDoc cls) {
             return cls;
         } else if (t instanceof ParameterizedType pt) {

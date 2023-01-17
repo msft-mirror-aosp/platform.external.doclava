@@ -125,10 +125,8 @@ abstract class TypeImpl implements Type {
     @Override
     @Used(implemented = true)
     public String simpleTypeName() {
-        return context.environment.getTypeUtils()
-                .asElement(typeMirror)
-                .getSimpleName()
-                .toString();
+        var qualifiedTypeName = QUALIFIED_NAME_VISITOR.visit(typeMirror, context);
+        return qualifiedTypeName.substring(qualifiedTypeName.lastIndexOf('.') + 1);
     }
 
     @Override
