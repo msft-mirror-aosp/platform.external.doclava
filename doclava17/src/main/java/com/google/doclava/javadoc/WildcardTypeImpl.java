@@ -67,6 +67,9 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     @Used(implemented = true)
     public Type[] extendsBounds() {
         TypeMirror extendsBound = wildcardType.getExtendsBound();
+        if (extendsBound == null) {
+            return new Type[0];
+        }
         return new Type[]{TypeImpl.create(extendsBound, context)};
     }
 
@@ -74,6 +77,9 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     @Used(implemented = true)
     public Type[] superBounds() {
         TypeMirror superBounds = wildcardType.getSuperBound();
+        if (superBounds == null) {
+            return new Type[0];
+        }
         return new Type[]{TypeImpl.create(superBounds, context)};
     }
 }
