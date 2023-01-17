@@ -166,9 +166,9 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(packageElement);
     }
 
     private String name;
