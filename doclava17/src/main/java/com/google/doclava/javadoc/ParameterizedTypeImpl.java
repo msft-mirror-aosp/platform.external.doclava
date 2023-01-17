@@ -30,12 +30,17 @@ import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 class ParameterizedTypeImpl extends TypeImpl implements ParameterizedType {
 
-    protected ParameterizedTypeImpl(TypeMirror typeMirror, Context context) {
-        super(typeMirror, context);
+    private final DeclaredType declaredType;
+
+    // Cached fields
+    private Type[] typeArguments;
+
+    protected ParameterizedTypeImpl(DeclaredType declaredType, Context context) {
+        super(declaredType, context);
+        this.declaredType = declaredType;
     }
 
     static ParameterizedTypeImpl create(DeclaredType declaredType, Context context) {
@@ -50,9 +55,15 @@ class ParameterizedTypeImpl extends TypeImpl implements ParameterizedType {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] typeArguments() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (typeArguments == null) {
+            typeArguments = declaredType.getTypeArguments()
+                    .stream()
+                    .map(typeMirror -> TypeImpl.create(typeMirror, context))
+                    .toArray(Type[]::new);
+        }
+        return typeArguments;
     }
 
     @Override
