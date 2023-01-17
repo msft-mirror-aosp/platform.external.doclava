@@ -128,12 +128,12 @@ class AnnotationValueImpl implements AnnotationValue {
 
                 @Override
                 public Object visitEnumConstant(VariableElement c, Context context) {
-                    throw new UnsupportedOperationException("not yet implemented");
+                    return null;
                 }
 
                 @Override
                 public Object visitAnnotation(AnnotationMirror m, Context ctx) {
-                    throw new UnsupportedOperationException("not yet implemented");
+                    return null;
                 }
 
                 @Override

@@ -67,8 +67,9 @@ abstract class TypeImpl implements Type {
             // void is also a "primitive type"
             case VOID -> PrimitiveTypeImpl.VOID;
             // arrays
-            case ARRAY -> throw new UnsupportedOperationException(
-                    "ARRAY type is not yet implemented");
+            case ARRAY -> {
+                yield ArrayTypeImpl.create((ArrayType) m, context);
+            }
             // complex types
             case WILDCARD -> {
                 var wildcardType = (javax.lang.model.type.WildcardType) m;
