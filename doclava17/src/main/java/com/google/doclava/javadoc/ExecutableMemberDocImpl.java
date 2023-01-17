@@ -53,6 +53,7 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     private Parameter[] parameters;
     private String signature;
     private String flatSignature;
+    private TypeVariable[] typeParameters;
 
     protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
         super(e, context);
@@ -157,9 +158,15 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public TypeVariable[] typeParameters() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (typeParameters == null) {
+            typeParameters = executableElement.getTypeParameters()
+                    .stream()
+                    .map(tpe -> TypeVariableImpl.create(tpe.asType(), context))
+                    .toArray(TypeVariable[]::new);
+        }
+        return typeParameters;
     }
 
     @Override
