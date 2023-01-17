@@ -109,10 +109,14 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     public Tag[] inlineTags() {
         if (inlineTags == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
-            List<DocTree> tags = new ArrayList<>(dt.getFullBody());
-            inlineTags = tags.stream()
-                    .map(tag -> TagImpl.create(tag, element, context))
-                    .toArray(Tag[]::new);
+            if (dt == null) {
+                inlineTags = new Tag[0];
+            } else {
+                List<DocTree> tags = new ArrayList<>(dt.getFullBody());
+                inlineTags = tags.stream()
+                        .map(tag -> TagImpl.create(tag, element, context))
+                        .toArray(Tag[]::new);
+            }
         }
         return inlineTags;
     }

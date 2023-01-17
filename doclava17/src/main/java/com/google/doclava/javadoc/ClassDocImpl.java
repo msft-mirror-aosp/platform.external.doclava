@@ -54,6 +54,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private ConstructorDoc[] constructorsFiltered;
     private ConstructorDoc[] constructorsAll;
     private Type[] interfaceTypes;
+    private ClassDoc[] interfaces;
     private TypeVariable[] typeParameters;
     private MethodDoc[] methodsFiltered;
     private MethodDoc[] methodsAll;
@@ -284,25 +285,25 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Unused
-    public ClassDoc[] interfaces() {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    @Override
     @Used(implemented = true)
-    public Type[] interfaceTypes() {
-        if (interfaceTypes == null) {
-            interfaceTypes = typeElement.getInterfaces()
+    public ClassDoc[] interfaces() {
+        if (interfaces == null) {
+            interfaces = typeElement.getInterfaces()
                     .stream()
                     .map(typeMirror -> {
                         TypeElement asElement = (TypeElement) context.environment.getTypeUtils()
                                 .asElement(typeMirror);
                         return ClassDocImpl.create(asElement, context);
                     })
-                    .toArray(Type[]::new);
+                    .toArray(ClassDoc[]::new);
         }
-        return interfaceTypes;
+        return interfaces;
+    }
+
+    @Override
+    @Used(implemented = true)
+    public Type[] interfaceTypes() {
+        return interfaces();
     }
 
     @Override
