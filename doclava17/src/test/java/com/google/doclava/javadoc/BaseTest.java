@@ -80,6 +80,10 @@ public abstract class BaseTest {
                 "com.example.classes.PublicClassWithNests.Nest1");
         static final TypeElement publicClassWithNests$Nest1$Nest2 = initTypeElement(
                 "com.example.classes.PublicClassWithNests.Nest1.Nest2");
+        static final TypeElement publicClassWithNests$Nest1$Nest2$Nest3 = initTypeElement(
+                "com.example.classes.PublicClassWithNests.Nest1.Nest2.Nest3");
+        static final TypeElement innerClasses = initTypeElement(
+                "com.example.classes.InnerClasses");
 
         static final TypeElement parametrizedAnnotation = initTypeElement(
                 "com.example.classes.ParametrizedAnnotation");

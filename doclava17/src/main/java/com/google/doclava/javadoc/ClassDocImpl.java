@@ -41,8 +41,10 @@ import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.ElementFilter;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
@@ -58,6 +60,8 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private FieldDoc[] fieldsFiltered;
     private FieldDoc[] fieldsAll;
     private FieldDoc[] enumConstants;
+    private ClassDoc[] innerClassesFiltered;
+    private ClassDoc[] innerClassesAll;
 
     protected ClassDocImpl(TypeElement c, Context context) {
         super(c, context);
@@ -439,21 +443,46 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc[] innerClasses() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (innerClassesFiltered == null) {
+            innerClassesFiltered = getInnerClasses(true);
+        }
+        return innerClassesFiltered;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc[] innerClasses(boolean filter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (filter) {
+            return innerClasses();
+        } else {
+            if (innerClassesAll == null) {
+                innerClassesAll = getInnerClasses(false);
+            }
+            return innerClassesAll;
+        }
+    }
+
+    private ClassDoc[] getInnerClasses(boolean filter) {
+        return ElementFilter.typesIn(typeElement.getEnclosedElements())
+                .stream()
+                .filter(te -> te.getNestingKind() == NestingKind.MEMBER &&
+                        (te.getKind() == ElementKind.CLASS || te.getKind() == ElementKind.INTERFACE)
+                )
+                .filter(te -> !filter || context.environment.isSelected(te))
+                .map(te -> ClassDocImpl.create(te, context))
+                .toArray(ClassDoc[]::new);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc findClass(String className) {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeElement cls = context.environment.getElementUtils().getTypeElement(className);
+        if (cls != null) {
+            return ClassDocImpl.create(cls, context);
+        }
+        return null;
     }
 
     @Override

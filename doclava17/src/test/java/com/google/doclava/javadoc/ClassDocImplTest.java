@@ -25,7 +25,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
+import com.sun.javadoc.ProgramElementDoc;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -52,8 +54,10 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl javaUtilMap;
 
     private ClassDocImpl publicClassWithNests;
-    private ClassDocImpl emptyClassWithNests$Nest1;
-    private ClassDocImpl emptyClassWithNests$Nest1$Nest2;
+    private ClassDocImpl publicClassWithNests$Nest1;
+    private ClassDocImpl publicClassWithNests$Nest1$Nest2;
+    private ClassDocImpl publicClassWithNests$Nest1$Nest2$Nest3;
+    private ClassDocImpl innerClasses;
 
     private ClassDocImpl constructors;
 
@@ -84,9 +88,12 @@ public class ClassDocImplTest extends BaseTest {
         javaUtilMap = ClassDocImpl.create(CLASS.javaUtilMap, context);
 
         publicClassWithNests = ClassDocImpl.create(CLASS.publicClassWithNests, context);
-        emptyClassWithNests$Nest1 = ClassDocImpl.create(CLASS.publicClassWithNests$Nest1, context);
-        emptyClassWithNests$Nest1$Nest2 = ClassDocImpl.create(
+        publicClassWithNests$Nest1 = ClassDocImpl.create(CLASS.publicClassWithNests$Nest1, context);
+        publicClassWithNests$Nest1$Nest2 = ClassDocImpl.create(
                 CLASS.publicClassWithNests$Nest1$Nest2, context);
+        publicClassWithNests$Nest1$Nest2$Nest3 = ClassDocImpl.create(
+                CLASS.publicClassWithNests$Nest1$Nest2$Nest3, context);
+        innerClasses = ClassDocImpl.create(CLASS.innerClasses, context);
 
         constructors = ClassDocImpl.create(CLASS.constructors, context);
 
@@ -187,8 +194,8 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals("Object", javaLangObject.name());
 
         assertEquals("PublicClassWithNests", publicClassWithNests.name());
-        assertEquals("PublicClassWithNests.Nest1", emptyClassWithNests$Nest1.name());
-        assertEquals("PublicClassWithNests.Nest1.Nest2", emptyClassWithNests$Nest1$Nest2.name());
+        assertEquals("PublicClassWithNests.Nest1", publicClassWithNests$Nest1.name());
+        assertEquals("PublicClassWithNests.Nest1.Nest2", publicClassWithNests$Nest1$Nest2.name());
     }
 
     @Test
@@ -208,9 +215,9 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals("com.example.classes.PublicClassWithNests",
                 publicClassWithNests.qualifiedName());
         assertEquals("com.example.classes.PublicClassWithNests.Nest1",
-                emptyClassWithNests$Nest1.qualifiedName());
+                publicClassWithNests$Nest1.qualifiedName());
         assertEquals("com.example.classes.PublicClassWithNests.Nest1.Nest2",
-                emptyClassWithNests$Nest1$Nest2.qualifiedName());
+                publicClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
     /**
@@ -372,11 +379,11 @@ public class ClassDocImplTest extends BaseTest {
     }
 
     /**
-     * @implNote This (and also {@link #fields_filter()} and
-     * {@link #isIncluded()}) tests do not cover cases when Doclet is supplied with a non-default
+     * @implNote This (and also {@link #fields_filter()} and {@link #isIncluded()}) tests do not
+     * cover cases when Doclet is supplied with a non-default
      * <b>selection control</b> flag (default is {@code -protected}), i.e. {@code -public}, {@code
-     * -package} or {@code private}. It also does not currently cover selection control options from
-     * new Doclet API (e.g. {@code --show-members}.
+     * -package} or {@code -private}. It also does not currently cover selection control options
+     * from new Doclet API (e.g. {@code --show-members}.
      * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
      * @see jdk.javadoc.doclet new options in "Options" section
      */
@@ -429,11 +436,10 @@ public class ClassDocImplTest extends BaseTest {
 
     /**
      * @implNote This (and also {@link #fields_filter()} and {@link #isIncluded()}) tests do not
-     * cover cases when Doclet is supplied with a non-default <b>selection control</b> flag
-     * (default is {@code -protected}), i.e. {@code -public}, {@code -package} or
-     * {@code private}. It also does not currently cover selection control options from new
-     * Doclet API (e.g. {@code --show-members}.
-     *
+     * cover cases when Doclet is supplied with a non-default <b>selection control</b> flag (default
+     * is {@code -protected}), i.e. {@code -public}, {@code -package} or {@code -private}. It also
+     * does not currently cover selection control options from new Doclet API (e.g.
+     * {@code --show-members}.
      * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
      * @see jdk.javadoc.doclet new options in "Options" section
      */
@@ -464,12 +470,12 @@ public class ClassDocImplTest extends BaseTest {
     }
 
     /**
-     * @implNote This (and also {@link #constructors_filter_false()}, {@link
-     * #constructors_filter_true()} and {@link #isIncluded()}) tests do not cover cases when Doclet
-     * is supplied with a non-default <b>selection control</b> flag (default is {@code -protected}),
-     * i.e. {@code -public}, {@code -package} or {@code private}. It also does not currently cover
-     * selection control options from new Doclet API (e.g. {@code --show-members}.
-     *
+     * @implNote This (and also {@link #constructors_filter_false()},
+     * {@link #constructors_filter_true()} and {@link #isIncluded()}) tests do not cover cases when
+     * Doclet is supplied with a non-default <b>selection control</b> flag (default is
+     * {@code -protected}), i.e. {@code -public}, {@code -package} or {@code -private}. It also does
+     * not currently cover selection control options from new Doclet API (e.g.
+     * {@code --show-members}.
      * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
      * @see jdk.javadoc.doclet new options in "Options" section
      */
@@ -517,9 +523,112 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals(1, enumConstructors.length);
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void innerClasses() {
+        // Test is intentionally empty as it innerClasses() is effectively innerClasses(true) and
+        // is covered in #innerClasses_filter_true().
+    }
+
+    /**
+     * @implNote This (and also {@link #innerClasses_filter_false()}, and {@link #isIncluded()})
+     * tests do not cover cases when Doclet is supplied with a non-default <b>selection control</b>
+     * flag (default is {@code -protected}), i.e. {@code -public}, {@code -package} or
+     * {@code -private}. It also does not currently cover selection control options from new Doclet
+     * API (e.g. {@code --show-members}.
+     * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
+     * @see jdk.javadoc.doclet new options in "Options" section
+     */
+    @Test
+    public void innerClasses_filter_true() {
+        // 1. No inner classes
+        assertArrayEmpty(publicAnnotation.innerClasses(true));
+        assertArrayEmpty(publicClass.innerClasses(true));
+        assertArrayEmpty(publicEnum.innerClasses(true));
+        assertArrayEmpty(publicInterface.innerClasses(true));
+
+        // 2. innerClasses() should return only immediate inner classes.
+        /*
+        public class PublicClassWithNests {
+            public class Nest1 {
+                public class Nest2 {
+                    public class Nest3 {
+                    }
+                }
+            }
+        }
+         */
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1"},
+                getInnerClassesNames(publicClassWithNests, true));
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1.Nest2"},
+                getInnerClassesNames(publicClassWithNests$Nest1, true));
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1.Nest2.Nest3"},
+                getInnerClassesNames(publicClassWithNests$Nest1$Nest2, true));
+        assertArrayEmpty(getInnerClassesNames(publicClassWithNests$Nest1$Nest2$Nest3, true));
+
+        // InnerClasses has 16 inner classes:
+        // {public,private,protected,package-private}
+        // x
+        // {annotation,class,enum,interface}
+
+        // 3. innerClasses() should return only classes and interfaces (no annotations/enums).
+        assertTrue(Arrays.stream(innerClasses.innerClasses(true))
+                .allMatch(cls -> cls.isClass() || cls.isInterface())
+        );
+
+        // 4. innerClasses() should return only public/protected/package-private (no private).
+        assertTrue(Arrays.stream(innerClasses.innerClasses(true))
+                .allMatch(cls -> cls.isPublic() || cls.isProtected() || cls.isPackagePrivate())
+        );
+    }
+
+    @Test
+    public void innerClasses_filter_false() {
+        // 1. No inner classes
+        assertArrayEmpty(publicAnnotation.innerClasses(false));
+        assertArrayEmpty(publicClass.innerClasses(false));
+        assertArrayEmpty(publicEnum.innerClasses(false));
+        assertArrayEmpty(publicInterface.innerClasses(false));
+
+        // 2. innerClasses() should return only immediate inner classes.
+        /*
+        public class PublicClassWithNests {
+            public class Nest1 {
+                public class Nest2 {
+                    public class Nest3 {
+                    }
+                }
+            }
+        }
+         */
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1"},
+                getInnerClassesNames(publicClassWithNests, false));
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1.Nest2"},
+                getInnerClassesNames(publicClassWithNests$Nest1, false));
+        assertArrayEquals(new String[]{"PublicClassWithNests.Nest1.Nest2.Nest3"},
+                getInnerClassesNames(publicClassWithNests$Nest1$Nest2, false));
+        assertArrayEmpty(getInnerClassesNames(publicClassWithNests$Nest1$Nest2$Nest3, false));
+
+        // InnerClasses has 16 inner classes:
+        // {public,private,protected,package-private}
+        // x
+        // {annotation,class,enum,interface}
+
+        // 3. innerClasses() should return only classes and interfaces (no annotations/enums).
+        assertTrue(Arrays.stream(innerClasses.innerClasses(false))
+                .allMatch(cls -> cls.isClass() || cls.isInterface())
+        );
+
+        // 4. innerClasses() should return all (public/protected/package-private/private).
+        assertTrue(Arrays.stream(innerClasses.innerClasses(false))
+                .allMatch(cls -> cls.isPublic() || cls.isProtected() || cls.isPackagePrivate()
+                        || cls.isPrivate())
+        );
+    }
+
+    private static String[] getInnerClassesNames(ClassDocImpl cls, boolean filter) {
+        return Arrays.stream(cls.innerClasses(filter))
+                .map(ProgramElementDoc::name)
+                .toArray(String[]::new);
     }
 
     @Ignore("Not yet implemented")
@@ -551,9 +660,9 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals("Object", javaLangObject.typeName());
 
         assertEquals("PublicClassWithNests", publicClassWithNests.typeName());
-        assertEquals("PublicClassWithNests.Nest1", emptyClassWithNests$Nest1.typeName());
+        assertEquals("PublicClassWithNests.Nest1", publicClassWithNests$Nest1.typeName());
         assertEquals("PublicClassWithNests.Nest1.Nest2",
-                emptyClassWithNests$Nest1$Nest2.typeName());
+                publicClassWithNests$Nest1$Nest2.typeName());
     }
 
     @Test
@@ -574,9 +683,9 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals("com.example.classes.PublicClassWithNests",
                 publicClassWithNests.qualifiedName());
         assertEquals("com.example.classes.PublicClassWithNests.Nest1",
-                emptyClassWithNests$Nest1.qualifiedName());
+                publicClassWithNests$Nest1.qualifiedName());
         assertEquals("com.example.classes.PublicClassWithNests.Nest1.Nest2",
-                emptyClassWithNests$Nest1$Nest2.qualifiedName());
+                publicClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
     @Test
@@ -593,8 +702,8 @@ public class ClassDocImplTest extends BaseTest {
         assertEquals("Object", javaLangObject.simpleTypeName());
 
         assertEquals("PublicClassWithNests", publicClassWithNests.simpleTypeName());
-        assertEquals("Nest1", emptyClassWithNests$Nest1.simpleTypeName());
-        assertEquals("Nest2", emptyClassWithNests$Nest1$Nest2.simpleTypeName());
+        assertEquals("Nest1", publicClassWithNests$Nest1.simpleTypeName());
+        assertEquals("Nest2", publicClassWithNests$Nest1$Nest2.simpleTypeName());
     }
 
     @Test
