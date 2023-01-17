@@ -73,9 +73,9 @@ class FieldDocImpl extends MemberDocImpl<VariableElement> implements FieldDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(variableElement);
     }
 
     @Override

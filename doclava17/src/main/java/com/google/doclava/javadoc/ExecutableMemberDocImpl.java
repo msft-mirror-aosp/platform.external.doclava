@@ -80,9 +80,9 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(executableElement);
     }
 
     @Override
