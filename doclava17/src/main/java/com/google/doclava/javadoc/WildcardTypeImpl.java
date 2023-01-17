@@ -53,8 +53,12 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
         if (extend == null) {
             return null;
         }
-        return ClassDocImpl.create(
-                (TypeElement) context.environment.getTypeUtils().asElement(extend), context);
+        try {
+            return ClassDocImpl.create(
+                    (TypeElement) context.environment.getTypeUtils().asElement(extend), context);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
