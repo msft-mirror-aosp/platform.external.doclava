@@ -133,9 +133,9 @@ class TagImpl implements Tag {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public SourcePosition position() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return SourcePositionImpl.STUB;
     }
 
     private static final SimpleDocTreeVisitor<String, Context> NAME_VISITOR =
