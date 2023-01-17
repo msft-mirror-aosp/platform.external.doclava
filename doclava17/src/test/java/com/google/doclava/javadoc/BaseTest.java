@@ -115,6 +115,11 @@ public abstract class BaseTest {
                 "com.example.classes.MethodsAccessModifiers");
     }
 
+    static class GENERIC {
+
+        static final TypeElement box = initTypeElement("com.example.classes.Tags.Box");
+    }
+
     static class INTERFACE {
 
         static final TypeElement serializable = initTypeElement("java.io.Serializable");
@@ -207,6 +212,9 @@ public abstract class BaseTest {
                 "com.example.constructors.Constructors", "Constructors(java.lang.String)");
         static final ExecutableElement arg2_int_String = initExecutableElement(
                 "com.example.constructors.Constructors", "Constructors(int,java.lang.String)");
+
+        static final ExecutableElement paramTag_arg2_T_int = initExecutableElement(
+                "com.example.classes.Tags.Box", "Box(T,int)");
     }
 
     static class METHOD {
