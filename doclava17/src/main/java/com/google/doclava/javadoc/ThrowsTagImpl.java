@@ -28,22 +28,84 @@ package com.google.doclava.javadoc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.ThrowsTree;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 
 class ThrowsTagImpl extends TagImpl implements ThrowsTag {
 
+    private final ThrowsTree throwsTree;
+
+    protected ThrowsTagImpl(ThrowsTree throwsTree, Element owner, Context context) {
+        super(throwsTree, owner, context);
+
+        this.throwsTree = throwsTree;
+    }
+
+    static ThrowsTagImpl create(ThrowsTree throwsTree, Element owner, Context context) {
+        var tagsOfElement = context.caches.tags.throwz.computeIfAbsent(owner,
+                el -> new HashMap<>());
+        return tagsOfElement.computeIfAbsent(throwsTree,
+                el -> new ThrowsTagImpl(el, owner, context));
+    }
+
+    private boolean exceptionNameInitialised;
+    private String exceptionName;
+
     @Override
     public String exceptionName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (!exceptionNameInitialised) {
+            var ref = throwsTree.getExceptionName();
+            if (ref != null) {
+                String signature = ref.getSignature();
+                var lastDotPos = signature.lastIndexOf(".");
+                exceptionName = signature.substring(lastDotPos + 1);
+            }
+            exceptionNameInitialised = true;
+        }
+        return exceptionName;
     }
+
+    private boolean exceptionCommentInitialised;
+    private String exceptionComment;
 
     @Override
     public String exceptionComment() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (!exceptionCommentInitialised) {
+            var desc = throwsTree.getDescription();
+            if (desc != null) {
+                exceptionComment = desc.stream()
+                        .map(DocTree::toString)
+                        .collect(Collectors.joining(" "));
+            }
+            exceptionCommentInitialised = true;
+        }
+        return exceptionComment;
     }
+
+    private boolean exceptionInitialised;
+    private ClassDocImpl exception;
 
     @Override
     public ClassDoc exception() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (!exceptionInitialised) {
+            var ref = throwsTree.getExceptionName();
+            if (ref != null) {
+                String signature = ref.getSignature();
+                if (signature != null) {
+                    TypeElement te =
+                            context.environment.getElementUtils().getTypeElement(signature);
+                    if (te != null) {
+                        exception = ClassDocImpl.create(te, context);
+                    }
+                }
+            }
+            exceptionInitialised = true;
+        }
+        return exception;
     }
 
     @Override
