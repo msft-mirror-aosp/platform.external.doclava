@@ -38,7 +38,10 @@ import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ReferenceType;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
@@ -157,7 +160,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(typeElement);
     }
 
     @Override
@@ -165,14 +168,30 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         return java.lang.reflect.Modifier.isAbstract(reflectModifiers);
     }
 
+    private Boolean isSerializable;
+
     @Override
     public boolean isSerializable() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isSerializable == null) {
+            var serializable = context.environment.getElementUtils()
+                    .getTypeElement("java.io.Serializable").asType();
+            isSerializable = context.environment.getTypeUtils()
+                    .isSubtype(typeElement.asType(), serializable);
+        }
+        return isSerializable;
     }
+
+    private Boolean isExternalizable;
 
     @Override
     public boolean isExternalizable() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isExternalizable == null) {
+            var externalizable = context.environment.getElementUtils()
+                    .getTypeElement("java.io.Externalizable").asType();
+            isExternalizable = context.environment.getTypeUtils()
+                    .isSubtype(typeElement.asType(), externalizable);
+        }
+        return isExternalizable;
     }
 
     @Override
@@ -202,7 +221,12 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public boolean subclassOf(ClassDoc cd) {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeElement other = context.environment.getElementUtils()
+                .getTypeElement(cd.qualifiedName());
+        if (isInterface()) {
+            return other.getQualifiedName().contentEquals("java.lang.Object");
+        }
+        return context.environment.getTypeUtils().isSubtype(typeElement.asType(), other.asType());
     }
 
     @Override
@@ -252,12 +276,37 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
 
     @Override
     public ConstructorDoc[] constructors() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (constructorsFiltered == null) {
+            constructorsFiltered = getConstructors(true);
+        }
+        return constructorsFiltered;
     }
+
+    private ConstructorDoc[] constructorsFiltered;
+    private ConstructorDoc[] constructorsAll;
 
     @Override
     public ConstructorDoc[] constructors(boolean filter) {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (filter) {
+            if (constructorsFiltered == null) {
+                constructorsFiltered = getConstructors(true);
+            }
+            return constructorsFiltered;
+        } else {
+            if (constructorsAll == null) {
+                constructorsAll = getConstructors(false);
+            }
+            return constructorsAll;
+        }
+    }
+
+    private ConstructorDoc[] getConstructors(boolean filter) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
+                .filter(ctor -> !filter || context.environment.isSelected(ctor))
+                .map(e -> ConstructorDocImpl.create((ExecutableElement) e, context))
+                .toArray(ConstructorDoc[]::new);
     }
 
     @Override

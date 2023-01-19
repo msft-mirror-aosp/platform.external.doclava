@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Externalizable;
 import java.lang.reflect.Modifier;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -34,6 +35,10 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl publicEnum;
     private ClassDocImpl publicAnnotation;
     private ClassDocImpl publicInterface;
+    private ClassDocImpl extendsSerializable;
+    private ClassDocImpl extendsExternalizable;
+    private ClassDocImpl implementsSerializable;
+    private ClassDocImpl implementsExternalizable;
 
     private ClassDocImpl javaLangError;
     private ClassDocImpl javaLangException;
@@ -42,6 +47,10 @@ public class ClassDocImplTest extends BaseTest {
     private ClassDocImpl publicClassWithNests;
     private ClassDocImpl emptyClassWithNests$Nest1;
     private ClassDocImpl emptyClassWithNests$Nest1$Nest2;
+
+    private ClassDocImpl constructors;
+
+    private ClassDocImpl packagePrivateClass;
 
     @Before
     public void setUp() {
@@ -55,6 +64,7 @@ public class ClassDocImplTest extends BaseTest {
         // note that it is created using AnnotationTypeDocImpl ctor.
         publicAnnotation = AnnotationTypeDocImpl.create(CLASS.publicAnnotation, context);
         publicInterface = ClassDocImpl.create(CLASS.publicInterface, context);
+        packagePrivateClass = ClassDocImpl.create(CLASS.packagePrivateClass, context);
 
         javaLangError = ClassDocImpl.create(INSTANCE.javaLangError, context);
         javaLangException = ClassDocImpl.create(INSTANCE.javaLangException, context);
@@ -64,6 +74,13 @@ public class ClassDocImplTest extends BaseTest {
         emptyClassWithNests$Nest1 = ClassDocImpl.create(CLASS.publicClassWithNests$Nest1, context);
         emptyClassWithNests$Nest1$Nest2 = ClassDocImpl.create(
                 CLASS.publicClassWithNests$Nest1$Nest2, context);
+
+        constructors = ClassDocImpl.create(CLASS.constructors, context);
+
+        implementsSerializable = ClassDocImpl.create(CLASS.implementsSerializable, context);
+        implementsExternalizable = ClassDocImpl.create(CLASS.implementsExternalizable, context);
+        extendsSerializable = ClassDocImpl.create(INTERFACE.extendsSerializable, context);
+        extendsExternalizable = ClassDocImpl.create(INTERFACE.extendsExternalizable, context);
     }
 
     @Test
@@ -179,9 +196,14 @@ public class ClassDocImplTest extends BaseTest {
                 emptyClassWithNests$Nest1$Nest2.qualifiedName());
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @see #constructors()
+     */
     @Test
     public void isIncluded() {
+        assertTrue(publicClass.isIncluded());
+
+        assertFalse(packagePrivateClass.isIncluded());
     }
 
     @Test
@@ -198,14 +220,31 @@ public class ClassDocImplTest extends BaseTest {
         assertFalse(javaLangObject.isAbstract());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isSerializable() {
+        // Classes
+        assertTrue(implementsSerializable.isSerializable());
+        assertTrue(implementsExternalizable.isSerializable());
+
+        assertFalse(javaLangObject.isSerializable());
+
+        // Interfaces
+        assertTrue(extendsSerializable.isSerializable());
+        assertTrue(extendsExternalizable.isSerializable());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void isExternalizable() {
+        // Classes
+        assertTrue(implementsExternalizable.isExternalizable());
+
+        assertFalse(implementsSerializable.isExternalizable());
+        assertFalse(javaLangObject.isExternalizable());
+
+        // Interfaces
+        assertTrue(extendsExternalizable.isExternalizable());
+
+        assertFalse(extendsSerializable.isExternalizable());
     }
 
     @Ignore("Not yet implemented")
@@ -233,9 +272,21 @@ public class ClassDocImplTest extends BaseTest {
     public void superclassType() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void subclassOf() {
+        // 1. Class is subclass of itself
+        assertTrue(javaLangObject.subclassOf(javaLangObject));
+        assertTrue(javaLangError.subclassOf(javaLangError));
+        assertTrue(publicClass.subclassOf(publicClass));
+
+        // 2. Class is subclass of java.lang.Object
+        assertTrue(javaLangError.subclassOf(javaLangObject));
+        assertTrue(publicClass.subclassOf(javaLangObject));
+
+        // 3. Interface is subclass of java.lang.Object *only*
+        assertTrue(publicInterface.subclassOf(javaLangObject));
+        assertFalse(publicInterface.subclassOf(publicInterface));
+        assertFalse(extendsExternalizable.subclassOf(extendsSerializable));
     }
 
     @Ignore("Not yet implemented")
@@ -283,14 +334,59 @@ public class ClassDocImplTest extends BaseTest {
     public void testMethods() {
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @implNote This (and also {@link #constructors_filter_false()},
+     * {@link #constructors_filter_true()} and
+     * {@link #isIncluded()}) tests do not cover cases when Doclet is supplied with
+     * a non-default <b>selection control</b> flag (default is {@code -protected}), i.e.
+     * {@code -public}, {@code -package} or {@code private}. It also does not currently cover
+     * selection control options from new Doclet API (e.g. {@code --show-members}.
+     *
+     * @see jdk.javadoc.doclet definition of <b>selection control</b> in "Terminology" section
+     * @see jdk.javadoc.doclet new options in "Options" section
+     */
     @Test
     public void constructors() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include only public and protected.
+        var ctors = constructors.constructors();
+        assertEquals(2, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors();
+        assertEquals(0, enumConstructors.length);
+
+        //TODO: Handle all selection control variants.
     }
 
-    @Ignore("Not yet implemented")
+    /**
+     * @see #constructors()
+     */
     @Test
-    public void testConstructors() {
+    public void constructors_filter_true() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include only public and protected.
+        var ctors = constructors.constructors(true);
+        assertEquals(2, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors(true);
+        assertEquals(0, enumConstructors.length);
+    }
+
+    /**
+     * @see #constructors()
+     */
+    @Test
+    public void constructors_filter_false() {
+        // 1. Class with four constructors (public, protected, private and package-private).
+        // Should include all four.
+        var ctors = constructors.constructors(false);
+        assertEquals(4, ctors.length);
+
+        // 2. Public enum has no declared constructors, but has one implicit private.
+        var enumConstructors = publicEnum.constructors(false);
+        assertEquals(1, enumConstructors.length);
     }
 
     @Ignore("Not yet implemented")
