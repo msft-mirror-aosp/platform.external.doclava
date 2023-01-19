@@ -27,11 +27,17 @@ package com.google.doclava.javadoc;
 
 import com.sun.javadoc.ConstructorDoc;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 
 class ConstructorDocImpl extends ExecutableMemberDocImpl implements ConstructorDoc {
 
     protected ConstructorDocImpl(ExecutableElement e, Context context) {
         super(e, context);
+    }
+
+    static ConstructorDocImpl create(ExecutableElement e, Context context) {
+        return context.caches.constructors.computeIfAbsent(e,
+                el -> new ConstructorDocImpl(el, context));
     }
 
     @Override
@@ -41,12 +47,18 @@ class ConstructorDocImpl extends ExecutableMemberDocImpl implements ConstructorD
 
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return executableElement.getEnclosingElement().getSimpleName().toString();
     }
 
     @Override
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        var enclosingClass = executableElement.getEnclosingElement();
+        return switch (enclosingClass.getKind()) {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM ->
+                    ((TypeElement) enclosingClass).getQualifiedName().toString();
+            default -> throw new UnsupportedOperationException("Expected CLASS, INTERFACE, "
+                    + "ANNOTATION_TYPE or ENUM, but got " + enclosingClass.getKind());
+        };
     }
 
 }
