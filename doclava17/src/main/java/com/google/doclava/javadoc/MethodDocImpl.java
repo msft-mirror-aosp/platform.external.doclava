@@ -29,6 +29,8 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.Type;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 
 class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
 
@@ -36,29 +38,50 @@ class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
         super(e, context);
     }
 
+    static MethodDocImpl create(ExecutableElement e, Context context) {
+        return context.caches.methods.computeIfAbsent(e,
+                el -> new MethodDocImpl(el, context));
+    }
+
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return executableElement.getSimpleName().toString();
     }
 
     @Override
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        var enclosingClass = executableElement.getEnclosingElement();
+        return switch (enclosingClass.getKind()) {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM -> {
+                var enclosingClassName =
+                        ((TypeElement) enclosingClass).getQualifiedName().toString();
+                yield enclosingClassName + "." + name();
+            }
+            default -> throw new UnsupportedOperationException("Expected CLASS, INTERFACE, "
+                    + "ANNOTATION_TYPE or ENUM, but got " + enclosingClass.getKind());
+        };
     }
 
     @Override
     public boolean isMethod() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return true;
     }
 
     @Override
     public boolean isAbstract() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isAbstract(reflectModifiers);
     }
+
+    private Boolean isDefault;
 
     @Override
     public boolean isDefault() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (isDefault == null) {
+            isDefault = executableElement.getModifiers()
+                    .stream()
+                    .anyMatch(m -> m == Modifier.DEFAULT);
+        }
+        return isDefault;
     }
 
     @Override

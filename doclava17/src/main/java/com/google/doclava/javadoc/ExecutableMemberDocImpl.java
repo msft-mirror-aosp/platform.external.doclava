@@ -33,10 +33,14 @@ import com.sun.javadoc.SourcePosition;
 import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
+import java.lang.reflect.Modifier;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 
 abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> implements
         ExecutableMemberDoc {
+
     protected final ExecutableElement executableElement;
 
     protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
@@ -46,17 +50,17 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
 
     @Override
     public boolean isNative() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return (reflectModifiers & Modifier.NATIVE) != 0;
     }
 
     @Override
     public boolean isSynchronized() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return (reflectModifiers & Modifier.SYNCHRONIZED) != 0;
     }
 
     @Override
     public boolean isVarArgs() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return executableElement.isVarArgs();
     }
 
     @Override
@@ -74,7 +78,6 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-
     @Override
     public ParamTag[] paramTags() {
         throw new UnsupportedOperationException("not yet implemented");
@@ -85,9 +88,30 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
         throw new UnsupportedOperationException("not yet implemented");
     }
 
+    private ClassDoc[] thrownExceptions;
+
     @Override
     public ClassDoc[] thrownExceptions() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (thrownExceptions == null) {
+            thrownExceptions = executableElement.getThrownTypes()
+                    .stream()
+                    .map(typeMirror -> {
+                        Element element = context.environment.getTypeUtils().asElement(typeMirror);
+                        return switch (element.getKind()) {
+                            case CLASS, INTERFACE, ENUM -> ClassDocImpl.create(
+                                    (TypeElement) element,
+                                    context);
+                            case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(
+                                    (TypeElement) element,
+                                    context);
+                            default -> throw new UnsupportedOperationException(
+                                    "Expected CLASS, INTERFACE, ANNOTATION_TYPE or ENUM, but got "
+                                            + element.getKind());
+                        };
+                    })
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return thrownExceptions;
     }
 
     @Override

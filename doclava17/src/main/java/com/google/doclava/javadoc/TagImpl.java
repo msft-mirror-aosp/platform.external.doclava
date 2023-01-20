@@ -28,27 +28,90 @@ package com.google.doclava.javadoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.SourcePosition;
 import com.sun.javadoc.Tag;
+import com.sun.source.doctree.BlockTagTree;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.DocTree.Kind;
+import com.sun.source.doctree.InlineTagTree;
+import com.sun.source.doctree.ParamTree;
+import com.sun.source.doctree.SeeTree;
+import com.sun.source.doctree.SerialFieldTree;
+import com.sun.source.doctree.ThrowsTree;
+import com.sun.source.util.SimpleDocTreeVisitor;
+import java.util.HashMap;
+import java.util.Objects;
+import javax.lang.model.element.Element;
 
 class TagImpl implements Tag {
 
+    protected final DocTree docTree;
+    protected final Element owner;
+    protected final Context context;
+
+    protected TagImpl(DocTree docTree, Element owner, Context context) {
+        this.docTree = docTree;
+        this.owner = owner;
+        this.context = context;
+    }
+
+    static TagImpl create(DocTree docTree, Element owner, Context context) {
+        return switch (docTree.getKind()) {
+            case SEE -> SeeTagImpl.create((SeeTree) docTree, owner, context);
+            case PARAM -> ParamTagImpl.create((ParamTree) docTree, owner, context);
+            case SERIAL_FIELD -> SerialFieldTagImpl.create((SerialFieldTree) docTree,
+                    owner, context);
+            case THROWS -> ThrowsTagImpl.create((ThrowsTree) docTree, owner, context);
+            default -> {
+                var tagsOfElement = context.caches.tags.generic.computeIfAbsent(owner,
+                        el -> new HashMap<>());
+                yield tagsOfElement.computeIfAbsent(docTree, el -> new TagImpl(el, owner,
+                        context));
+            }
+        };
+    }
+
+    private String name;
+
     @Override
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (name == null) {
+            name = "@" + NAME_VISITOR.visit(docTree, context);
+        }
+        return name;
     }
 
     @Override
     public Doc holder() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.obtain(owner);
     }
+
+    private String kind;
 
     @Override
     public String kind() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (kind == null) {
+            kind = "@" + remapKind(NAME_VISITOR.visit(docTree, context));
+        }
+        return kind;
     }
+
+    static String remapKind(String name) {
+        Objects.requireNonNull(name);
+        return switch (name) {
+            case "exception" -> "throws";
+            case "link", "linkplain" -> "see";
+            case "serialData" -> "serial";
+            default -> name;
+        };
+    }
+
+    private String text;
 
     @Override
     public String text() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (text == null) {
+            text = docTree.toString();
+        }
+        return text;
     }
 
     @Override
@@ -65,4 +128,22 @@ class TagImpl implements Tag {
     public SourcePosition position() {
         throw new UnsupportedOperationException("not yet implemented");
     }
+
+    private static final SimpleDocTreeVisitor<String, Context> NAME_VISITOR =
+            new SimpleDocTreeVisitor<>() {
+                @Override
+                protected String defaultAction(DocTree node, Context context) {
+                    if (node instanceof BlockTagTree bt) {
+                        return bt.getTagName();
+                    }
+                    if (node instanceof InlineTagTree it) {
+                        return it.getTagName();
+                    }
+                    if (node.getKind() == Kind.ERRONEOUS) {
+                        System.err.println("Malformed tag: " + node.toString());
+                        return "erroneous";
+                    }
+                    return node.getKind().toString().toLowerCase();
+                }
+            };
 }

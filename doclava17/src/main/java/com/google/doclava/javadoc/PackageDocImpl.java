@@ -41,7 +41,7 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     static PackageDocImpl create(PackageElement e, Context context) {
-        return context.caches.packages.computeIfAbsent(e, el -> new PackageDocImpl(e, context));
+        return context.caches.packages.computeIfAbsent(e, el -> new PackageDocImpl(el, context));
     }
 
     @Override

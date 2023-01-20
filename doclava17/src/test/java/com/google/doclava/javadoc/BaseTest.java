@@ -19,7 +19,6 @@ package com.google.doclava.javadoc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -69,7 +68,8 @@ public abstract class BaseTest {
                 "com.example.classes.PublicAnnotation");
         static final TypeElement publicClass = initTypeElement("com.example.classes.PublicClass");
         static final TypeElement publicEnum = initTypeElement("com.example.classes.PublicEnum");
-        static final TypeElement publicInterface = initTypeElement("com.example.classes.PublicInterface");
+        static final TypeElement publicInterface = initTypeElement(
+                "com.example.classes.PublicInterface");
 
         static final TypeElement publicClassWithNests = initTypeElement(
                 "com.example.classes.PublicClassWithNests");
@@ -80,12 +80,34 @@ public abstract class BaseTest {
 
         static final TypeElement parametrizedAnnotation = initTypeElement(
                 "com.example.classes.ParametrizedAnnotation");
+
+        static final TypeElement tags = initTypeElement("com.example.classes.Tags");
+        static final TypeElement tags$See = initTypeElement("com.example.classes.Tags.See");
+        static final TypeElement tags$Throws = initTypeElement("com.example.classes.Tags.Throws");
+        static final TypeElement tags$Various = initTypeElement("com.example.classes.Tags.Various");
+
+        static final TypeElement constructors = initTypeElement(
+                "com.example.constructors.Constructors");
+
+        static final TypeElement packagePrivateClass = initTypeElement("com.example.classes.PackagePrivateClass");
+
+        static final TypeElement implementsSerializable = initTypeElement(
+                "com.example.classes.ImplementsSerializable");
+        static final TypeElement implementsExternalizable = initTypeElement(
+                "com.example.classes.ImplementsExternalizable");
+    }
+    
+    static class INTERFACE {
+        static final TypeElement extendsSerializable = initTypeElement(
+                "com.example.classes.ExtendsSerializable");
+        static final TypeElement extendsExternalizable = initTypeElement(
+                "com.example.classes.ExtendsExternalizable");
     }
 
     static class INSTANCE {
 
         static final TypeElement javaLangObject = initTypeElement("java.lang.Object");
-        static final TypeElement javaLangError  = initTypeElement("java.lang.Error");
+        static final TypeElement javaLangError = initTypeElement("java.lang.Error");
         static final TypeElement javaLangException = initTypeElement("java.lang.Exception");
     }
 
@@ -117,40 +139,78 @@ public abstract class BaseTest {
          */
         static class WITH_DEFAULT {
 
-            static ExecutableElement returningBool = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "bool");
-            static ExecutableElement returningByte = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "byt");
-            static ExecutableElement returningChar = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "ch");
-            static ExecutableElement returningDouble = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "dbl");
-            static ExecutableElement returningFloat = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "flt");
-            static ExecutableElement returningInteger = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "integer");
-            static ExecutableElement returningLond = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "lng");
-            static ExecutableElement returningShort = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "shrt");
-            static ExecutableElement returningString = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "str");
-            static ExecutableElement returningClass = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "cls");
-            static ExecutableElement returningEnum = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "enm");
-            static ExecutableElement returningAnnotation = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "annotation");
-            static ExecutableElement returningArrayOfString = initExecutableElement(
-                    "com.example.classes.AllDefaultAnnotation", "arrayOfStrings");
+            static final ExecutableElement returningBool = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "bool()");
+            static final ExecutableElement returningByte = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "byt()");
+            static final ExecutableElement returningChar = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "ch()");
+            static final ExecutableElement returningDouble = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "dbl()");
+            static final ExecutableElement returningFloat = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "flt()");
+            static final ExecutableElement returningInteger = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "integer()");
+            static final ExecutableElement returningLond = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "lng()");
+            static final ExecutableElement returningShort = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "shrt()");
+            static final ExecutableElement returningString = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "str()");
+            static final ExecutableElement returningClass = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "cls()");
+            static final ExecutableElement returningEnum = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "enm()");
+            static final ExecutableElement returningAnnotation = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "annotation()");
+            static final ExecutableElement returningArrayOfString = initExecutableElement(
+                    "com.example.classes.AllDefaultAnnotation", "arrayOfStrings()");
         }
 
-        static TypeElement allDefaultAnnotation = initTypeElement(
+        static final TypeElement allDefaultAnnotation = initTypeElement(
                 "com.example.classes.AllDefaultAnnotation");
-        static ExecutableElement annotationMethod = initExecutableElement(
-                "com.example.classes.ParametrizedAnnotation", "primitiveI");
-        static ExecutableElement annotationMethodWithDefault = initExecutableElement(
-                "com.example.classes.ParametrizedAnnotation", "primitiveDefaultL");
+        static final ExecutableElement annotationMethod = initExecutableElement(
+                "com.example.classes.ParametrizedAnnotation", "primitiveI()");
+        static final ExecutableElement annotationMethodWithDefault = initExecutableElement(
+                "com.example.classes.ParametrizedAnnotation", "primitiveDefaultL()");
+    }
+
+    static class CONSTRUCTOR {
+
+        static final ExecutableElement empty = initExecutableElement(
+                "com.example.constructors.Constructors", "Constructors()");
+        static final ExecutableElement arg1_int = initExecutableElement(
+                "com.example.constructors.Constructors", "Constructors(int)");
+        static final ExecutableElement arg1_String = initExecutableElement(
+                "com.example.constructors.Constructors", "Constructors(java.lang.String)");
+        static final ExecutableElement arg2_int_String = initExecutableElement(
+                "com.example.constructors.Constructors", "Constructors(int,java.lang.String)");
+    }
+
+    static class METHOD {
+
+        static class OF_CLASS {
+
+            static final ExecutableElement public_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "public_void_arg0()");
+            static final ExecutableElement private_int_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "private_int_arg0()");
+            static final ExecutableElement packagePrivate_String_arg2_int_String = initExecutableElement(
+                    "com.example.methods.OfClass",
+                    "packagePrivate_String_arg2_int_String(int,java.lang.String)");
+            static final ExecutableElement public_abstract_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfClass", "public_abstract_void_arg0()");
+            static final ExecutableElement override_public_String_toString0 = initExecutableElement(
+                    "com.example.methods.OfClass", "toString()");
+        }
+
+        static class OF_INTERFACE {
+
+            static final ExecutableElement public_void_arg0 = initExecutableElement(
+                    "com.example.methods.OfInterface", "public_void_arg0()");
+            static final ExecutableElement public_default_String_arg0 = initExecutableElement(
+                    "com.example.methods.OfInterface", "public_default_String_arg0()");
+        }
     }
 
     private static TypeElement initTypeElement(String name) {
@@ -166,21 +226,27 @@ public abstract class BaseTest {
     }
 
     /**
-     * Finds ExecutableElement in the environment by class type and method name. Does not handle
-     * same method names and different type signatures. Fails assertion if multiple methods with the
-     * same name found.
+     * Finds ExecutableElement in the environment by class type and element signature.
+     * Signature should be in the following format: {@code methodName(type1[,type2...])}, types
+     * are specified in a fully qualified form. For example:
+     *
+     * <ul>
+     *     <li>{@code Constructor()}</li>
+     *     <li>{@code Constructor(int)}</li>
+     *     <li>{@code update(java.lang.String,float)}</li>
+     * </ul>
      *
      * @param type fully qualified class name
-     * @param methodName method name
+     * @param signature signature of executable element
      * @return ExecutableElement
      */
-    private static ExecutableElement initExecutableElement(String type, String methodName) {
+    private static ExecutableElement initExecutableElement(String type, String signature) {
         var t = initTypeElement(type);
         var methods = t.getEnclosedElements()
                 .stream()
-                .filter(e -> e.getKind() == ElementKind.METHOD)
+                .filter(e -> e instanceof ExecutableElement)
                 .map(e -> (ExecutableElement) e)
-                .filter(e -> e.getSimpleName().toString().equals(methodName))
+                .filter(exe -> signature.equals(exe.toString()))
                 .toList();
 
         assertEquals(1, methods.size());

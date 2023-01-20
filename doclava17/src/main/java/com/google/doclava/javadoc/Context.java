@@ -16,22 +16,35 @@
 
 package com.google.doclava.javadoc;
 
+import com.sun.javadoc.Doc;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.ParamTree;
+import com.sun.source.doctree.SeeTree;
+import com.sun.source.doctree.SerialFieldTree;
+import com.sun.source.doctree.ThrowsTree;
 import java.util.HashMap;
 import java.util.Map;
 import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.SimpleElementVisitor14;
 import jdk.javadoc.doclet.DocletEnvironment;
 
 /**
- * Holds temporary objects required to construct {@link RootDocImpl} from a
- * {@link jdk.javadoc.doclet.DocletEnvironment}.
+ * Holds temporary objects required to construct {@link RootDocImpl} from a {@link
+ * jdk.javadoc.doclet.DocletEnvironment}.
  */
 class Context {
+
     public final DocletEnvironment environment;
     public final Caches caches = new Caches();
     public final DocletElementUtils docletElementUtils;
+
+    public Doc obtain(Element element) {
+        return OBTAIN_VISITOR.visit(element, this);
+    }
 
     public static class Caches {
 
@@ -41,10 +54,46 @@ class Context {
         public final Map<ExecutableElement, AnnotationMethodDocImpl> annotationMethods =
                 new HashMap<>();
         public final Map<AnnotationValue, AnnotationValueImpl> annotationValues = new HashMap<>();
+        public final Map<ExecutableElement, ConstructorDocImpl> constructors = new HashMap<>();
+        public final Map<ExecutableElement, MethodDocImpl> methods = new HashMap<>();
+
+        public final Tags tags = new Tags();
+
+        public static class Tags {
+
+            public final Map<Element, Map<DocTree, TagImpl>> generic = new HashMap<>();
+            public final Map<Element, Map<SeeTree, SeeTagImpl>> see = new HashMap<>();
+            public final Map<Element, Map<SerialFieldTree, SerialFieldTagImpl>> serialField =
+                    new HashMap<>();
+            public final Map<Element, Map<ParamTree, ParamTagImpl>> param = new HashMap<>();
+            public final Map<Element, Map<ThrowsTree, ThrowsTagImpl>> throwz = new HashMap<>();
+        }
     }
 
     public Context(DocletEnvironment environment) {
         this.environment = environment;
         this.docletElementUtils = new DocletElementUtils(environment);
     }
+
+    private static final SimpleElementVisitor14<Doc, Context> OBTAIN_VISITOR =
+            new SimpleElementVisitor14<>() {
+
+                @Override
+                public Doc visitPackage(PackageElement e, Context context) {
+                    return PackageDocImpl.create(e, context);
+                }
+
+                @Override
+                public Doc visitType(TypeElement e, Context context) {
+                    return switch (e.getKind()) {
+                        case CLASS, ENUM, INTERFACE -> ClassDocImpl.create(e, context);
+                        case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(e, context);
+                        case RECORD -> throw new UnsupportedOperationException(
+                                "Records not yet supported");
+                        default -> throw new IllegalArgumentException(
+                                "Expected ANNOTATION_TYPE, CLASS, "
+                                        + "ENUM, INTERFACE, or RECORD; but got " + e.getKind());
+                    };
+                }
+            };
 }
