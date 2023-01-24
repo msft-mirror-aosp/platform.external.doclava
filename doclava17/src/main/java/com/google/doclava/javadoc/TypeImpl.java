@@ -34,8 +34,66 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.SimpleTypeVisitor14;
 
 abstract class TypeImpl implements Type {
+
+    protected final TypeMirror typeMirror;
+    protected final Context context;
+
+    protected TypeImpl(TypeMirror typeMirror, Context context) {
+        this.typeMirror = typeMirror;
+        this.context = context;
+    }
+
+    protected static Type create(TypeMirror m, Context context) {
+        return switch (m.getKind()) {
+            // primitive types
+            case BOOLEAN -> PrimitiveTypeImpl.BOOLEAN;
+            case BYTE -> PrimitiveTypeImpl.BYTE;
+            case CHAR -> PrimitiveTypeImpl.CHAR;
+            case DOUBLE -> PrimitiveTypeImpl.DOUBLE;
+            case FLOAT -> PrimitiveTypeImpl.FLOAT;
+            case INT -> PrimitiveTypeImpl.INT;
+            case LONG -> PrimitiveTypeImpl.LONG;
+            case SHORT -> PrimitiveTypeImpl.SHORT;
+            // void is also a "primitive type"
+            case VOID -> PrimitiveTypeImpl.VOID;
+            // arrays
+            case ARRAY -> throw new UnsupportedOperationException(
+                    "ARRAY type is not yet implemented");
+            // complex types
+            case WILDCARD -> {
+                var wildcardType = (javax.lang.model.type.WildcardType) m;
+                yield WildcardTypeImpl.create(wildcardType, context);
+            }
+            case TYPEVAR -> {
+                var typeVar = (javax.lang.model.type.TypeVariable) m;
+                yield TypeVariableImpl.create(typeVar, context);
+            }
+            case DECLARED -> {
+                var dt = (DeclaredType) m;
+                // Order matters! AnnotatedTypeImpl goes first as it has an "underlying type"
+                // which will be constructed by this method in create() routine.
+                if (!dt.getAnnotationMirrors().isEmpty()) {
+                    yield AnnotatedTypeImpl.create(dt, context);
+                }
+                if (!dt.getTypeArguments().isEmpty()) {
+                    yield ParameterizedTypeImpl.create(dt, context);
+                }
+                //TODO: check that it will cast.
+                var el = (TypeElement) dt.asElement();
+                yield ClassDocImpl.create(el, context);
+            }
+            default -> throw new IllegalArgumentException(
+                    "Unexpected type of kind: " + m.getKind());
+        };
+    }
 
     @Override
     @Unused
@@ -46,7 +104,7 @@ abstract class TypeImpl implements Type {
     @Override
     @Used
     public String qualifiedTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return QUALIFIED_NAME_VISITOR.visit(typeMirror, context);
     }
 
     @Override
@@ -56,9 +114,12 @@ abstract class TypeImpl implements Type {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public String simpleTypeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.getTypeUtils()
+                .asElement(typeMirror)
+                .getSimpleName()
+                .toString();
     }
 
     @Override
@@ -108,4 +169,33 @@ abstract class TypeImpl implements Type {
     public AnnotatedType asAnnotatedType() {
         return null;
     }
+
+    private static final SimpleTypeVisitor14<String, Context> QUALIFIED_NAME_VISITOR = new SimpleTypeVisitor14<>() {
+        @Override
+        public String visitPrimitive(PrimitiveType t, Context context) {
+            return switch (t.getKind()) {
+                case BOOLEAN -> "boolean";
+                case BYTE -> "byte";
+                case CHAR -> "char";
+                case DOUBLE -> "double";
+                case FLOAT -> "float";
+                case INT -> "int";
+                case LONG -> "long";
+                case SHORT -> "short";
+                default -> throw new IllegalArgumentException("Unexpected primitive type with "
+                        + "kind: " + t.getKind());
+            };
+        }
+
+        @Override
+        public String visitArray(ArrayType t, Context context) {
+            return this.visit(t.getComponentType(), context);
+        }
+
+        @Override
+        protected String defaultAction(TypeMirror e, Context context) {
+            throw new UnsupportedOperationException(
+                    "Name visitor is not yet implemented for " + e.getKind());
+        }
+    };
 }
