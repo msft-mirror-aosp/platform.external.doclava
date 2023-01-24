@@ -29,11 +29,22 @@ import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 
 class ParameterizedTypeImpl extends TypeImpl implements ParameterizedType {
 
+    protected ParameterizedTypeImpl(TypeMirror typeMirror, Context context) {
+        super(typeMirror, context);
+    }
+
+    static ParameterizedTypeImpl create(DeclaredType declaredType, Context context) {
+        return context.caches.types.parameterized.computeIfAbsent(declaredType,
+                el -> new ParameterizedTypeImpl(el, context));
+    }
+
     @Override
-    @Used
+    @Used(implemented = true)
     public ParameterizedType asParameterizedType() {
         return this;
     }
