@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
@@ -81,56 +83,67 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
     }
 
     @Override
+    @Used
     public ClassDoc containingClass() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public PackageDoc containingPackage() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused(implemented = true)
     public int modifierSpecifier() {
         return reflectModifiers;
     }
 
     @Override
+    @Unused(implemented = true)
     public String modifiers() {
         return java.lang.reflect.Modifier.toString(reflectModifiers);
     }
 
     @Override
+    @Used
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isPublic() {
         return java.lang.reflect.Modifier.isPublic(reflectModifiers);
     }
 
     @Override
+    @Used
     public boolean isProtected() {
         return java.lang.reflect.Modifier.isProtected(reflectModifiers);
     }
 
     @Override
+    @Used
     public boolean isPrivate() {
         return java.lang.reflect.Modifier.isPrivate(reflectModifiers);
     }
 
     @Override
+    @Used
     public boolean isPackagePrivate() {
         return !(isPublic() || isPrivate() || isProtected());
     }
 
     @Override
+    @Used
     public boolean isStatic() {
         return java.lang.reflect.Modifier.isStatic(reflectModifiers);
     }
 
     @Override
+    @Used
     public boolean isFinal() {
         return java.lang.reflect.Modifier.isFinal(reflectModifiers);
     }

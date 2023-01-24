@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents an annotated type.
  * For example:
@@ -39,7 +42,9 @@ package com.sun.javadoc;
  */
 public interface AnnotatedType extends Type {
 
+    @Unused
     AnnotationDesc[] annotations();
 
+    @Used
     Type underlyingType();
 }

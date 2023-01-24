@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents an annotation.
  * An annotation associates a value with each element of an annotation type.
@@ -40,6 +43,7 @@ public interface AnnotationDesc {
      *
      * @return the annotation type of this annotation.
      */
+    @Used
     AnnotationTypeDoc annotationType();
 
     /**
@@ -50,6 +54,7 @@ public interface AnnotationDesc {
      *
      * @return this annotation's elements and their values.
      */
+    @Used
     ElementValuePair[] elementValues();
 
     /**
@@ -57,6 +62,7 @@ public interface AnnotationDesc {
      *
      * @return true if the annotation is synthesized.
      */
+    @Unused
     boolean isSynthesized();
 
     /**
@@ -73,6 +79,7 @@ public interface AnnotationDesc {
          *
          * @return the annotation type element.
          */
+        @Used
         AnnotationTypeElementDoc element();
 
         /**
@@ -80,6 +87,7 @@ public interface AnnotationDesc {
          *
          * @return the value associated with the annotation type element.
          */
+        @Used
         AnnotationValue value();
     }
 }

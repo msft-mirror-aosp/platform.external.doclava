@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationValue;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -60,6 +61,7 @@ class AnnotationValueImpl implements AnnotationValue {
     private Object value;
 
     @Override
+    @Used(implemented = true)
     public Object value() {
         if (value == null) {
             value = valueVisitor.visit(annotationValue, context);

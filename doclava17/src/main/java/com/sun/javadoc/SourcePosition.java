@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import java.io.File;
 
 /**
@@ -37,10 +39,12 @@ import java.io.File;
 public interface SourcePosition {
     /** The source file. Returns null if no file information is
      *  available. */
+    @Used
     File file();
 
     /** The line in the source file. The first line is numbered 1;
      *  0 means no line number information is available. */
+    @Used
     int line();
 
     /** The column in the source file. The first column is
@@ -48,8 +52,10 @@ public interface SourcePosition {
      *  Columns count characters in the input stream; a tab
      *  advances the column number to the next 8-column tab stop.
      */
+    @Used
     int column();
 
     /** Convert the source position to the form "Filename:line". */
+    @Unused
     String toString();
 }

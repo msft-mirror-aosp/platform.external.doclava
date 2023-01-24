@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ExecutableMemberDoc;
 import com.sun.javadoc.ParamTag;
@@ -49,41 +51,49 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isNative() {
         return (reflectModifiers & Modifier.NATIVE) != 0;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isSynchronized() {
         return (reflectModifiers & Modifier.SYNCHRONIZED) != 0;
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isVarArgs() {
         return executableElement.isVarArgs();
     }
 
     @Override
+    @Used
     public boolean isSynthetic() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isIncluded() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ThrowsTag[] throwsTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ParamTag[] paramTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ParamTag[] typeParamTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -91,6 +101,7 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     private ClassDoc[] thrownExceptions;
 
     @Override
+    @Used(implemented = true)
     public ClassDoc[] thrownExceptions() {
         if (thrownExceptions == null) {
             thrownExceptions = executableElement.getThrownTypes()
@@ -115,36 +126,43 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
+    @Unused
     public Type[] thrownExceptionTypes() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Parameter[] parameters() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public Type receiverType() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public TypeVariable[] typeParameters() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String signature() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String flatSignature() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public SourcePosition position() {
         throw new UnsupportedOperationException("not yet implemented");
     }

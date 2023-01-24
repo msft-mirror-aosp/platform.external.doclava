@@ -26,6 +26,8 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents an element of an annotation type.
  *
@@ -40,5 +42,6 @@ public interface AnnotationTypeElementDoc extends MethodDoc {
      *
      * @return the default value of this element.
      */
+    @Used
     AnnotationValue defaultValue();
 }

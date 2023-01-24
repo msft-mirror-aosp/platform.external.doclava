@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.WildcardType;
@@ -32,21 +33,25 @@ import com.sun.javadoc.WildcardType;
 class WildcardTypeImpl extends TypeImpl implements WildcardType {
 
     @Override
+    @Used
     public ClassDoc asClassDoc() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public WildcardType asWildcardType() {
         return this;
     }
 
     @Override
+    @Used
     public Type[] extendsBounds() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Type[] superBounds() {
         throw new UnsupportedOperationException("not yet implemented");
     }
