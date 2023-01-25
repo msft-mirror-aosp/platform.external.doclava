@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a @throws or @exception documentation tag.
  * Parses and holds the exception name and exception comment.
@@ -43,6 +46,7 @@ public interface ThrowsTag extends Tag {
      *
      * @return name of the exception.
      */
+    @Unused
     String exceptionName();
 
     /**
@@ -51,6 +55,7 @@ public interface ThrowsTag extends Tag {
      *
      * @return exception comment.
      */
+    @Used
     String exceptionComment();
 
     /**
@@ -65,6 +70,7 @@ public interface ThrowsTag extends Tag {
      * @return <code>ClassDoc</code> that represents the exception.
      * @see #exceptionType
      */
+    @Used
     ClassDoc exception();
 
     /**
@@ -75,5 +81,6 @@ public interface ThrowsTag extends Tag {
      * @return the type of the exception.
      * @since 1.5
      */
+    @Unused
     Type exceptionType();
 }

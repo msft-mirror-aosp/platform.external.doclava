@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.SerialFieldTag;
 import com.sun.source.doctree.SerialFieldTree;
@@ -49,6 +51,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
      * Return the serialziable field name.
      */
     @Override
+    @Unused
     public String fieldName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -67,6 +70,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
      * @returns null if no ClassDocImpl for field type is visible from containingClass context.
      */
     @Override
+    @Unused
     public ClassDoc fieldTypeDoc() {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -76,6 +80,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
      * corresponding FieldDocImpl.
      */
     @Override
+    @Unused
     public String description() {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -84,6 +89,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
      * Return the kind of this tag.
      */
     @Override
+    @Used(implemented = true)
     public String kind() {
         return "@serialField";
     }
@@ -91,6 +97,7 @@ class SerialFieldTagImpl extends TagImpl implements SerialFieldTag, Comparable<O
     /**
      * Convert this object to a string.
      */
+    @Unused
     public String toString() {
         throw new UnsupportedOperationException("not yet implemented");
     }

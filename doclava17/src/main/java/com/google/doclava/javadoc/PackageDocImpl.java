@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
@@ -45,56 +47,67 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     @Override
+    @Unused
     public ClassDoc[] allClasses(boolean filter) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc[] allClasses() {
         return allClasses(true);
     }
 
     @Override
+    @Used
     public ClassDoc[] ordinaryClasses() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] exceptions() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] errors() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] enums() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] interfaces() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public AnnotationTypeDoc[] annotationTypes() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc findClass(String className) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isIncluded() {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -102,6 +115,7 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     private String name;
 
     @Override
+    @Used(implemented = true)
     public String name() {
         if (name == null) {
             name = packageElement.getSimpleName().toString();

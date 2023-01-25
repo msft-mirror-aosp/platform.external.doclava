@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents an invocation of a generic class or interface.  For example,
  * given the generic interface {@code List<E>}, possible invocations
@@ -50,6 +53,7 @@ public interface ParameterizedType extends Type {
      *
      * @return the generic class or interface that declared this type.
      */
+    @Unused
     ClassDoc asClassDoc();
 
     /**
@@ -60,6 +64,7 @@ public interface ParameterizedType extends Type {
      *
      * @return the actual type arguments of this type.
      */
+    @Used
     Type[] typeArguments();
 
     /**
@@ -74,6 +79,7 @@ public interface ParameterizedType extends Type {
      *
      * @return the class type that is a direct supertype of this one.
      */
+    @Unused
     Type superclassType();
 
     /**
@@ -90,6 +96,7 @@ public interface ParameterizedType extends Type {
      * @return the interface types directly implemented by or extended by this
      * parameterized type.
      */
+    @Unused
     Type[] interfaceTypes();
 
     /**
@@ -104,5 +111,6 @@ public interface ParameterizedType extends Type {
      *
      * @return the type that contains this type as a member.
      */
+    @Unused
     Type containingType();
 }

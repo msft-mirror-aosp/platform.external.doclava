@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+
 /**
  * Represents a user-defined cross-reference to related documentation.
  * The tag can reference a package, class or member, or can hold
@@ -53,6 +55,7 @@ public interface SeeTag extends Tag {
      * </p>
      * return "the trim method".
      */
+    @Unused
     String label();
 
     /**
@@ -66,6 +69,7 @@ public interface SeeTag extends Tag {
      * </p>
      * return the <code>PackageDoc</code> for <code>java.lang</code>.
      */
+    @Unused
     PackageDoc referencedPackage();
 
     /**
@@ -84,6 +88,7 @@ public interface SeeTag extends Tag {
      * Return null if <code>@see</code> references a non-element, such as
      * <code>@see &lt;a href="java.sun.com"&gt;</code>.
      */
+    @Unused
     String referencedClassName();
 
     /**
@@ -95,6 +100,7 @@ public interface SeeTag extends Tag {
      * </p>
      * return the <code>ClassDoc</code> for <code>java.lang.String</code>.
      */
+    @Unused
     ClassDoc referencedClass();
 
     /**
@@ -108,6 +114,7 @@ public interface SeeTag extends Tag {
      * </p>
      * return "startsWith(String)".
      */
+    @Unused
     String referencedMemberName();
 
     /**
@@ -122,5 +129,6 @@ public interface SeeTag extends Tag {
      * </p>
      * return the <code>MethodDoc</code> for <code>startsWith</code>.
      */
+    @Unused
     MemberDoc referencedMember();
 }
