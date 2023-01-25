@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents an @param documentation tag.
  * Stores the name and comment parts of the parameter tag.
@@ -44,6 +46,7 @@ public interface ParamTag extends Tag {
      *
      * @return the parameter name.
      */
+    @Used
     String parameterName();
 
     /**
@@ -52,6 +55,7 @@ public interface ParamTag extends Tag {
      *
      * @return the parameter comment.
      */
+    @Used
     String parameterComment();
 
     /**
@@ -63,5 +67,6 @@ public interface ParamTag extends Tag {
      * parameter.
      * @since 1.5
      */
+    @Used
     boolean isTypeParameter();
 }

@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Parameter information.
  * This includes a parameter type and parameter name.
@@ -36,12 +39,14 @@ public interface Parameter {
     /**
      * Get the type of this parameter.
      */
+    @Used
     Type type();
 
     /**
      * Get local name of this parameter.
      * For example if parameter is the short 'index', returns "index".
      */
+    @Used
     String name();
 
     /**
@@ -52,6 +57,7 @@ public interface Parameter {
      * representation of the type, including the dimensions of arrays and
      * the type arguments of parameterized types.  Names are qualified.
      */
+    @Used
     String typeName();
 
     /**
@@ -61,6 +67,7 @@ public interface Parameter {
      *
      * @return type and parameter name of this parameter.
      */
+    @Unused
     String toString();
 
     /**
@@ -70,5 +77,6 @@ public interface Parameter {
      * @return the annotations of this parameter.
      * @since 1.5
      */
+    @Used
     AnnotationDesc[] annotations();
 }

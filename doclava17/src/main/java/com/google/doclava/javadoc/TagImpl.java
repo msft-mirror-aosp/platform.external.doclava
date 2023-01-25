@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.SourcePosition;
 import com.sun.javadoc.Tag;
@@ -72,6 +74,7 @@ class TagImpl implements Tag {
     private String name;
 
     @Override
+    @Used(implemented = true)
     public String name() {
         if (name == null) {
             name = "@" + NAME_VISITOR.visit(docTree, context);
@@ -80,6 +83,7 @@ class TagImpl implements Tag {
     }
 
     @Override
+    @Unused(implemented = true)
     public Doc holder() {
         return context.obtain(owner);
     }
@@ -87,6 +91,7 @@ class TagImpl implements Tag {
     private String kind;
 
     @Override
+    @Used(implemented = true)
     public String kind() {
         if (kind == null) {
             kind = "@" + remapKind(NAME_VISITOR.visit(docTree, context));
@@ -107,6 +112,7 @@ class TagImpl implements Tag {
     private String text;
 
     @Override
+    @Used(implemented = true)
     public String text() {
         if (text == null) {
             text = docTree.toString();
@@ -115,16 +121,19 @@ class TagImpl implements Tag {
     }
 
     @Override
+    @Unused
     public Tag[] inlineTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public Tag[] firstSentenceTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public SourcePosition position() {
         throw new UnsupportedOperationException("not yet implemented");
     }

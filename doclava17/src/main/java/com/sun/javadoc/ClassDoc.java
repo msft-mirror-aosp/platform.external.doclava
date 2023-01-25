@@ -26,6 +26,9 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a java class or interface and provides access to
  * information about the class, the class's comment and tags, and the
@@ -47,6 +50,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Return true if this class is abstract.  Return true
      * for all interfaces.
      */
+    @Used
     boolean isAbstract();
 
     /**
@@ -57,12 +61,14 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * <code>java.io.Serializable</code>,
      * Externalizable objects are also Serializable.
      */
+    @Unused
     boolean isSerializable();
 
     /**
      * Return true if this class implements or interface extends
      * <code>java.io.Externalizable</code>.
      */
+    @Unused
     boolean isExternalizable();
 
     /**
@@ -72,6 +78,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return an array of MethodDoc objects that represents
      *         the serialization methods for this class or interface.
      */
+    @Unused
     MethodDoc[] serializationMethods();
 
     /**
@@ -91,6 +98,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @see #definesSerializableFields()
      * @see SerialFieldTag
      */
+    @Unused
     FieldDoc[] serializableFields();
 
     /**
@@ -100,6 +108,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @see #serializableFields()
      * @see SerialFieldTag
      */
+    @Unused
     boolean definesSerializableFields();
 
     /**
@@ -113,6 +122,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *         there is no superclass.
      * @see #superclassType
      */
+    @Used
     ClassDoc superclass();
 
     /**
@@ -123,6 +133,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return the superclass of this class, or null if there is no superclass.
      * @since 1.5
      */
+    @Used
     Type superclassType();
 
     /**
@@ -134,6 +145,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @param cd the candidate superclass.
      * @return true if cd is a superclass of this class.
      */
+    @Unused
     boolean subclassOf(ClassDoc cd);
 
     /**
@@ -148,6 +160,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return an array of ClassDoc objects representing the interfaces.
      * @see #interfaceTypes
      */
+    @Unused
     ClassDoc[] interfaces();
 
     /**
@@ -160,6 +173,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *         <code>ClassDoc</code> or a <code>ParametrizedType</code>.
      * @since 1.5
      */
+    @Used
     Type[] interfaceTypes();
 
     /**
@@ -169,6 +183,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return the formal type parameters of this class or interface.
      * @since 1.5
      */
+    @Used
     TypeVariable[] typeParameters();
 
     /**
@@ -178,6 +193,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return the type parameter tags of this class or interface.
      * @since 1.5
      */
+    @Unused
     ParamTag[] typeParamTags();
 
     /**
@@ -189,6 +205,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return an array of FieldDoc objects representing the included
      *         fields in this class or interface.
      */
+    @Unused
     FieldDoc[] fields();
 
     /**
@@ -204,6 +221,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return       an array of FieldDoc objects representing the included
      *               fields in this class or interface.
      */
+    @Used
     FieldDoc[] fields(boolean filter);
 
     /**
@@ -213,6 +231,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *
      * @return the enum constants if this is an enum type.
      */
+    @Used
     FieldDoc[] enumConstants();
 
     /**
@@ -225,6 +244,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *         methods in this class or interface.  Does not include
      *         constructors or annotation type elements.
      */
+    @Unused
     MethodDoc[] methods();
 
     /**
@@ -240,6 +260,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return       an array of MethodDoc objects representing the included
      *               methods in this class or interface.
      */
+    @Used
     MethodDoc[] methods(boolean filter);
 
     /**
@@ -252,6 +273,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return an array of ConstructorDoc objects representing the included
      *         constructors in this class.
      */
+    @Unused
     ConstructorDoc[] constructors();
 
     /**
@@ -267,6 +289,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return       an array of ConstructorDoc objects representing the included
      *               constructors in this class.
      */
+    @Used
     ConstructorDoc[] constructors(boolean filter);
 
 
@@ -282,6 +305,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return an array of ClassDoc objects representing the included classes
      *         and interfaces defined in this class or interface.
      */
+    @Used
     ClassDoc[] innerClasses();
 
     /**
@@ -299,6 +323,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * @return       a filtered array of ClassDoc objects representing the included
      *               classes and interfaces defined in this class or interface.
      */
+    @Used
     ClassDoc[] innerClasses(boolean filter);
 
     /**
@@ -307,6 +332,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * 3) in this package, 4) in the class imports, 5) in the package imports.
      * Return the ClassDoc if found, null if not found.
      */
+    @Used
     ClassDoc findClass(String className);
 
     /**
@@ -321,6 +347,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *          classes are imported through single-type-import declarations.
      */
     @Deprecated
+    @Unused
     ClassDoc[] importedClasses();
 
     /**
@@ -336,5 +363,6 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *          declarations to be returned.
      */
     @Deprecated
+    @Unused
     PackageDoc[] importedPackages();
 }

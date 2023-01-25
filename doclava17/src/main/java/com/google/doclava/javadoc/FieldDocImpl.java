@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.SerialFieldTag;
 import com.sun.javadoc.Type;
@@ -37,51 +39,61 @@ class FieldDocImpl extends MemberDocImpl<VariableElement> implements FieldDoc {
     }
 
     @Override
+    @Used
     public boolean isSynthetic() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String name() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String qualifiedName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isIncluded() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Type type() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isTransient() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isVolatile() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public SerialFieldTag[] serialFieldTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public Object constantValue() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public String constantValueExpression() {
         throw new UnsupportedOperationException("not yet implemented");
     }

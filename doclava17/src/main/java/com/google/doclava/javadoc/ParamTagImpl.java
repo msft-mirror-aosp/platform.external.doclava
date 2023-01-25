@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParamTag;
 import com.sun.source.doctree.ParamTree;
 import java.util.HashMap;
@@ -43,16 +44,19 @@ class ParamTagImpl extends TagImpl implements ParamTag {
     }
 
     @Override
+    @Used
     public String parameterName() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public String parameterComment() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public boolean isTypeParameter() {
         throw new UnsupportedOperationException("not yet implemented");
     }

@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a method of a java class.
  *
@@ -36,11 +39,13 @@ public interface MethodDoc extends ExecutableMemberDoc {
     /**
      * Return true if this method is abstract
      */
+    @Used
     boolean isAbstract();
 
     /**
      * Return true if this method is default
      */
+    @Used
     boolean isDefault();
 
     /**
@@ -49,6 +54,7 @@ public interface MethodDoc extends ExecutableMemberDoc {
      * @return the return type of this method, null if it
      * is a constructor.
      */
+    @Used
     Type returnType();
 
     /**
@@ -62,6 +68,7 @@ public interface MethodDoc extends ExecutableMemberDoc {
      *         defining a method that this method overrides, or null if
      *         this method does not override.
      */
+    @Unused
     ClassDoc overriddenClass();
 
     /**
@@ -72,6 +79,7 @@ public interface MethodDoc extends ExecutableMemberDoc {
      *         method does not override another in a superclass
      * @since 1.5
      */
+    @Unused
     Type overriddenType();
 
     /**
@@ -81,6 +89,7 @@ public interface MethodDoc extends ExecutableMemberDoc {
      * in a superclass this method overrides, null if
      * this method does not override.
      */
+    @Used
     MethodDoc overriddenMethod();
 
     /**
@@ -95,5 +104,6 @@ public interface MethodDoc extends ExecutableMemberDoc {
      * @return <tt>true</tt> if this method overrides the other
      * @since 1.5
      */
+    @Unused
     boolean overrides(MethodDoc meth);
 }

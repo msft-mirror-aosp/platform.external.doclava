@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a java program element: class, interface, field,
  * constructor, or method.
@@ -44,6 +47,7 @@ public interface ProgramElementDoc extends Doc {
      * @return a ClassDoc for this element's containing class or interface.
      * If this is a top-level class or interface, return null.
      */
+    @Used
     ClassDoc containingClass();
 
     /**
@@ -53,6 +57,7 @@ public interface ProgramElementDoc extends Doc {
      * If in the unnamed package, this PackageDoc will have the
      * name "".
      */
+    @Used
     PackageDoc containingPackage();
 
     /**
@@ -65,6 +70,7 @@ public interface ProgramElementDoc extends Doc {
      *
      * @return the qualified name of the program element as a String.
      */
+    @Used
     String qualifiedName();
 
     /**
@@ -72,6 +78,7 @@ public interface ProgramElementDoc extends Doc {
      *
      * @see java.lang.reflect.Modifier
      */
+    @Unused
     int modifierSpecifier();
 
     /**
@@ -83,6 +90,7 @@ public interface ProgramElementDoc extends Doc {
      * return "public abstract".
      * Annotations are not included.
      */
+    @Unused
     String modifiers();
 
     /**
@@ -92,34 +100,41 @@ public interface ProgramElementDoc extends Doc {
      * @return the annotations of this program element.
      * @since 1.5
      */
+    @Used
     AnnotationDesc[] annotations();
 
     /**
      * Return true if this program element is public.
      */
+    @Used
     boolean isPublic();
 
     /**
      * Return true if this program element is protected.
      */
+    @Used
     boolean isProtected();
 
     /**
      * Return true if this program element is private.
      */
+    @Used
     boolean isPrivate();
 
     /**
      * Return true if this program element is package private.
      */
+    @Used
     boolean isPackagePrivate();
     /**
      * Return true if this program element is static.
      */
+    @Used
     boolean isStatic();
 
     /**
      * Return true if this program element is final.
      */
+    @Used
     boolean isFinal();
 }
