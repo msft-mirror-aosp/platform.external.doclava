@@ -30,18 +30,48 @@ import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.Type;
+import javax.lang.model.type.DeclaredType;
 
 class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
 
+    private final DeclaredType declaredType;
+
+    private Type underlyingType;
+
+    private AnnotationDesc[] annotations;
+
+    protected AnnotatedTypeImpl(DeclaredType declaredType, Context context) {
+        super(declaredType, context);
+        this.declaredType = declaredType;
+    }
+
+    static AnnotatedTypeImpl create(DeclaredType declaredType, Context context) {
+        return context.caches.types.annotated.computeIfAbsent(declaredType,
+                el -> new AnnotatedTypeImpl(el, context));
+    }
+
+    /**
+     * @return annotations
+     * @implNote Implemented as used in {@code ParameterImplTests#annotations()}.
+     */
     @Override
-    @Unused
+    @Unused(implemented = true)
     public AnnotationDesc[] annotations() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (annotations == null) {
+            annotations = declaredType.getAnnotationMirrors()
+                    .stream()
+                    .map(am -> new AnnotationDescImpl(am, context))
+                    .toArray(AnnotationDescImpl[]::new);
+        }
+        return annotations;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type underlyingType() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (underlyingType == null) {
+            underlyingType = TypeImpl.create(declaredType, context);
+        }
+        return underlyingType;
     }
 }

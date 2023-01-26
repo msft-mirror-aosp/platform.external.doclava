@@ -16,60 +16,95 @@
 
 package com.google.doclava.javadoc;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.Doc;
+import java.util.Arrays;
+import java.util.Comparator;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class PackageDocImplTest extends BaseTest {
 
-    private PackageDocImpl comExampleClasses;
+    private PackageDocImpl comExamplePackages;
 
     @Before
     public void setUp() {
         super.setUp();
-        comExampleClasses = PackageDocImpl.create(PACKAGE.comExampleClasses, context);
+        comExamplePackages = PackageDocImpl.create(PACKAGE.comExamplePackages, context);
     }
 
-    @Ignore("Not yet implemented")
+    @Ignore("Not used")
     @Test
     public void allClasses() {
     }
 
-    @Ignore("Not yet implemented")
+    @Ignore("Not used")
     @Test
-    public void testAllClasses() {
+    public void allClasses_filter() {
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void ordinaryClasses() {
+        ClassDoc[] ordinaryClasses = comExamplePackages.ordinaryClasses();
+
+        assertEquals(3, ordinaryClasses.length);
+        assertArrayEquals(new String[]{
+                        "ClassWithNested", "ClassWithNested.Nested", "ClassWithNested.Nested.Nested2"},
+                Arrays.stream(ordinaryClasses)
+                        .sorted(Comparator.comparing(Doc::name))
+                        .map(Doc::name)
+                        .toArray(String[]::new)
+        );
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void exceptions() {
+        ClassDoc[] exceptions = comExamplePackages.exceptions();
+
+        assertEquals(1, exceptions.length);
+        assertTrue(exceptions[0].isException());
+        assertEquals("Exception", exceptions[0].name());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void errors() {
+        ClassDoc[] errors = comExamplePackages.errors();
+
+        assertEquals(1, errors.length);
+        assertTrue(errors[0].isError());
+        assertEquals("Error", errors[0].name());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void enums() {
+        ClassDoc[] enums = comExamplePackages.enums();
+
+        assertEquals(1, enums.length);
+        assertTrue(enums[0].isEnum());
+        assertEquals("Enum", enums[0].name());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void interfaces() {
+        ClassDoc[] interfaces = comExamplePackages.interfaces();
+
+        assertEquals(1, interfaces.length);
+        assertTrue(interfaces[0].isInterface());
+        assertEquals("Interface", interfaces[0].name());
     }
 
-    @Ignore("Not yet implemented")
     @Test
     public void annotationTypes() {
+        ClassDoc[] annotationTypes = comExamplePackages.annotationTypes();
+
+        assertEquals(1, annotationTypes.length);
+        assertTrue(annotationTypes[0].isAnnotationType());
+        assertEquals("Annotation", annotationTypes[0].name());
     }
 
     @Ignore("Not yet implemented")
@@ -89,11 +124,11 @@ public class PackageDocImplTest extends BaseTest {
 
     @Test
     public void name() {
-        assertEquals("classes", comExampleClasses.name());
+        assertEquals("packages", comExamplePackages.name());
     }
 
     @Test
     public void qualifiedName() {
-        assertEquals("com.example.classes", comExampleClasses.qualifiedName());
+        assertEquals("com.example.packages", comExamplePackages.qualifiedName());
     }
 }

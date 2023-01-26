@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.example.methods;
+package com.example.classes;
 
 import com.example.classes.UniversalAnnotation;
 
-public abstract class OfClass {
+public class MethodsAccessModifiers {
     public void public_void_arg0() {}
 
     private int private_int_arg0() {
@@ -29,13 +29,6 @@ public abstract class OfClass {
         return a + b;
     }
 
-    public abstract void public_abstract_void_arg0();
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    Object void_arg1_annotatedObject(@UniversalAnnotation Object obj) {}
+    protected void protected_void_arg0() {}
 }
 

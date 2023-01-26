@@ -33,7 +33,10 @@ import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ProgramElementDoc;
 import java.util.Set;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 
 abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> implements
         ProgramElementDoc {
@@ -51,9 +54,14 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
      */
     protected int reflectModifiers;
 
+    protected T element;
+
+    private AnnotationDescImpl[] annotations;
+
     protected ProgramElementDocImpl(T e, Context context) {
         super(e, context);
 
+        this.element = e;
         this.reflectModifiers = elementModifiersToReflectModifiers(e.getModifiers());
     }
 
@@ -83,15 +91,32 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc containingClass() {
-        throw new UnsupportedOperationException("not yet implemented");
+        Element cur = element.getEnclosingElement();
+        while (cur != null && cur.getKind() != ElementKind.ANNOTATION_TYPE
+                && cur.getKind() != ElementKind.CLASS
+                && cur.getKind() != ElementKind.ENUM && cur.getKind() != ElementKind.INTERFACE) {
+            cur = cur.getEnclosingElement();
+        }
+        if (cur == null) {
+            return null;
+        }
+        return switch (cur.getKind()) {
+            case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE -> ClassDocImpl.create((TypeElement) cur,
+                    context);
+            default -> null;
+        };
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public PackageDoc containingPackage() {
-        throw new UnsupportedOperationException("not yet implemented");
+        Element cur = element.getEnclosingElement();
+        while (cur.getKind() != ElementKind.PACKAGE) {
+            cur = cur.getEnclosingElement();
+        }
+        return PackageDocImpl.create((PackageElement) cur, context);
     }
 
     @Override
@@ -107,43 +132,49 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public AnnotationDesc[] annotations() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (annotations == null) {
+            annotations = element.getAnnotationMirrors()
+                    .stream()
+                    .map(am -> new AnnotationDescImpl(am, context))
+                    .toArray(AnnotationDescImpl[]::new);
+        }
+        return annotations;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPublic() {
         return java.lang.reflect.Modifier.isPublic(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isProtected() {
         return java.lang.reflect.Modifier.isProtected(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPrivate() {
         return java.lang.reflect.Modifier.isPrivate(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isPackagePrivate() {
         return !(isPublic() || isPrivate() || isProtected());
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isStatic() {
         return java.lang.reflect.Modifier.isStatic(reflectModifiers);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isFinal() {
         return java.lang.reflect.Modifier.isFinal(reflectModifiers);
     }

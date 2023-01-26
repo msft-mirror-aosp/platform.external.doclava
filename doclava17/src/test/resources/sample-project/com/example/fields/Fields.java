@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-package com.example.methods;
+package com.example.fields;
 
-import com.example.classes.UniversalAnnotation;
+public class Fields {
 
-public abstract class OfClass {
-    public void public_void_arg0() {}
+    public int public_int;
 
-    private int private_int_arg0() {
-        return 0;
-    }
+    public transient volatile Object public_transient_volatile_Object;
 
-    String packagePrivate_String_arg2_int_String(int a, String b) {
-        return a + b;
-    }
+    public final int public_final_int = 5;
 
-    public abstract void public_abstract_void_arg0();
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    Object void_arg1_annotatedObject(@UniversalAnnotation Object obj) {}
+    public final String public_final_String = "abc";
 }
-
