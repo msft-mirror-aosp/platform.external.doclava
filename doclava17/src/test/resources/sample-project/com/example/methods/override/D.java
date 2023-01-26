@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package com.example.methods;
+package com.example.methods.override;
 
-import com.example.classes.UniversalAnnotation;
-
-public abstract class OfClass {
-    public void public_void_arg0() {}
-
-    private int private_int_arg0() {
-        return 0;
-    }
-
-    String packagePrivate_String_arg2_int_String(int a, String b) {
-        return a + b;
-    }
-
-    public abstract void public_abstract_void_arg0();
+public class D extends A {
 
     @Override
-    public String toString() {
-        return super.toString();
+    public String name() {
+        return "D";
     }
-
-    Object void_arg1_annotatedObject(@UniversalAnnotation Object obj) {}
 }
-

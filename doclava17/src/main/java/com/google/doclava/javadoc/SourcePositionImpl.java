@@ -31,21 +31,23 @@ import java.io.File;
 
 class SourcePositionImpl implements SourcePosition {
 
+    public static final SourcePositionImpl STUB = new SourcePositionImpl();
+
     @Override
-    @Used
+    @Used(implemented = true)
     public File file() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public int line() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return 0;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public int column() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return 0;
     }
 }

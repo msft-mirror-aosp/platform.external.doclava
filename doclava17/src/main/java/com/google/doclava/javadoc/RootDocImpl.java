@@ -106,9 +106,9 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return "*! Doclava !*";
     }
 
     @Override

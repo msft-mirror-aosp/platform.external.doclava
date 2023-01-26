@@ -39,11 +39,16 @@ import java.lang.reflect.Modifier;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements.Origin;
 
 abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> implements
         ExecutableMemberDoc {
 
     protected final ExecutableElement executableElement;
+
+    // Cached fields
+    private ClassDoc[] thrownExceptions;
+    private Parameter[] parameters;
 
     protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
         super(e, context);
@@ -68,16 +73,16 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
         return executableElement.isVarArgs();
     }
 
-    @Override
-    @Used
+    @Used(implemented = true)
     public boolean isSynthetic() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.getElementUtils()
+                .getOrigin(executableElement) == Origin.SYNTHETIC;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(executableElement);
     }
 
     @Override
@@ -97,8 +102,6 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     public ParamTag[] typeParamTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
-
-    private ClassDoc[] thrownExceptions;
 
     @Override
     @Used(implemented = true)
@@ -132,9 +135,15 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Parameter[] parameters() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (parameters == null) {
+            parameters = executableElement.getParameters()
+                    .stream()
+                    .map(variableElement -> ParameterImpl.create(variableElement, context))
+                    .toArray(ParameterImpl[]::new);
+        }
+        return parameters;
     }
 
     @Override
@@ -162,8 +171,8 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public SourcePosition position() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return SourcePositionImpl.STUB;
     }
 }

@@ -29,6 +29,11 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.SimpleElementVisitor14;
 import jdk.javadoc.doclet.DocletEnvironment;
 
@@ -56,8 +61,11 @@ class Context {
         public final Map<AnnotationValue, AnnotationValueImpl> annotationValues = new HashMap<>();
         public final Map<ExecutableElement, ConstructorDocImpl> constructors = new HashMap<>();
         public final Map<ExecutableElement, MethodDocImpl> methods = new HashMap<>();
+        public final Map<VariableElement, FieldDocImpl> fields = new HashMap<>();
+        public final Map<VariableElement, ParameterImpl> parameters = new HashMap<>();
 
         public final Tags tags = new Tags();
+        public final Types types = new Types();
 
         public static class Tags {
 
@@ -67,6 +75,15 @@ class Context {
                     new HashMap<>();
             public final Map<Element, Map<ParamTree, ParamTagImpl>> param = new HashMap<>();
             public final Map<Element, Map<ThrowsTree, ThrowsTagImpl>> throwz = new HashMap<>();
+        }
+
+        public static class Types {
+
+            public final Map<TypeMirror, TypeImpl> common = new HashMap<>();
+            public final Map<DeclaredType, AnnotatedTypeImpl> annotated = new HashMap<DeclaredType, AnnotatedTypeImpl>();
+            public final Map<WildcardType, WildcardTypeImpl> wildcard = new HashMap<>();
+            public final Map<DeclaredType, ParameterizedTypeImpl> parameterized = new HashMap<>();
+            public final Map<TypeVariable, TypeVariableImpl> typevar = new HashMap<>();
         }
     }
 
