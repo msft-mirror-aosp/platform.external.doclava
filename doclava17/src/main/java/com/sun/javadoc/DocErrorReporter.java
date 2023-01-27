@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+
 /**
  * This interface provides error, warning and notice printing.
  *
@@ -38,6 +40,7 @@ public interface DocErrorReporter {
      *
      * @param msg message to print
      */
+    @Unused
     void printError(String msg);
 
     /**
@@ -47,6 +50,7 @@ public interface DocErrorReporter {
      * @param msg message to print
      * @since 1.4
      */
+    @Unused
     void printError(SourcePosition pos, String msg);
 
     /**
@@ -54,6 +58,7 @@ public interface DocErrorReporter {
      *
      * @param msg message to print
      */
+    @Unused
     void printWarning(String msg);
 
     /**
@@ -63,6 +68,7 @@ public interface DocErrorReporter {
      * @param msg message to print
      * @since 1.4
      */
+    @Unused
     void printWarning(SourcePosition pos, String msg);
 
     /**
@@ -70,6 +76,7 @@ public interface DocErrorReporter {
      *
      * @param msg message to print
      */
+    @Unused
     void printNotice(String msg);
 
     /**
@@ -79,5 +86,6 @@ public interface DocErrorReporter {
      * @param msg message to print
      * @since 1.4
      */
+    @Unused
     void printNotice(SourcePosition pos, String msg);
 }

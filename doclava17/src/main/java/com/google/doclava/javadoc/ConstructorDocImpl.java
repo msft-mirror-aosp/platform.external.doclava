@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ConstructorDoc;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -41,16 +43,19 @@ class ConstructorDocImpl extends ExecutableMemberDocImpl implements ConstructorD
     }
 
     @Override
+    @Unused(implemented = true)
     public boolean isConstructor() {
         return true;
     }
 
     @Override
+    @Used(implemented = true)
     public String name() {
         return executableElement.getEnclosingElement().getSimpleName().toString();
     }
 
     @Override
+    @Used(implemented = true)
     public String qualifiedName() {
         var enclosingClass = executableElement.getEnclosingElement();
         return switch (enclosingClass.getKind()) {

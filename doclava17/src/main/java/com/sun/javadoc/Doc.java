@@ -25,6 +25,8 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import java.text.BreakIterator;
 import java.util.Locale;
 
@@ -44,6 +46,7 @@ public interface Doc extends Comparable<Object> {
      * Return the text of the comment for this doc item.
      * Tags have been removed.
      */
+    @Unused
     String commentText();
 
     /**
@@ -52,6 +55,7 @@ public interface Doc extends Comparable<Object> {
      * @return an array of {@link Tag} objects containing all tags on
      *         this Doc item.
      */
+    @Unused
     Tag[] tags();
 
     /**
@@ -65,6 +69,7 @@ public interface Doc extends Comparable<Object> {
      * @return an array of Tag containing all tags whose 'kind()'
      * matches 'tagname'.
      */
+    @Unused
     Tag[] tags(String tagname);
 
     /**
@@ -72,6 +77,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return an array of SeeTag containing all @see tags.
      */
+    @Unused
     SeeTag[] seeTags();
 
     /**
@@ -85,6 +91,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return an array of {@link Tag}s representing the comment
      */
+    @Used
     Tag[] inlineTags();
 
     /**
@@ -113,6 +120,7 @@ public interface Doc extends Comparable<Object> {
      * @return an array of {@link Tag}s representing the
      * first sentence of the comment
      */
+    @Unused
     Tag[] firstSentenceTags();
 
     /**
@@ -120,6 +128,7 @@ public interface Doc extends Comparable<Object> {
      * are included as text.  Used mainly for store and retrieve
      * operations like internalization.
      */
+    @Used
     String getRawCommentText();
 
     /**
@@ -127,6 +136,7 @@ public interface Doc extends Comparable<Object> {
      * are included as text.  Used mainly for store and retrieve
      * operations like internalization.
      */
+    @Unused
     void setRawCommentText(String rawDocumentation);
 
     /**
@@ -134,6 +144,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return  the name
      */
+    @Used
     String name();
 
     /**
@@ -156,6 +167,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents a field
      */
+    @Unused
     boolean isField();
 
     /**
@@ -164,6 +176,7 @@ public interface Doc extends Comparable<Object> {
      * @return true if it represents an enum constant
      * @since 1.5
      */
+    @Unused
     boolean isEnumConstant();
 
     /**
@@ -171,6 +184,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents a constructor
      */
+    @Unused
     boolean isConstructor();
 
     /**
@@ -179,6 +193,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents a method
      */
+    @Unused
     boolean isMethod();
 
     /**
@@ -187,6 +202,7 @@ public interface Doc extends Comparable<Object> {
      * @return true if it represents an annotation type element
      * @since 1.5
      */
+    @Used
     boolean isAnnotationTypeElement();
 
     /**
@@ -194,6 +210,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents an interface
      */
+    @Used
     boolean isInterface();
 
     /**
@@ -201,6 +218,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents an exception
      */
+    @Used
     boolean isException();
 
     /**
@@ -208,6 +226,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents a error
      */
+    @Used
     boolean isError();
 
     /**
@@ -216,6 +235,7 @@ public interface Doc extends Comparable<Object> {
      * @return true if it represents an enum type
      * @since 1.5
      */
+    @Used
     boolean isEnum();
 
     /**
@@ -224,6 +244,7 @@ public interface Doc extends Comparable<Object> {
      * @return true if it represents an annotation type
      * @since 1.5
      */
+    @Unused
     boolean isAnnotationType();
 
     /**
@@ -234,6 +255,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents an ordinary class
      */
+    @Used
     boolean isOrdinaryClass();
 
     /**
@@ -244,6 +266,7 @@ public interface Doc extends Comparable<Object> {
      *
      * @return true if it represents a class
      */
+    @Unused
     boolean isClass();
 
     /**
@@ -251,6 +274,7 @@ public interface Doc extends Comparable<Object> {
      * <a href="{@docRoot}/com/sun/javadoc/package-summary.html#included">included</a>
      * in the result set.
      */
+    @Used
     boolean isIncluded();
 
     /**
@@ -261,5 +285,6 @@ public interface Doc extends Comparable<Object> {
      *
      * @since 1.4
      */
+    @Used
     SourcePosition position();
 }

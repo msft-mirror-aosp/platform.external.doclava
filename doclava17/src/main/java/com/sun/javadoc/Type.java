@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a type.  A type can be a class or interface, an
  * invocation (like {@code List<String>}) of a generic class or interface,
@@ -44,6 +47,7 @@ public interface Type {
      * For example, a two dimensional array of String returns
      * "<code>String</code>".
      */
+    @Unused
     String typeName();
 
     /**
@@ -52,6 +56,7 @@ public interface Type {
      * For example, a two dimensional array of String
      * returns "<code>java.lang.String</code>".
      */
+    @Used
     String qualifiedTypeName();
 
     /**
@@ -64,6 +69,7 @@ public interface Type {
      *
      * @since 1.5
      */
+    @Used
     String simpleTypeName();
 
     /**
@@ -72,6 +78,7 @@ public interface Type {
      * For example, a two dimensional array of String returns
      * "<code>[][]</code>".
      */
+    @Used
     String dimension();
 
     /**
@@ -85,6 +92,7 @@ public interface Type {
      *
      * @return a string representation of the type.
      */
+    @Used
     String toString();
 
     /**
@@ -93,6 +101,7 @@ public interface Type {
      * @return true if this type represents a primitive type.
      * @since 1.5
      */
+    @Used
     boolean isPrimitive();
 
     /**
@@ -108,6 +117,7 @@ public interface Type {
      * @return the <code>ClassDoc</code> of this type,
      *         or null if it is a primitive type.
      */
+    @Used
     ClassDoc asClassDoc();
 
     /**
@@ -119,6 +129,7 @@ public interface Type {
      *         invocation of a generic type, or null if it is not.
      * @since 1.5
      */
+    @Used
     ParameterizedType asParameterizedType();
 
     /**
@@ -129,6 +140,7 @@ public interface Type {
      *         or null if it is not.
      * @since 1.5
      */
+    @Used
     TypeVariable asTypeVariable();
 
     /**
@@ -139,6 +151,7 @@ public interface Type {
      *         or null if it is not.
      * @since 1.5
      */
+    @Used
     WildcardType asWildcardType();
 
     /**
@@ -149,6 +162,7 @@ public interface Type {
      *         or null if it is not
      * @since 1.8
      */
+    @Used
     AnnotatedType asAnnotatedType();
 
     /**
@@ -159,6 +173,7 @@ public interface Type {
      *         type, or null if it is not.
      * @since 1.5
      */
+    @Unused
     AnnotationTypeDoc asAnnotationTypeDoc();
 
     /**
@@ -168,5 +183,6 @@ public interface Type {
      * @return a <code>Type</code> representing the element type or null.
      * @since 1.8
      */
+    @Unused
     Type getElementType();
 }

@@ -26,6 +26,8 @@
 package com.sun.javadoc;
 
 
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a wildcard type argument.
  * Examples include:    <pre>
@@ -48,6 +50,7 @@ public interface WildcardType extends Type {
      *
      * @return the extends bounds of this wildcard type argument
      */
+    @Used
     Type[] extendsBounds();
 
     /**
@@ -57,5 +60,6 @@ public interface WildcardType extends Type {
      *
      * @return the super bounds of this wildcard type argument
      */
+    @Used
     Type[] superBounds();
 }

@@ -25,23 +25,29 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.SourcePosition;
 import java.io.File;
 
 class SourcePositionImpl implements SourcePosition {
 
+    public static final SourcePositionImpl STUB = new SourcePositionImpl();
+
     @Override
+    @Used(implemented = true)
     public File file() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return null;
     }
 
     @Override
+    @Used(implemented = true)
     public int line() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return 0;
     }
 
     @Override
+    @Used(implemented = true)
     public int column() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return 0;
     }
 }

@@ -25,15 +25,20 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParamTag;
 import com.sun.source.doctree.ParamTree;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 
 class ParamTagImpl extends TagImpl implements ParamTag {
 
+    private final ParamTree paramTree;
+
     protected ParamTagImpl(ParamTree paramTree, Element owner, Context context) {
         super(paramTree, owner, context);
+        this.paramTree = paramTree;
     }
 
     static ParamTagImpl create(ParamTree paramTree, Element owner, Context context) {
@@ -43,17 +48,23 @@ class ParamTagImpl extends TagImpl implements ParamTag {
     }
 
     @Override
+    @Used(implemented = true)
     public String parameterName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return paramTree.getName().getName().toString();
     }
 
     @Override
+    @Used(implemented = true)
     public String parameterComment() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return paramTree.getDescription()
+                .stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(" "));
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isTypeParameter() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return paramTree.isTypeParameter();
     }
 }

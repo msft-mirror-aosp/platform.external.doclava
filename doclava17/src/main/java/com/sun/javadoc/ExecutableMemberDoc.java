@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a method or constructor of a java class.
  *
@@ -47,6 +50,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      *         thrown by this method.
      * @see #thrownExceptionTypes
      */
+    @Used
     ClassDoc[] thrownExceptions();
 
     /**
@@ -57,16 +61,19 @@ public interface ExecutableMemberDoc extends MemberDoc {
      *         <code>TypeVariable</code>.
      * @since 1.5
      */
+    @Unused
     Type[] thrownExceptionTypes();
 
     /**
      * Return true if this method is native
      */
+    @Used
     boolean isNative();
 
     /**
      * Return true if this method is synchronized
      */
+    @Used
     boolean isSynchronized();
 
     /**
@@ -75,6 +82,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      *
      * @since 1.5
      */
+    @Used
     boolean isVarArgs();
 
     /**
@@ -85,6 +93,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * @return an array of Parameter, one element per argument
      * in the order the arguments are present.
      */
+    @Used
     Parameter[] parameters();
 
     /**
@@ -93,6 +102,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * @return the receiver type of this executable element.
      * @since 1.8
      */
+    @Unused
     Type receiverType();
 
     /**
@@ -101,6 +111,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * @return an array of ThrowTag containing all <code>&#64;exception</code>
      * and <code>&#64;throws</code> tags.
      */
+    @Unused
     ThrowsTag[] throwsTags();
 
     /**
@@ -110,6 +121,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * @return an array of ParamTag containing all <code>&#64;param</code> tags
      * corresponding to the parameters of this method.
      */
+    @Unused
     ParamTag[] paramTags();
 
     /**
@@ -119,6 +131,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * corresponding to the type parameters of this method.
      * @since 1.5
      */
+    @Unused
     ParamTag[] typeParamTags();
 
     /**
@@ -126,6 +139,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      *      For instance, for a method <code>mymethod(String x, int y)</code>,
      *      it will return <code>(java.lang.String,int)</code>.
      */
+    @Used
     String signature();
 
     /**
@@ -135,6 +149,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      *      For instance, for a method <code>mymethod(String x, int y)</code>,
      *      it will return <code>(String, int)</code>.
      */
+    @Used
     String flatSignature();
 
     /**
@@ -144,5 +159,6 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * @return the formal type parameters of this method or constructor.
      * @since 1.5
      */
+    @Used
     TypeVariable[] typeParameters();
 }

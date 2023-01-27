@@ -25,63 +25,91 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.SerialFieldTag;
 import com.sun.javadoc.Type;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.Elements.Origin;
 
 class FieldDocImpl extends MemberDocImpl<VariableElement> implements FieldDoc {
 
+    protected final VariableElement variableElement;
+
     protected FieldDocImpl(VariableElement e, Context context) {
         super(e, context);
+        variableElement = e;
+    }
+
+    static FieldDocImpl create(VariableElement e, Context context) {
+        return context.caches.fields.computeIfAbsent(e, el -> new FieldDocImpl(el, context));
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isSynthetic() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.getElementUtils().getOrigin(variableElement) == Origin.SYNTHETIC;
     }
 
     @Override
+    @Used(implemented = true)
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return variableElement.getSimpleName().toString();
     }
 
     @Override
+    @Used(implemented = true)
     public String qualifiedName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        var enclosingClass = variableElement.getEnclosingElement();
+        return switch (enclosingClass.getKind()) {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM ->
+                    ((TypeElement) enclosingClass).getQualifiedName().toString() + "."
+                            + variableElement.getSimpleName();
+            default -> throw new UnsupportedOperationException("Expected CLASS, INTERFACE, "
+                    + "ANNOTATION_TYPE or ENUM, but got " + enclosingClass.getKind());
+        };
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(variableElement);
     }
 
     @Override
+    @Used(implemented = true)
     public Type type() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return TypeImpl.create(variableElement.asType(), context);
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isTransient() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isTransient(reflectModifiers);
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isVolatile() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return java.lang.reflect.Modifier.isVolatile(reflectModifiers);
     }
 
     @Override
+    @Unused
     public SerialFieldTag[] serialFieldTags() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public Object constantValue() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return variableElement.getConstantValue();
     }
 
     @Override
+    @Unused
     public String constantValueExpression() {
         throw new UnsupportedOperationException("not yet implemented");
     }

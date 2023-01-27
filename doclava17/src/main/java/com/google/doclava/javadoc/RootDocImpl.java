@@ -25,6 +25,8 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.RootDoc;
@@ -68,38 +70,45 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
     }
 
     @Override
+    @Unused
     public String[][] options() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public PackageDoc[] specifiedPackages() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc[] specifiedClasses() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc[] classes() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public ClassDoc classNamed(String qualifiedName) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used
     public PackageDoc packageNamed(String name) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return "*! Doclava !*";
     }
 
     @Override
@@ -108,36 +117,43 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isIncluded() {
         return false;
     }
 
     @Override
+    @Unused
     public void printError(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public void printError(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public void printWarning(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public void printWarning(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public void printNotice(String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public void printNotice(SourcePosition pos, String msg) {
         throw new UnsupportedOperationException("not yet implemented");
     }

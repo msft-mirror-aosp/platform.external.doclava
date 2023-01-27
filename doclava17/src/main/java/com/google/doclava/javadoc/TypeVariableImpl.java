@@ -25,29 +25,46 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
+import javax.lang.model.type.TypeMirror;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
 
+    protected TypeVariableImpl(TypeMirror typeMirror, Context context) {
+        super(typeMirror, context);
+    }
+
+    static TypeVariableImpl create(javax.lang.model.type.TypeVariable typeVariable,
+            Context context) {
+        return context.caches.types.typevar.computeIfAbsent(typeVariable,
+                el -> new TypeVariableImpl(typeVariable, context));
+    }
+
     @Override
+    @Used
     public Type[] bounds() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ProgramElementDoc owner() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public TypeVariable asTypeVariable() {
         return this;
     }
 
     @Override
+    @Unused
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }

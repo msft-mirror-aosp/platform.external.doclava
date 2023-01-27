@@ -25,6 +25,9 @@
 
 package com.sun.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+
 /**
  * Represents a field in a java class.
  *
@@ -38,16 +41,19 @@ public interface FieldDoc extends MemberDoc {
     /**
      * Get type of this field.
      */
+    @Used
     Type type();
 
     /**
      * Return true if this field is transient
      */
+    @Used
     boolean isTransient();
 
     /**
      * Return true if this field is volatile
      */
+    @Used
     boolean isVolatile();
 
     /**
@@ -56,6 +62,7 @@ public interface FieldDoc extends MemberDoc {
      * @return an array of <tt>SerialFieldTag</tt> objects containing
      *         all <code>@serialField</code> tags.
      */
+    @Unused
     SerialFieldTag[] serialFieldTags();
 
     /**
@@ -65,6 +72,7 @@ public interface FieldDoc extends MemberDoc {
      * automatically wrapped in an object if it has a primitive type.
      * If the field is not constant, returns null.
      */
+    @Used
     Object constantValue();
 
     /**
@@ -75,5 +83,6 @@ public interface FieldDoc extends MemberDoc {
      * other than primitive literals. If the field is
      * not constant, returns null.
      */
+    @Unused
     String constantValueExpression();
 }

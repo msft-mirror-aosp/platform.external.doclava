@@ -25,29 +25,52 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.Parameter;
 import com.sun.javadoc.Type;
+import javax.lang.model.element.VariableElement;
 
 class ParameterImpl implements Parameter {
 
+    private final String name;
+    private final Type type;
+    private final AnnotationDescImpl[] annotations;
+
+    public ParameterImpl(VariableElement variableElement, Context context) {
+        this.name = variableElement.getSimpleName().toString();
+        this.type = TypeImpl.create(variableElement.asType(), context);
+        this.annotations = variableElement.getAnnotationMirrors()
+                .stream()
+                .map(am -> new AnnotationDescImpl(am, context))
+                .toArray(AnnotationDescImpl[]::new);
+    }
+
+    static ParameterImpl create(VariableElement ve, Context context) {
+        return context.caches.parameters.computeIfAbsent(ve, el -> new ParameterImpl(el, context));
+    }
+
     @Override
+    @Used(implemented = true)
     public Type type() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return type;
     }
 
     @Override
+    @Used(implemented = true)
     public String name() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return name;
     }
 
     @Override
+    @Used(implemented = true)
     public String typeName() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return type.qualifiedTypeName() + type.dimension();
     }
 
     @Override
+    @Used(implemented = true)
     public AnnotationDesc[] annotations() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return annotations;
     }
 }

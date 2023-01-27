@@ -25,15 +25,35 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 
 class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
 
     private final PackageElement packageElement;
+
+    private ClassDoc[] ordinaryClasses;
+    private ClassDoc[] exceptions;
+    private ClassDoc[] errors;
+    private ClassDoc[] enums;
+    private ClassDoc[] interfaces;
+    private AnnotationTypeDoc[] annotationTypes;
 
     protected PackageDocImpl(PackageElement e, Context context) {
         super(e, context);
@@ -45,63 +65,116 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     @Override
+    @Unused
     public ClassDoc[] allClasses(boolean filter) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc[] allClasses() {
         return allClasses(true);
     }
 
+    private Stream<Element> filterEnclosedElements(Predicate<Element> predicate) {
+        EnclosedElementsIterator it = new EnclosedElementsIterator(packageElement);
+        return StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
+                .filter(predicate);
+    }
+
     @Override
+    @Used(implemented = true)
     public ClassDoc[] ordinaryClasses() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (ordinaryClasses == null) {
+            ordinaryClasses = filterEnclosedElements(e -> e.getKind() == ElementKind.CLASS)
+                    .map(e -> ClassDocImpl.create((TypeElement) e, context))
+                    .filter(cls -> !cls.isError() && !cls.isException())
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return ordinaryClasses;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc[] exceptions() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (exceptions == null) {
+            exceptions = filterEnclosedElements(e -> e.getKind() == ElementKind.CLASS)
+                    .map(element -> ClassDocImpl.create((TypeElement) element, context))
+                    .filter(ClassDocImpl::isException)
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return exceptions;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc[] errors() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (errors == null) {
+            errors = filterEnclosedElements(e -> e.getKind() == ElementKind.CLASS)
+                    .map(element -> ClassDocImpl.create((TypeElement) element, context))
+                    .filter(ClassDocImpl::isError)
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return errors;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc[] enums() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (enums == null) {
+            enums = filterEnclosedElements(e -> e.getKind() == ElementKind.ENUM)
+                    .map(element -> ClassDocImpl.create((TypeElement) element, context))
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return enums;
     }
 
     @Override
+    @Used(implemented = true)
     public ClassDoc[] interfaces() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (interfaces == null) {
+            interfaces = filterEnclosedElements(e -> e.getKind() == ElementKind.INTERFACE)
+                    .map(element -> ClassDocImpl.create((TypeElement) element, context))
+                    .toArray(ClassDocImpl[]::new);
+        }
+        return interfaces;
     }
 
     @Override
+    @Used(implemented = true)
     public AnnotationTypeDoc[] annotationTypes() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (annotationTypes == null) {
+            annotationTypes = filterEnclosedElements(
+                    e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+                    .map(element -> AnnotationTypeDocImpl.create((TypeElement) element, context))
+                    .toArray(AnnotationTypeDocImpl[]::new);
+        }
+        return annotationTypes;
     }
 
     @Override
+    @Unused
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Unused
     public ClassDoc findClass(String className) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
+    @Used(implemented = true)
     public boolean isIncluded() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.environment.isIncluded(packageElement);
     }
 
     private String name;
 
     @Override
+    @Used(implemented = true)
     public String name() {
         if (name == null) {
             name = packageElement.getSimpleName().toString();
@@ -117,5 +190,28 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
             qualifiedName = packageElement.getQualifiedName().toString();
         }
         return qualifiedName;
+    }
+
+    private static final class EnclosedElementsIterator implements Iterator<Element> {
+
+        private final Deque<Element> queue;
+
+        public EnclosedElementsIterator(Element element) {
+            this.queue = new ArrayDeque<>(element.getEnclosedElements());
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !queue.isEmpty();
+        }
+
+        @Override
+        public Element next() {
+            Element current = queue.pop();
+            if (!current.getEnclosedElements().isEmpty()) {
+                queue.addAll(current.getEnclosedElements());
+            }
+            return current;
+        }
     }
 }
