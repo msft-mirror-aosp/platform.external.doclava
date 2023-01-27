@@ -25,6 +25,86 @@
 
 package com.google.doclava.javadoc;
 
-public class ArrayTypeImpl {
+import com.google.doclava.annotation.Unused;
+import com.google.doclava.annotation.Used;
+import com.sun.javadoc.AnnotationTypeDoc;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.ParameterizedType;
+import com.sun.javadoc.Type;
+import com.sun.javadoc.TypeVariable;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
+public final class ArrayTypeImpl extends TypeImpl {
+
+    private final ArrayType arrayType;
+    private final Type underlyingType;
+    private final String dimension;
+
+    private ArrayTypeImpl(ArrayType at, Context context) {
+        super(at, context);
+        arrayType = at;
+
+        int dim = 0;
+        TypeMirror cur = at;
+        while (cur.getKind() == TypeKind.ARRAY) {
+            dim++;
+            cur = ((ArrayType) cur).getComponentType();
+        }
+        dimension = "[]".repeat(dim);
+        underlyingType = TypeImpl.create(cur, context);
+    }
+
+    public static ArrayTypeImpl create(ArrayType at, Context context) {
+        return context.caches.types.array.computeIfAbsent(at, x -> new ArrayTypeImpl(x, context));
+    }
+
+    @Override
+    @Used(implemented = true)
+    public String qualifiedTypeName() {
+        return underlyingType.qualifiedTypeName();
+    }
+
+    @Override
+    @Used(implemented = true)
+    public String simpleTypeName() {
+        return underlyingType.simpleTypeName();
+    }
+
+    @Override
+    @Used(implemented = true)
+    public String dimension() {
+        return dimension;
+    }
+
+    @Override
+    @Used(implemented = true)
+    public ClassDoc asClassDoc() {
+        return underlyingType.asClassDoc();
+    }
+
+    @Override
+    @Used(implemented = true)
+    public TypeVariable asTypeVariable() {
+        return underlyingType.asTypeVariable();
+    }
+
+    @Override
+    @Used(implemented = true)
+    public ParameterizedType asParameterizedType() {
+        return underlyingType.asParameterizedType();
+    }
+
+    @Override
+    @Unused(implemented = true)
+    public AnnotationTypeDoc asAnnotationTypeDoc() {
+        return underlyingType.asAnnotationTypeDoc();
+    }
+
+    @Override
+    @Used(implemented = true)
+    public boolean isPrimitive() {
+        return underlyingType.isPrimitive();
+    }
 }

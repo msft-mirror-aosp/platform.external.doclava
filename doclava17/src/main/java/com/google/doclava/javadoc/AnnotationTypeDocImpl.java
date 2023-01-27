@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.AnnotationTypeElementDoc;
@@ -62,5 +63,11 @@ class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
     @Used(implemented = true)
     public boolean isInterface() {
         return false;
+    }
+
+    @Override
+    @Unused(implemented = true)
+    public AnnotationTypeDoc asAnnotationTypeDoc() {
+        return this;
     }
 }

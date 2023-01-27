@@ -34,6 +34,8 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
+import java.util.stream.Collectors;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -88,6 +90,9 @@ abstract class TypeImpl implements Type {
                 }
                 //TODO: check that it will cast.
                 var el = (TypeElement) dt.asElement();
+                if (el.getKind() == ElementKind.ANNOTATION_TYPE) {
+                    yield AnnotationTypeDocImpl.create(el, context);
+                }
                 yield ClassDocImpl.create(el, context);
             }
             case NONE -> {
@@ -106,7 +111,7 @@ abstract class TypeImpl implements Type {
     }
 
     @Override
-    @Used
+    @Used(implemented = false) // Not all cases covered yet in QUALIFIED_NAME_VISITOR
     public String qualifiedTypeName() {
         return QUALIFIED_NAME_VISITOR.visit(typeMirror, context);
     }
@@ -189,6 +194,27 @@ abstract class TypeImpl implements Type {
                 default -> throw new IllegalArgumentException("Unexpected primitive type with "
                         + "kind: " + t.getKind());
             };
+        }
+
+        @Override
+        public String visitTypeVariable(javax.lang.model.type.TypeVariable t, Context context) {
+            return t.asElement().toString();
+        }
+
+        @Override
+        public String visitDeclared(DeclaredType t, Context context) {
+            final String typeName = t.asElement().toString();
+
+            final String typeArguments = t.getTypeArguments()
+                    .stream()
+                    .map(tm -> this.visit(tm, context))
+                    .collect(Collectors.joining(", "));
+
+            if (typeArguments.isEmpty()) {
+                return typeName;
+            } else {
+                return "%s<%s>".formatted(typeName, typeArguments);
+            }
         }
 
         @Override
