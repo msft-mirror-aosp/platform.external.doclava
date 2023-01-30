@@ -29,6 +29,7 @@ import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.Parameter;
 import com.sun.javadoc.Type;
+import com.sun.javadoc.TypeVariable;
 import javax.lang.model.element.VariableElement;
 
 class ParameterImpl implements Parameter {
@@ -65,7 +66,16 @@ class ParameterImpl implements Parameter {
     @Override
     @Used(implemented = true)
     public String typeName() {
-        return type.qualifiedTypeName() + type.dimension();
+        String result;
+        if (type instanceof ClassDocImpl || type instanceof TypeVariable) {
+            result = type.typeName() + type.dimension();
+        } else {
+            result = type.qualifiedTypeName() + type.dimension();
+        }
+        if (result.contains("<")) {
+            throw new RuntimeException("qwe");
+        }
+        return result;
     }
 
     @Override
