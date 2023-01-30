@@ -222,6 +222,13 @@ abstract class TypeImpl implements Type {
         }
 
         @Override
+        public String visitWildcard(javax.lang.model.type.WildcardType t, Context context) {
+            //TODO: hack
+            return "?";
+            //return super.visitWildcard(t, context);
+        }
+
+        @Override
         protected String defaultAction(TypeMirror e, Context context) {
             throw new UnsupportedOperationException(
                     "Name visitor is not yet implemented for " + e.getKind());

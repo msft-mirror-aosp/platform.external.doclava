@@ -28,9 +28,12 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
+import java.util.Objects;
+import javax.lang.model.type.TypeMirror;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
 
@@ -51,6 +54,15 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     @Used(implemented = true)
     public Type[] bounds() {
         return new Type[0];
+    }
+
+    @Override
+    @Used(implemented = true)
+    public ClassDoc asClassDoc() {
+        TypeMirror erasure = context.environment.getTypeUtils().erasure(typeVariable);
+        Type type = create(erasure, context);
+        Objects.requireNonNull(type);
+        return type.asClassDoc();
     }
 
     @Override

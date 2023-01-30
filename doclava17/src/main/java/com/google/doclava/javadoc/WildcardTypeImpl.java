@@ -28,7 +28,7 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Type;
-import javax.lang.model.element.TypeElement;
+import java.util.Objects;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
@@ -49,16 +49,10 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     @Override
     @Used(implemented = true)
     public ClassDoc asClassDoc() {
-        TypeMirror extend = wildcardType.getExtendsBound();
-        if (extend == null) {
-            return null;
-        }
-        try {
-            return ClassDocImpl.create(
-                    (TypeElement) context.environment.getTypeUtils().asElement(extend), context);
-        } catch (Exception e) {
-            return null;
-        }
+        TypeMirror erasure = context.environment.getTypeUtils().erasure(wildcardType);
+        Type type = create(erasure, context);
+        Objects.requireNonNull(type);
+        return type.asClassDoc();
     }
 
     @Override
@@ -86,4 +80,6 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
         }
         return new Type[]{TypeImpl.create(superBounds, context)};
     }
+
+
 }
