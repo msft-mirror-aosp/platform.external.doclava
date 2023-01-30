@@ -82,4 +82,12 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
     }
+
+    @Override
+    @Used(implemented = true)
+    public String typeName() {
+        TypeMirror erasure = context.environment.getTypeUtils().erasure(typeVariable);
+        Type type = create(erasure, context);
+        return type.typeName();
+    }
 }

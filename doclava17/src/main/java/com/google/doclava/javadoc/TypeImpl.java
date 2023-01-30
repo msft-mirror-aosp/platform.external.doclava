@@ -34,7 +34,6 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
-import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -204,16 +203,11 @@ abstract class TypeImpl implements Type {
         public String visitDeclared(DeclaredType t, Context context) {
             final String typeName = t.asElement().toString();
 
-            final String typeArguments = t.getTypeArguments()
-                    .stream()
-                    .map(tm -> this.visit(tm, context))
-                    .collect(Collectors.joining(", "));
-
-            if (typeArguments.isEmpty()) {
-                return typeName;
-            } else {
-                return "%s<%s>".formatted(typeName, typeArguments);
+            if (typeName.contains("<")) {
+                throw new RuntimeException();
             }
+
+            return typeName;
         }
 
         @Override
