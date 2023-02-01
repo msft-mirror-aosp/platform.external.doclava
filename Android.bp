@@ -66,6 +66,13 @@ java_library_host {
     ],
     use_tools_jar: true,
     java_resource_dirs: ["res"],
+    errorprone: {
+        javacflags: [
+            "-Xep:FormatString:WARN",
+            "-Xep:ComparableType:WARN",
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }
 
 java_library_host {
@@ -84,6 +91,14 @@ java_library_host {
     ],
     use_tools_jar: true,
     java_resource_dirs: ["res"],
+
+    errorprone: {
+        javacflags: [
+            "-Xep:FormatString:WARN",
+            "-Xep:ComparableType:WARN",
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }
 
 
