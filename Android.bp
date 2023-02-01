@@ -39,6 +39,7 @@ license {
         "SPDX-license-identifier-CC-BY",
         "SPDX-license-identifier-GPL",
         "SPDX-license-identifier-GPL-2.0",
+        "SPDX-license-identifier-GPL-2.0-with-classpath-exception",
         "SPDX-license-identifier-LGPL",
         "SPDX-license-identifier-MIT",
     ],
@@ -66,6 +67,13 @@ java_library_host {
     ],
     use_tools_jar: true,
     java_resource_dirs: ["res"],
+    errorprone: {
+        javacflags: [
+            "-Xep:FormatString:WARN",
+            "-Xep:ComparableType:WARN",
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }
 
 java_library_host {
@@ -84,6 +92,14 @@ java_library_host {
     ],
     use_tools_jar: true,
     java_resource_dirs: ["res"],
+
+    errorprone: {
+        javacflags: [
+            "-Xep:FormatString:WARN",
+            "-Xep:ComparableType:WARN",
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }
 
 
