@@ -23,6 +23,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import jdk.javadoc.doclet.DocletEnvironment;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -118,6 +119,20 @@ public abstract class BaseTest {
     static class GENERIC {
 
         static final TypeElement box = initTypeElement("com.example.classes.Tags.Box");
+    }
+
+    static class ARRAY {
+
+        static final ArrayType int_1 = (ArrayType) initVariableElement(
+                "com.example.fields.Arrays", "arr_int_1").asType();
+        static final ArrayType string_2 = (ArrayType) initVariableElement(
+                "com.example.fields.Arrays", "arr_String_2").asType();
+        static final ArrayType T_3 = (ArrayType) initVariableElement(
+                "com.example.fields.Arrays", "arr_T_3").asType();
+        static final ArrayType ListOfStrings_4 = (ArrayType) initVariableElement(
+                "com.example.fields.Arrays", "arr_ListOfString_4").asType();
+        static final ArrayType override_5 = (ArrayType) initVariableElement(
+                "com.example.fields.Arrays", "arr_Override_5").asType();
     }
 
     static class INTERFACE {
