@@ -31,12 +31,14 @@ import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
-import javax.lang.model.type.TypeMirror;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
 
-    protected TypeVariableImpl(TypeMirror typeMirror, Context context) {
-        super(typeMirror, context);
+    private final javax.lang.model.type.TypeVariable typeVariable;
+
+    protected TypeVariableImpl(javax.lang.model.type.TypeVariable typeVariable, Context context) {
+        super(typeVariable, context);
+        this.typeVariable = typeVariable;
     }
 
     static TypeVariableImpl create(javax.lang.model.type.TypeVariable typeVariable,
@@ -46,9 +48,9 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] bounds() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return new Type[0];
     }
 
     @Override
