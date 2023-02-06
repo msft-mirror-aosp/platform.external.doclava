@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.Converter;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
@@ -486,13 +487,57 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
                 .toArray(ClassDoc[]::new);
     }
 
+    /**
+     * Note that this implementation does not search in sources!
+     *
+     * <p>
+     *
+     * {@inheritDoc}
+     *
+     * @implNote Does not search in sources.
+     */
     @Override
     @Used(implemented = true)
     public ClassDoc findClass(String className) {
+        ClassDoc result = searchClass(className);
+        if (result != null) {
+            return result;
+        }
+
+        ClassDoc enclosing = containingClass();
+        while (enclosing != null && enclosing.containingClass() != null) {
+            enclosing = enclosing.containingClass();
+        }
+        if (enclosing == null) {
+            return null;
+        }
+        return ((ClassDocImpl) enclosing).searchClass(className);
+    }
+
+    private ClassDoc searchClass(String className) {
         TypeElement cls = context.environment.getElementUtils().getTypeElement(className);
         if (cls != null) {
             return ClassDocImpl.create(cls, context);
         }
+
+        for (ClassDoc nested : innerClasses()) {
+            if (nested.name().equals(className) || nested.name().endsWith("." + className)) {
+                return nested;
+            } else {
+                ClassDoc inNested = ((ClassDocImpl) nested).searchClass(className);
+                if (inNested != null) {
+                    return inNested;
+                }
+            }
+        }
+
+        ClassDoc inPackage = containingPackage().findClass(className);
+        if (inPackage != null) {
+            return inPackage;
+        }
+
+        //
+
         return null;
     }
 
