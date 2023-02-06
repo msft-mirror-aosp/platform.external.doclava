@@ -88,21 +88,31 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc[] classes() {
-        throw new UnsupportedOperationException("not yet implemented");
+        return context.caches.classes.values().toArray(ClassDoc[]::new);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc classNamed(String qualifiedName) {
-        throw new UnsupportedOperationException("not yet implemented");
+        for (ClassDoc cls : context.caches.classes.values()) {
+            if (cls.qualifiedName().equals(qualifiedName)) {
+                return cls;
+            }
+        }
+        return null;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public PackageDoc packageNamed(String name) {
-        throw new UnsupportedOperationException("not yet implemented");
+        for (PackageDoc pkg : context.caches.packages.values()) {
+            if (pkg.name().equals(name)) {
+                return pkg;
+            }
+        }
+        return null;
     }
 
     @Override
