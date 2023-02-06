@@ -28,12 +28,17 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Type;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
 class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType {
 
+    private final WildcardType wildcardType;
+
     protected WildcardTypeImpl(WildcardType wildcardType, Context context) {
         super(wildcardType, context);
+        this.wildcardType = wildcardType;
     }
 
     static WildcardTypeImpl create(WildcardType wildcardType, Context context) {
@@ -42,9 +47,14 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc asClassDoc() {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeMirror extend = wildcardType.getExtendsBound();
+        if (extend == null) {
+            return null;
+        }
+        return ClassDocImpl.create(
+                (TypeElement) context.environment.getTypeUtils().asElement(extend), context);
     }
 
     @Override
@@ -54,14 +64,16 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] extendsBounds() {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeMirror extendsBound = wildcardType.getExtendsBound();
+        return new Type[]{TypeImpl.create(extendsBound, context)};
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] superBounds() {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeMirror superBounds = wildcardType.getSuperBound();
+        return new Type[]{TypeImpl.create(superBounds, context)};
     }
 }
