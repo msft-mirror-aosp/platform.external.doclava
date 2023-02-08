@@ -36,9 +36,11 @@ import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import java.lang.reflect.Modifier;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements.Origin;
 
 abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> implements
@@ -49,6 +51,9 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     // Cached fields
     private ClassDoc[] thrownExceptions;
     private Parameter[] parameters;
+    private String signature;
+    private String flatSignature;
+    private TypeVariable[] typeParameters;
 
     protected ExecutableMemberDocImpl(ExecutableElement e, Context context) {
         super(e, context);
@@ -153,21 +158,45 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public TypeVariable[] typeParameters() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (typeParameters == null) {
+            typeParameters = executableElement.getTypeParameters()
+                    .stream()
+                    .map(tpe -> TypeVariableImpl.create(tpe.asType(), context))
+                    .toArray(TypeVariable[]::new);
+        }
+        return typeParameters;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public String signature() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (signature == null) {
+             String params = executableElement.getParameters()
+                     .stream()
+                     .map(param -> param.asType().toString())
+                     .collect(Collectors.joining(", "));
+            signature = "(" + params + ")";
+        }
+        return signature;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public String flatSignature() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (flatSignature == null) {
+            String params = executableElement.getParameters()
+                    .stream()
+                    .map(param -> {
+                        TypeMirror mirror = param.asType();
+                        Type t = TypeImpl.create(mirror, context);
+                        return t.simpleTypeName();
+                    })
+                    .collect(Collectors.joining(", "));
+            flatSignature = "(" + params + ")";
+        }
+        return flatSignature;
     }
 
     @Override
