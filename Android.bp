@@ -100,7 +100,7 @@ java_library_host {
 }
 
 java_library_host {
-    name: "doclava",
+    name: "doclava8",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk8"],
     java_version: "1.8",
@@ -111,7 +111,7 @@ java_library_host {
 }
 
 java_library_host {
-    name: "doclava-no-guava",
+    name: "doclava8-no-guava",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk8"],
     java_version: "1.8",
@@ -122,7 +122,7 @@ java_library_host {
 }
 
 java_library_host {
-    name: "doclava17",
+    name: "doclava",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk17"],
     java_version: "17",
@@ -132,7 +132,7 @@ java_library_host {
 }
 
 java_library_host {
-    name: "doclava17-no-guava",
+    name: "doclava-no-guava",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk17"],
     java_version: "17",
