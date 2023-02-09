@@ -16,6 +16,8 @@
 
 package com.example.methods;
 
+import com.example.classes.UniversalAnnotation;
+
 public abstract class OfClass {
     public void public_void_arg0() {}
 
@@ -33,5 +35,7 @@ public abstract class OfClass {
     public String toString() {
         return super.toString();
     }
+
+    Object void_arg1_annotatedObject(@UniversalAnnotation Object obj) {}
 }
 

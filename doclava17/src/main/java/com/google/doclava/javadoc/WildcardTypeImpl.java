@@ -28,9 +28,18 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Type;
-import com.sun.javadoc.WildcardType;
+import javax.lang.model.type.WildcardType;
 
-class WildcardTypeImpl extends TypeImpl implements WildcardType {
+class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType {
+
+    protected WildcardTypeImpl(WildcardType wildcardType, Context context) {
+        super(wildcardType, context);
+    }
+
+    static WildcardTypeImpl create(WildcardType wildcardType, Context context) {
+        return context.caches.types.wildcard.computeIfAbsent(wildcardType,
+                el -> new WildcardTypeImpl(wildcardType, context));
+    }
 
     @Override
     @Used
@@ -40,7 +49,7 @@ class WildcardTypeImpl extends TypeImpl implements WildcardType {
 
     @Override
     @Used(implemented = true)
-    public WildcardType asWildcardType() {
+    public com.sun.javadoc.WildcardType asWildcardType() {
         return this;
     }
 

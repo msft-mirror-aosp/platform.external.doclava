@@ -16,8 +16,6 @@
 
 package com.example.classes;
 
-import java.io.Serial;
-
 public class Tags {
 
     /**
@@ -80,6 +78,31 @@ public class Tags {
 
         }
 
+    }
+
+    /**
+     * Fixture to test {@link com.google.doclava.javadoc.ParamTagImpl}.
+     *
+     * @param <T> stored in Box
+     */
+    public static class Box<T> {
+        private T storedObject;
+        private int price;
+
+        private Box() {}
+
+        /**
+         * @param storedObject Something valuable
+         * @param price
+         */
+        public Box(T storedObject, int price) {
+            this.storedObject = storedObject;
+            this.price = price;
+        }
+
+        public T value() {
+            return storedObject;
+        }
     }
 
     /**

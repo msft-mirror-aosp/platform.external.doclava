@@ -31,8 +31,19 @@ import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
+import javax.lang.model.type.TypeMirror;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
+
+    protected TypeVariableImpl(TypeMirror typeMirror, Context context) {
+        super(typeMirror, context);
+    }
+
+    static TypeVariableImpl create(javax.lang.model.type.TypeVariable typeVariable,
+            Context context) {
+        return context.caches.types.typevar.computeIfAbsent(typeVariable,
+                el -> new TypeVariableImpl(typeVariable, context));
+    }
 
     @Override
     @Used

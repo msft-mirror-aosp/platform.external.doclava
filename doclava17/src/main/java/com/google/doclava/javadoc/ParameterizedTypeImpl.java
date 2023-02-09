@@ -29,19 +29,41 @@ import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
+import javax.lang.model.type.DeclaredType;
 
 class ParameterizedTypeImpl extends TypeImpl implements ParameterizedType {
 
+    private final DeclaredType declaredType;
+
+    // Cached fields
+    private Type[] typeArguments;
+
+    protected ParameterizedTypeImpl(DeclaredType declaredType, Context context) {
+        super(declaredType, context);
+        this.declaredType = declaredType;
+    }
+
+    static ParameterizedTypeImpl create(DeclaredType declaredType, Context context) {
+        return context.caches.types.parameterized.computeIfAbsent(declaredType,
+                el -> new ParameterizedTypeImpl(el, context));
+    }
+
     @Override
-    @Used
+    @Used(implemented = true)
     public ParameterizedType asParameterizedType() {
         return this;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public Type[] typeArguments() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (typeArguments == null) {
+            typeArguments = declaredType.getTypeArguments()
+                    .stream()
+                    .map(typeMirror -> TypeImpl.create(typeMirror, context))
+                    .toArray(Type[]::new);
+        }
+        return typeArguments;
     }
 
     @Override
