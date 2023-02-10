@@ -11,7 +11,7 @@ out
 .DS_Store
 *.swp
 
-/.java-version
+.java-version
 
 # Ignore Gradle build output directory
 build
