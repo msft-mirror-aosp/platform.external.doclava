@@ -38,6 +38,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor14;
@@ -98,6 +99,14 @@ abstract class TypeImpl implements Type {
             case NONE -> {
                 // e.g. Object.superclass()
                 yield null;
+            }
+            case ERROR -> {
+                var errorType = (ErrorType) m;
+                var el = (TypeElement) errorType.asElement();
+                if (el.getKind() == ElementKind.ANNOTATION_TYPE) {
+                    yield AnnotationTypeDocImpl.create(el, context);
+                }
+                yield ErrorTypeImpl.create(errorType, context);
             }
             default -> throw new IllegalArgumentException(
                     "Unexpected type of kind: " + m.getKind());

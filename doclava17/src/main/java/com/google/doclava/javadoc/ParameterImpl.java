@@ -72,9 +72,6 @@ class ParameterImpl implements Parameter {
         } else {
             result = type.qualifiedTypeName() + type.dimension();
         }
-        if (result.contains("<")) {
-            throw new RuntimeException("qwe");
-        }
         return result;
     }
 
