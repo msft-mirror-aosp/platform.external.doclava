@@ -39,3 +39,7 @@ tasks.named<Test>("test") {
         includeEngines("junit-vintage")
     }
 }
+
+tasks.withType<JavaCompile>() {
+    options.isWarnings = false
+}
