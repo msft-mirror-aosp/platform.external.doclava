@@ -127,6 +127,7 @@ class DocletElementUtils {
     public TypeElement getEnclosingTypeElement(Element e) {
         if (isPackage(e)) {
             return null;
+
         }
         Element encl = e.getEnclosingElement();
         if (isPackage(encl)) {
@@ -134,6 +135,9 @@ class DocletElementUtils {
         }
         while (!(isClass(encl) || isEnum(encl) || isInterface(encl) || isAnnotation(encl))) {
             encl = encl.getEnclosingElement();
+            if (encl == null) {
+                return null;
+            }
         }
         return (TypeElement) encl;
     }

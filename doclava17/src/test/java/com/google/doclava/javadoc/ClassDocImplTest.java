@@ -686,6 +686,8 @@ public class ClassDocImplTest extends BaseTest {
                 publicClassWithNests$Nest1.qualifiedName());
         assertEquals("com.example.classes.PublicClassWithNests.Nest1.Nest2",
                 publicClassWithNests$Nest1$Nest2.qualifiedName());
+
+        assertEquals("java.util.Map", javaUtilMap.qualifiedTypeName());
     }
 
     @Test
