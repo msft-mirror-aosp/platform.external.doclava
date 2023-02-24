@@ -33,16 +33,10 @@ class SourcePositionImpl implements SourcePosition {
 
     public static final SourcePositionImpl STUB = new SourcePositionImpl();
 
-    private final File file;
-
-    public SourcePositionImpl() {
-        this.file = new File(".");
-    }
-
     @Override
     @Used(implemented = true)
     public File file() {
-        return file;
+        return null;
     }
 
     @Override

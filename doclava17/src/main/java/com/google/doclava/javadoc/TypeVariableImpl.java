@@ -28,20 +28,15 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
-import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
-import java.util.Objects;
 import javax.lang.model.type.TypeMirror;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
 
-    private final javax.lang.model.type.TypeVariable typeVariable;
-
-    protected TypeVariableImpl(javax.lang.model.type.TypeVariable typeVariable, Context context) {
-        super(typeVariable, context);
-        this.typeVariable = typeVariable;
+    protected TypeVariableImpl(TypeMirror typeMirror, Context context) {
+        super(typeMirror, context);
     }
 
     static TypeVariableImpl create(javax.lang.model.type.TypeVariable typeVariable,
@@ -51,18 +46,9 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     }
 
     @Override
-    @Used(implemented = true)
+    @Used
     public Type[] bounds() {
-        return new Type[0];
-    }
-
-    @Override
-    @Used(implemented = true)
-    public ClassDoc asClassDoc() {
-        TypeMirror erasure = context.environment.getTypeUtils().erasure(typeVariable);
-        Type type = create(erasure, context);
-        Objects.requireNonNull(type);
-        return type.asClassDoc();
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
@@ -81,13 +67,5 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     @Unused
     public AnnotationDesc[] annotations() {
         throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    @Override
-    @Used(implemented = true)
-    public String typeName() {
-        TypeMirror erasure = context.environment.getTypeUtils().erasure(typeVariable);
-        Type type = create(erasure, context);
-        return type.typeName();
     }
 }

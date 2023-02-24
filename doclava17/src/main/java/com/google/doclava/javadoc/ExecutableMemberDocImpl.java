@@ -36,7 +36,6 @@ import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import java.lang.reflect.Modifier;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -124,11 +123,12 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
                             case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(
                                     (TypeElement) element,
                                     context);
-                            default -> null;
+                            default -> throw new UnsupportedOperationException(
+                                    "Expected CLASS, INTERFACE, ANNOTATION_TYPE or ENUM, but got "
+                                            + element.getKind());
                         };
                     })
-                    .filter(Objects::nonNull)
-                    .toArray(ClassDoc[]::new);
+                    .toArray(ClassDocImpl[]::new);
         }
         return thrownExceptions;
     }

@@ -28,17 +28,12 @@ package com.google.doclava.javadoc;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Type;
-import java.util.Objects;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
 class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType {
 
-    private final WildcardType wildcardType;
-
     protected WildcardTypeImpl(WildcardType wildcardType, Context context) {
         super(wildcardType, context);
-        this.wildcardType = wildcardType;
     }
 
     static WildcardTypeImpl create(WildcardType wildcardType, Context context) {
@@ -47,12 +42,9 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     }
 
     @Override
-    @Used(implemented = true)
+    @Used
     public ClassDoc asClassDoc() {
-        TypeMirror erasure = context.environment.getTypeUtils().erasure(wildcardType);
-        Type type = create(erasure, context);
-        Objects.requireNonNull(type);
-        return type.asClassDoc();
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
@@ -62,24 +54,14 @@ class WildcardTypeImpl extends TypeImpl implements com.sun.javadoc.WildcardType 
     }
 
     @Override
-    @Used(implemented = true)
+    @Used
     public Type[] extendsBounds() {
-        TypeMirror extendsBound = wildcardType.getExtendsBound();
-        if (extendsBound == null) {
-            return new Type[0];
-        }
-        return new Type[]{TypeImpl.create(extendsBound, context)};
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    @Used(implemented = true)
+    @Used
     public Type[] superBounds() {
-        TypeMirror superBounds = wildcardType.getSuperBound();
-        if (superBounds == null) {
-            return new Type[0];
-        }
-        return new Type[]{TypeImpl.create(superBounds, context)};
+        throw new UnsupportedOperationException("not yet implemented");
     }
-
-
 }

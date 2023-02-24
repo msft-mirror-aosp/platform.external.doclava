@@ -124,7 +124,7 @@ public class PackageDocImplTest extends BaseTest {
 
     @Test
     public void name() {
-        assertEquals("com.example.packages", comExamplePackages.name());
+        assertEquals("packages", comExamplePackages.name());
     }
 
     @Test

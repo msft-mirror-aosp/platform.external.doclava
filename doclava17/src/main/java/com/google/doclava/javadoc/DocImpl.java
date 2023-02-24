@@ -109,14 +109,10 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     public Tag[] inlineTags() {
         if (inlineTags == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
-            if (dt == null) {
-                inlineTags = new Tag[0];
-            } else {
-                List<DocTree> tags = new ArrayList<>(dt.getFullBody());
-                inlineTags = tags.stream()
-                        .map(tag -> TagImpl.create(tag, element, context))
-                        .toArray(Tag[]::new);
-            }
+            List<DocTree> tags = new ArrayList<>(dt.getFullBody());
+            inlineTags = tags.stream()
+                    .map(tag -> TagImpl.create(tag, element, context))
+                    .toArray(Tag[]::new);
         }
         return inlineTags;
     }
@@ -149,12 +145,8 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     public String getRawCommentText() {
         if (getRawCommentText == null) {
             var dt = context.environment.getDocTrees().getDocCommentTree(element);
-            if (dt == null) {
-                getRawCommentText = "";
-            } else {
-                //TODO: this implementation is slightly different, consider reimplementing.
-                getRawCommentText = dt.toString();
-            }
+            //TODO: this implementation is slightly different, consider reimplementing.
+            getRawCommentText = dt.toString();
         }
         return getRawCommentText;
     }
@@ -259,6 +251,6 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     @Override
     @Used(implemented = true)
     public SourcePosition position() {
-        return SourcePositionImpl.STUB;
+        return null;
     }
 }

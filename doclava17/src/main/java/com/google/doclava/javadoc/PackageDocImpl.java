@@ -25,7 +25,6 @@
 
 package com.google.doclava.javadoc;
 
-import com.google.doclava.Converter;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
@@ -35,7 +34,6 @@ import com.sun.javadoc.PackageDoc;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Predicate;
@@ -50,10 +48,6 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
 
     private final PackageElement packageElement;
 
-
-    private String qualifiedName;
-    private ClassDoc[] allClasses;
-    private ClassDoc[] allClassesFiltered;
     private ClassDoc[] ordinaryClasses;
     private ClassDoc[] exceptions;
     private ClassDoc[] errors;
@@ -67,43 +61,17 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     static PackageDocImpl create(PackageElement e, Context context) {
-        var ret = context.caches.packages.computeIfAbsent(e, el -> new PackageDocImpl(el, context));
-        return ret;
+        return context.caches.packages.computeIfAbsent(e, el -> new PackageDocImpl(el, context));
     }
 
     @Override
-    @Used(implemented = true)
+    @Unused
     public ClassDoc[] allClasses(boolean filter) {
-        if (!filter && allClasses != null) {
-            return allClasses;
-        }
-        if (filter && allClassesFiltered != null) {
-            return allClassesFiltered;
-        }
-
-        List<ClassDocImpl> classes =
-                filterEnclosedElements(e -> e.getKind() == ElementKind.CLASS ||
-                        e.getKind() == ElementKind.INTERFACE ||
-                        e.getKind() == ElementKind.ENUM ||
-                        e.getKind() == ElementKind.ANNOTATION_TYPE)
-                .filter(e -> !filter || context.environment.isSelected(e))
-                .map(e -> {
-                    if (e.getKind() == ElementKind.ANNOTATION_TYPE) {
-                        return AnnotationTypeDocImpl.create((TypeElement) e, context);
-                    }
-                    return ClassDocImpl.create((TypeElement) e, context);
-                })
-                .toList();
-
-        if (filter) {
-            return allClassesFiltered = classes.toArray(ClassDoc[]::new);
-        } else {
-            return allClasses = classes.toArray(ClassDoc[]::new);
-        }
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    @Used(implemented = true)
+    @Unused
     public ClassDoc[] allClasses() {
         return allClasses(true);
     }
@@ -112,7 +80,6 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
         EnclosedElementsIterator it = new EnclosedElementsIterator(packageElement);
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
-                .filter(context.environment::isIncluded)
                 .filter(predicate);
     }
 
@@ -193,14 +160,9 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
     }
 
     @Override
-    @Used(implemented = true)
+    @Unused
     public ClassDoc findClass(String className) {
-        for (ClassDoc c : allClasses()) {
-            if (c.name().equals(className)) {
-                return c;
-            }
-        }
-        return null;
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
@@ -209,11 +171,18 @@ class PackageDocImpl extends DocImpl<PackageElement> implements PackageDoc {
         return context.environment.isIncluded(packageElement);
     }
 
+    private String name;
+
     @Override
     @Used(implemented = true)
     public String name() {
-        return qualifiedName();
+        if (name == null) {
+            name = packageElement.getSimpleName().toString();
+        }
+        return name;
     }
+
+    private String qualifiedName;
 
     @Override
     public String qualifiedName() {
