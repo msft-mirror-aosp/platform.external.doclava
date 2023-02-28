@@ -34,11 +34,11 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
-import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor14;
@@ -67,8 +67,9 @@ abstract class TypeImpl implements Type {
             // void is also a "primitive type"
             case VOID -> PrimitiveTypeImpl.VOID;
             // arrays
-            case ARRAY -> throw new UnsupportedOperationException(
-                    "ARRAY type is not yet implemented");
+            case ARRAY -> {
+                yield ArrayTypeImpl.create((ArrayType) m, context);
+            }
             // complex types
             case WILDCARD -> {
                 var wildcardType = (javax.lang.model.type.WildcardType) m;
@@ -99,6 +100,14 @@ abstract class TypeImpl implements Type {
                 // e.g. Object.superclass()
                 yield null;
             }
+            case ERROR -> {
+                var errorType = (ErrorType) m;
+                var el = (TypeElement) errorType.asElement();
+                if (el.getKind() == ElementKind.ANNOTATION_TYPE) {
+                    yield AnnotationTypeDocImpl.create(el, context);
+                }
+                yield ErrorTypeImpl.create(errorType, context);
+            }
             default -> throw new IllegalArgumentException(
                     "Unexpected type of kind: " + m.getKind());
         };
@@ -125,10 +134,8 @@ abstract class TypeImpl implements Type {
     @Override
     @Used(implemented = true)
     public String simpleTypeName() {
-        return context.environment.getTypeUtils()
-                .asElement(typeMirror)
-                .getSimpleName()
-                .toString();
+        var qualifiedTypeName = QUALIFIED_NAME_VISITOR.visit(typeMirror, context);
+        return qualifiedTypeName.substring(qualifiedTypeName.lastIndexOf('.') + 1);
     }
 
     @Override
@@ -205,21 +212,23 @@ abstract class TypeImpl implements Type {
         public String visitDeclared(DeclaredType t, Context context) {
             final String typeName = t.asElement().toString();
 
-            final String typeArguments = t.getTypeArguments()
-                    .stream()
-                    .map(tm -> this.visit(tm, context))
-                    .collect(Collectors.joining(", "));
-
-            if (typeArguments.isEmpty()) {
-                return typeName;
-            } else {
-                return "%s<%s>".formatted(typeName, typeArguments);
+            if (typeName.contains("<")) {
+                throw new RuntimeException();
             }
+
+            return typeName;
         }
 
         @Override
         public String visitArray(ArrayType t, Context context) {
             return this.visit(t.getComponentType(), context);
+        }
+
+        @Override
+        public String visitWildcard(javax.lang.model.type.WildcardType t, Context context) {
+            //TODO: hack
+            return "?";
+            //return super.visitWildcard(t, context);
         }
 
         @Override

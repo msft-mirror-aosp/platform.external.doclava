@@ -31,22 +31,29 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.SourcePosition;
+import java.util.ArrayList;
+import java.util.List;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 import jdk.javadoc.doclet.DocletEnvironment;
 
 /**
- * The {@code RootDocImpl} is an implementation of the "old" Doclet APIs (previously under {@code
- * com.sun.javadoc.*}, deprecated since 9 and removed in 13) in terms of new Doclet APIs {@link
- * jdk.javadoc.doclet.Doclet}. ({@link DocletEnvironment}).
+ * The {@code RootDocImpl} is an implementation of the "old" Doclet APIs (previously under
+ * {@code com.sun.javadoc.*}, deprecated since 9 and removed in 13) in terms of new Doclet APIs
+ * {@link jdk.javadoc.doclet.Doclet}. ({@link DocletEnvironment}).
  */
 public class RootDocImpl extends DocImpl<Element> implements RootDoc {
+
+    private ClassDoc[] classes;
 
     public RootDocImpl(DocletEnvironment environment) {
         super(null, new Context(environment));
 
-        for (var e : context.environment.getIncludedElements()) {
+        for (var e : environment.getSpecifiedElements()) {
             switch (e.getKind()) {
                 case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE -> addClass((TypeElement) e);
                 case PACKAGE -> PackageDocImpl.create((PackageElement) e, context);
@@ -67,6 +74,18 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
             default -> throw new UnsupportedOperationException(
                     "Unexpected element kind:" + c.getKind());
         }
+        // Initialize nested
+        // TODO: Need to ensure this is needed!
+        ElementFilter.typesIn(c.getEnclosedElements())
+                .stream()
+                .filter(te -> te.getNestingKind() == NestingKind.MEMBER)
+                .forEach(te -> {
+                    if (te.getKind() == ElementKind.ANNOTATION_TYPE) {
+                        AnnotationTypeDocImpl.create(te, context);
+                    } else {
+                        ClassDocImpl.create(te, context);
+                    }
+                });
     }
 
     @Override
@@ -88,21 +107,32 @@ public class RootDocImpl extends DocImpl<Element> implements RootDoc {
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc[] classes() {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (classes == null) {
+            List<ClassDoc> classesAndAnnotations = new ArrayList<>(context.caches.classes.values());
+            classesAndAnnotations.addAll(context.caches.annotations.values());
+            classes = classesAndAnnotations.toArray(ClassDoc[]::new);
+        }
+        return classes;
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public ClassDoc classNamed(String qualifiedName) {
-        throw new UnsupportedOperationException("not yet implemented");
+        TypeElement cls = context.environment.getElementUtils().getTypeElement(qualifiedName);
+        return cls == null ? null : ClassDocImpl.create(cls, context);
     }
 
     @Override
-    @Used
+    @Used(implemented = true)
     public PackageDoc packageNamed(String name) {
-        throw new UnsupportedOperationException("not yet implemented");
+        for (PackageDoc pkg : context.caches.packages.values()) {
+            if (pkg.name().equals(name)) {
+                return pkg;
+            }
+        }
+        return null;
     }
 
     @Override

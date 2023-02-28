@@ -53,6 +53,39 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
+filegroup {
+    name: "doclava_sources_jdk8",
+    srcs: ["src/com/google/doclava/**/*.java"],
+}
+
+filegroup {
+    name: "doclava_sources_jdk17",
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+        "doclava17/src/main/java/**/*.java",
+    ],
+    exclude_srcs: [
+        "src/com/google/doclava/Doclava.java",
+    ],
+}
+
+java_defaults {
+    name: "doclava_defaults",
+    java_resource_dirs: ["res"],
+    errorprone: {
+        javacflags: [
+            "-Xep:FormatString:WARN",
+            "-Xep:ComparableType:WARN",
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
+    static_libs: [
+        "jsilver",
+        "antlr-runtime",
+        "tagsoup",
+    ],
+}
+
 // Stub doclet to be used with JDK 17 until b/240421555 is fixed
 java_library_host {
     name: "stubdoclet",
@@ -67,52 +100,45 @@ java_library_host {
 }
 
 java_library_host {
-    name: "doclava",
+    name: "doclava8",
+    defaults: ["doclava_defaults"],
+    srcs: [":doclava_sources_jdk8"],
     java_version: "1.8",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-    ],
     static_libs: [
-        "jsilver",
         "guava",
-        "antlr-runtime",
-        "tagsoup",
     ],
     use_tools_jar: true,
-    java_resource_dirs: ["res"],
-    errorprone: {
-        javacflags: [
-            "-Xep:FormatString:WARN",
-            "-Xep:ComparableType:WARN",
-            "-Xep:ReturnValueIgnored:WARN",
-        ],
-    },
+}
+
+java_library_host {
+    name: "doclava8-no-guava",
+    defaults: ["doclava_defaults"],
+    srcs: [":doclava_sources_jdk8"],
+    java_version: "1.8",
+    libs: [
+        "guava",
+    ],
+    use_tools_jar: true,
+}
+
+java_library_host {
+    name: "doclava",
+    defaults: ["doclava_defaults"],
+    srcs: [":doclava_sources_jdk17"],
+    java_version: "17",
+    static_libs: [
+        "guava",
+    ],
 }
 
 java_library_host {
     name: "doclava-no-guava",
-    java_version: "1.8",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-    ],
+    defaults: ["doclava_defaults"],
+    srcs: [":doclava_sources_jdk17"],
+    java_version: "17",
     libs: [
         "guava",
     ],
-    static_libs: [
-        "jsilver",
-        "antlr-runtime",
-        "tagsoup",
-    ],
-    use_tools_jar: true,
-    java_resource_dirs: ["res"],
-
-    errorprone: {
-        javacflags: [
-            "-Xep:FormatString:WARN",
-            "-Xep:ComparableType:WARN",
-            "-Xep:ReturnValueIgnored:WARN",
-        ],
-    },
 }
 
 

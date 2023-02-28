@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,35 +25,37 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
-import com.sun.javadoc.SourcePosition;
-import java.io.File;
+import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.ProgramElementDoc;
+import com.sun.javadoc.Type;
+import com.sun.javadoc.TypeVariable;
+import java.util.Objects;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
-class SourcePositionImpl implements SourcePosition {
+class ErrorTypeImpl extends ClassDocImpl {
 
-    public static final SourcePositionImpl STUB = new SourcePositionImpl();
+    private final javax.lang.model.type.ErrorType errorType;
 
-    private final File file;
+    protected ErrorTypeImpl(TypeElement el, javax.lang.model.type.ErrorType errorType,
+            Context context) {
+        super(el, context);
+        this.errorType = errorType;
+    }
 
-    public SourcePositionImpl() {
-        this.file = new File(".");
+    static ErrorTypeImpl create(javax.lang.model.type.ErrorType errorType,
+            Context context) {
+        var typeEl = (TypeElement) errorType.asElement();
+        return (ErrorTypeImpl) context.caches.classes.computeIfAbsent(typeEl,
+                el -> new ErrorTypeImpl(el, errorType, context));
     }
 
     @Override
     @Used(implemented = true)
-    public File file() {
-        return file;
-    }
-
-    @Override
-    @Used(implemented = true)
-    public int line() {
-        return 0;
-    }
-
-    @Override
-    @Used(implemented = true)
-    public int column() {
-        return 0;
+    public boolean isIncluded() {
+        return false;
     }
 }
