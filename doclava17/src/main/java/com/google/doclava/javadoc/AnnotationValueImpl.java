@@ -120,7 +120,8 @@ class AnnotationValueImpl implements AnnotationValue {
                 public Object visitType(TypeMirror m, Context ctx) {
                     var e = ctx.environment.getTypeUtils().asElement(m);
                     return switch (e.getKind()) {
-                        case CLASS -> ClassDocImpl.create((TypeElement) e, ctx);
+                        case CLASS, INTERFACE, ENUM -> ClassDocImpl.create((TypeElement) e, ctx);
+                        case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create((TypeElement) e, ctx);
                         default -> throw new UnsupportedOperationException(
                                 e.getKind() + " is not not yet implemented");
                     };
@@ -128,12 +129,12 @@ class AnnotationValueImpl implements AnnotationValue {
 
                 @Override
                 public Object visitEnumConstant(VariableElement c, Context context) {
-                    throw new UnsupportedOperationException("not yet implemented");
+                    return null;
                 }
 
                 @Override
                 public Object visitAnnotation(AnnotationMirror m, Context ctx) {
-                    throw new UnsupportedOperationException("not yet implemented");
+                    return null;
                 }
 
                 @Override
