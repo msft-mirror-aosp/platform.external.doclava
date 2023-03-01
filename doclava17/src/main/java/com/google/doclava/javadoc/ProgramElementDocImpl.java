@@ -137,6 +137,8 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
         if (annotations == null) {
             annotations = element.getAnnotationMirrors()
                     .stream()
+                    // b/270334687: Filter out elements that are not ANNOTATION_TYPE
+                    .filter(am -> ((TypeElement) am.getAnnotationType().asElement()).getKind() == ElementKind.ANNOTATION_TYPE)
                     .map(am -> new AnnotationDescImpl(am, context))
                     .toArray(AnnotationDescImpl[]::new);
         }
