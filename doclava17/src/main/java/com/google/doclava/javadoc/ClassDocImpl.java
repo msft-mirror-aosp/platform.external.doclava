@@ -25,6 +25,7 @@
 
 package com.google.doclava.javadoc;
 
+import com.google.doclava.Converter;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
@@ -44,6 +45,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
@@ -54,6 +57,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     private ConstructorDoc[] constructorsFiltered;
     private ConstructorDoc[] constructorsAll;
     private Type[] interfaceTypes;
+    private ClassDoc[] interfaces;
     private TypeVariable[] typeParameters;
     private MethodDoc[] methodsFiltered;
     private MethodDoc[] methodsAll;
@@ -248,7 +252,11 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (isInterface()) {
             return null;
         }
-        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        TypeMirror superclassMirror = typeElement.getSuperclass();
+        if (superclassMirror.getKind() == TypeKind.NONE) {
+            return null;
+        }
+        Type t = TypeImpl.create(superclassMirror, context);
         if (t instanceof ClassDoc cls) {
             return cls;
         } else {
@@ -262,7 +270,11 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (isInterface()) {
             return null;
         }
-        Type t = TypeImpl.create(typeElement.getSuperclass(), context);
+        TypeMirror superclassMirror = typeElement.getSuperclass();
+        if (superclassMirror.getKind() == TypeKind.NONE) {
+            return null;
+        }
+        Type t = TypeImpl.create(superclassMirror, context);
         if (t instanceof ClassDoc cls) {
             return cls;
         } else if (t instanceof ParameterizedType pt) {
@@ -284,25 +296,25 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     }
 
     @Override
-    @Unused
-    public ClassDoc[] interfaces() {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    @Override
     @Used(implemented = true)
-    public Type[] interfaceTypes() {
-        if (interfaceTypes == null) {
-            interfaceTypes = typeElement.getInterfaces()
+    public ClassDoc[] interfaces() {
+        if (interfaces == null) {
+            interfaces = typeElement.getInterfaces()
                     .stream()
                     .map(typeMirror -> {
                         TypeElement asElement = (TypeElement) context.environment.getTypeUtils()
                                 .asElement(typeMirror);
                         return ClassDocImpl.create(asElement, context);
                     })
-                    .toArray(Type[]::new);
+                    .toArray(ClassDoc[]::new);
         }
-        return interfaceTypes;
+        return interfaces;
+    }
+
+    @Override
+    @Used(implemented = true)
+    public Type[] interfaceTypes() {
+        return interfaces();
     }
 
     @Override
@@ -475,13 +487,57 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
                 .toArray(ClassDoc[]::new);
     }
 
+    /**
+     * Note that this implementation does not search in sources!
+     *
+     * <p>
+     *
+     * {@inheritDoc}
+     *
+     * @implNote Does not search in sources.
+     */
     @Override
     @Used(implemented = true)
     public ClassDoc findClass(String className) {
+        ClassDoc result = searchClass(className);
+        if (result != null) {
+            return result;
+        }
+
+        ClassDoc enclosing = containingClass();
+        while (enclosing != null && enclosing.containingClass() != null) {
+            enclosing = enclosing.containingClass();
+        }
+        if (enclosing == null) {
+            return null;
+        }
+        return ((ClassDocImpl) enclosing).searchClass(className);
+    }
+
+    private ClassDoc searchClass(String className) {
         TypeElement cls = context.environment.getElementUtils().getTypeElement(className);
         if (cls != null) {
             return ClassDocImpl.create(cls, context);
         }
+
+        for (ClassDoc nested : innerClasses()) {
+            if (nested.name().equals(className) || nested.name().endsWith("." + className)) {
+                return nested;
+            } else {
+                ClassDoc inNested = ((ClassDocImpl) nested).searchClass(className);
+                if (inNested != null) {
+                    return inNested;
+                }
+            }
+        }
+
+        ClassDoc inPackage = containingPackage().findClass(className);
+        if (inPackage != null) {
+            return inPackage;
+        }
+
+        //
+
         return null;
     }
 
