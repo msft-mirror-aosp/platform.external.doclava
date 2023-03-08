@@ -105,7 +105,33 @@ class FieldDocImpl extends MemberDocImpl<VariableElement> implements FieldDoc {
     @Override
     @Used(implemented = true)
     public Object constantValue() {
-        return variableElement.getConstantValue();
+        var cv = variableElement.getConstantValue();
+        if (cv == null) {
+            return null;
+        }
+        // cv is either a primitive type or a String
+        if (cv instanceof String) {
+            return cv;
+        } else if (cv instanceof Boolean b) {
+            return b;
+        } else if (cv instanceof Byte b) {
+            return (int) b;
+        } else if (cv instanceof Character c) {
+            return (int) c;
+        } else if (cv instanceof Double d) {
+            return d;
+        } else if (cv instanceof Float f) {
+            return f;
+        } else if (cv instanceof Integer i) {
+            return i;
+        } else if (cv instanceof Long l) {
+            return l;
+        } else if (cv instanceof Short s) {
+            return (int) s;
+        } else {
+            throw new IllegalArgumentException("Unexpected constant value of type " + cv.getClass()
+                    + " when expected java.lang.String or primitive type");
+        }
     }
 
     @Override
