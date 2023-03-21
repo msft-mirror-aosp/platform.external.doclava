@@ -125,7 +125,6 @@ java_library_host {
     name: "doclava",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk17"],
-    java_version: "17",
     static_libs: [
         "guava",
     ],
@@ -135,7 +134,6 @@ java_library_host {
     name: "doclava-no-guava",
     defaults: ["doclava_defaults"],
     srcs: [":doclava_sources_jdk17"],
-    java_version: "17",
     libs: [
         "guava",
     ],
