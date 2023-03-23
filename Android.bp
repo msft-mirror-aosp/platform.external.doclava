@@ -53,14 +53,6 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
-filegroup {
-    name: "doclava_sources_jdk17",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-        "doclava17/src/main/java/com/google/doclava/Doclava.java",
-    ],
-}
-
 java_defaults {
     name: "doclava_defaults",
     java_resource_dirs: ["res"],
@@ -84,9 +76,6 @@ java_library_host {
     srcs: [
         "doclava17/src/main/java/**/*.java",
     ],
-    exclude_srcs: [
-        "doclava17/src/main/java/com/google/doclava/Doclava.java",
-    ],
     libs: [
         "guava",
     ],
@@ -95,7 +84,9 @@ java_library_host {
 java_library_host {
     name: "doclava",
     defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
     static_libs: [
         "guava",
     ],
@@ -104,7 +95,9 @@ java_library_host {
 java_library_host {
     name: "doclava-no-guava",
     defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
     libs: [
         "guava",
     ],
