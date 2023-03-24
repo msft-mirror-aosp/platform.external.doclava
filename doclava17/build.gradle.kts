@@ -32,10 +32,6 @@ sourceSets {
     main {
         java {
             srcDir("${project.rootDir}/src")
-            exclude {
-                it.file.absolutePath.endsWith("src/com/google/doclava/Doclava.java") ||
-                    it.file.absolutePath.endsWith("src/com/google/stubdoclet/StubDoclet.java")
-            }
         }
         resources {
             srcDirs("${project.rootDir}/res")
