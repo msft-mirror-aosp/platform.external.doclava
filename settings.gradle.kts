@@ -20,4 +20,4 @@ rootProject.name = "doclava"
 val ideaActive = System.getProperty("idea.active").toBoolean()
 
 // Uses a custom implementation of com.sun.javadoc using jdk.javadoc.doclet API.
-include("doclava17")
+include("doclet_adapter")
