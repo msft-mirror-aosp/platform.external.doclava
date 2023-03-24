@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-impl_path="doclava17/src/main/java/com/google/doclava/javadoc"
+impl_path="doclet_adapter/src/main/java/com/google/doclava/javadoc"
 
 used_total=$(printf '%d' $(grep -ri '@Used' $impl_path | wc -l))
 used_implemented=$(printf '%d' $(grep -ri '@Used(implemented = true)' | wc -l))

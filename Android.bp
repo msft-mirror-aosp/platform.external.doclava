@@ -74,7 +74,7 @@ java_defaults {
 java_library_host {
     name: "doclava-doclet-adapter",
     srcs: [
-        "doclava17/src/main/java/**/*.java",
+        "doclet_adapter/src/main/java/**/*.java",
     ],
     libs: [
         "guava",
