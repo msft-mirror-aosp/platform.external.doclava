@@ -53,22 +53,6 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
-filegroup {
-    name: "doclava_sources_jdk8",
-    srcs: ["src/com/google/doclava/**/*.java"],
-}
-
-filegroup {
-    name: "doclava_sources_jdk17",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-        "doclava17/src/main/java/com/google/doclava/Doclava.java",
-    ],
-    exclude_srcs: [
-        "src/com/google/doclava/Doclava.java",
-    ],
-}
-
 java_defaults {
     name: "doclava_defaults",
     java_resource_dirs: ["res"],
@@ -88,34 +72,9 @@ java_defaults {
 }
 
 java_library_host {
-    name: "doclava8",
-    defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk8"],
-    java_version: "1.8",
-    static_libs: [
-        "guava",
-    ],
-    use_tools_jar: true,
-}
-
-java_library_host {
-    name: "doclava8-no-guava",
-    defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk8"],
-    java_version: "1.8",
-    libs: [
-        "guava",
-    ],
-    use_tools_jar: true,
-}
-
-java_library_host {
     name: "doclava-doclet-adapter",
     srcs: [
         "doclava17/src/main/java/**/*.java",
-    ],
-    exclude_srcs: [
-        "doclava17/src/main/java/com/google/doclava/Doclava.java",
     ],
     libs: [
         "guava",
@@ -125,7 +84,9 @@ java_library_host {
 java_library_host {
     name: "doclava",
     defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
     static_libs: [
         "guava",
     ],
@@ -134,7 +95,9 @@ java_library_host {
 java_library_host {
     name: "doclava-no-guava",
     defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
     libs: [
         "guava",
     ],
