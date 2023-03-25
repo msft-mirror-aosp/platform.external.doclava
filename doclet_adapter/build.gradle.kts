@@ -20,39 +20,45 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+dependencies {
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
 
 sourceSets {
     main {
         java {
-            srcDirs("${project.rootDir}/src")
-            exclude {
-                it.file.absolutePath.endsWith("src/com/google/stubdoclet/StubDoclet.java")
-            }
+            srcDir("${project.rootDir}/src")
         }
         resources {
             srcDirs("${project.rootDir}/res")
         }
     }
-    test {
-        java {
-            srcDir("${project.rootDir}/test")
-            exclude("${project.rootDir}/test/api*")
-        }
-        resources {
-            srcDirs("${project.rootDir}/test/api")
-        }
-    }
 }
 
-tasks.test {
-    workingDir = project.rootDir;
+val addedExports = listOf("--add-exports", "jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED")
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(addedExports)
+
+    // Exporting a package from system module jdk.javadoc is not allowed with --release so
+    // trick gradle to use -source/-target flags instead.
+    sourceCompatibility = JavaVersion.VERSION_17.majorVersion
+}
+
+tasks.withType<Test> {
+    jvmArgs(addedExports)
 }
 
 val docletJars by configurations.creating {
     extendsFrom(configurations.runtimeClasspath.get())
+}
+
+tasks.javadoc {
+    dependsOn("e2eTestAOSP")
 }
 
 tasks.create<Exec>("e2eTestAOSP") {
@@ -72,7 +78,7 @@ tasks.create<Exec>("e2eTestAOSP") {
     }
 
     val javadocTool = javaToolchains.javadocToolFor {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }.get().executablePath.toString()
 
     val args = mutableListOf(
@@ -106,7 +112,7 @@ tasks.create<Exec>("e2eTestAOSP") {
         "-source", "1.8",
         "-J-Xmx1600m",
         "-XDignore.symbol.file",
-        "-hdf", "page.build", "AOSP.MASTER-nikitai-doclava8",
+        "-hdf", "page.build", "AOSP.MASTER-nikitai-doclava17",
         "-hdf", "page.now", "Wed Feb  1 20:27:46 GMT 2023",
         "-templatedir", "../res/assets/templates-sdk",
         "-htmldir", "frameworks_base_docs/html",
