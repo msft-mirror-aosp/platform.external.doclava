@@ -127,7 +127,7 @@ class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
         final Elements elemUtils = context.environment.getElementUtils();
 
         return switch (enclosingElement.getKind()) {
-            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM -> {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM, RECORD -> {
                 var owningClass = ((TypeElement) enclosingElement);
                 for (TypeMirror superclass = owningClass.getSuperclass();
                         superclass.getKind() != TypeKind.NONE;
