@@ -66,6 +66,7 @@ abstract class TypeImpl implements Type {
             case SHORT -> PrimitiveTypeImpl.SHORT;
             // void is also a "primitive type"
             case VOID -> PrimitiveTypeImpl.VOID;
+            case NULL -> PrimitiveTypeImpl.NULL;
             // arrays
             case ARRAY -> {
                 yield ArrayTypeImpl.create((ArrayType) m, context);
