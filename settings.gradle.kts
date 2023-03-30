@@ -19,5 +19,13 @@ rootProject.name = "doclava"
 // Gradle launched from IntelliJ IDEA?
 val ideaActive = System.getProperty("idea.active").toBoolean()
 
+// New Doclava
 // Uses a custom implementation of com.sun.javadoc using jdk.javadoc.doclet API.
-include("doclet_adapter")
+include("doclava17")
+
+// Old Doclava
+// Uses tools.jar from OpenJDK 11 for com.sun.javadoc implementation.
+//
+// IntelliJ IDEA breaks (syntax highlight, error messages) when faces "duplicate content roots"
+// because 'doclava17' reuses sources of 'doclava'.
+if (!ideaActive) include("doclava8")
