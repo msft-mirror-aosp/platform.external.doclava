@@ -53,19 +53,8 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
-java_library_host {
-    name: "doclava",
-    java_version: "1.8",
-    srcs: [
-        "src/**/*.java",
-    ],
-    static_libs: [
-        "jsilver",
-        "guava",
-        "antlr-runtime",
-        "tagsoup",
-    ],
-    use_tools_jar: true,
+java_defaults {
+    name: "doclava_defaults",
     java_resource_dirs: ["res"],
     errorprone: {
         javacflags: [
@@ -74,32 +63,44 @@ java_library_host {
             "-Xep:ReturnValueIgnored:WARN",
         ],
     },
+    static_libs: [
+        "jsilver",
+        "antlr-runtime",
+        "tagsoup",
+        "doclava-doclet-adapter",
+    ],
 }
 
 java_library_host {
-    name: "doclava-no-guava",
-    java_version: "1.8",
+    name: "doclava-doclet-adapter",
     srcs: [
-        "src/**/*.java",
+        "doclet_adapter/src/main/java/**/*.java",
     ],
     libs: [
         "guava",
     ],
-    static_libs: [
-        "jsilver",
-        "antlr-runtime",
-        "tagsoup",
-    ],
-    use_tools_jar: true,
-    java_resource_dirs: ["res"],
+}
 
-    errorprone: {
-        javacflags: [
-            "-Xep:FormatString:WARN",
-            "-Xep:ComparableType:WARN",
-            "-Xep:ReturnValueIgnored:WARN",
-        ],
-    },
+java_library_host {
+    name: "doclava",
+    defaults: ["doclava_defaults"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
+    static_libs: [
+        "guava",
+    ],
+}
+
+java_library_host {
+    name: "doclava-no-guava",
+    defaults: ["doclava_defaults"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
+    libs: [
+        "guava",
+    ],
 }
 
 

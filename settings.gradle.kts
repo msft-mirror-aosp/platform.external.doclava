@@ -15,4 +15,9 @@
  */
 
 rootProject.name = "doclava"
-include( "doclava", "doclava17")
+
+// Gradle launched from IntelliJ IDEA?
+val ideaActive = System.getProperty("idea.active").toBoolean()
+
+// Uses a custom implementation of com.sun.javadoc using jdk.javadoc.doclet API.
+include("doclet_adapter")
