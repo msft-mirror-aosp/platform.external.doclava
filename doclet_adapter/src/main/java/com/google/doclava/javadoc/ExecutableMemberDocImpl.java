@@ -115,18 +115,7 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
         if (thrownExceptions == null) {
             thrownExceptions = executableElement.getThrownTypes()
                     .stream()
-                    .map(typeMirror -> {
-                        Element element = context.environment.getTypeUtils().asElement(typeMirror);
-                        return switch (element.getKind()) {
-                            case CLASS, INTERFACE, ENUM -> ClassDocImpl.create(
-                                    (TypeElement) element,
-                                    context);
-                            case ANNOTATION_TYPE -> AnnotationTypeDocImpl.create(
-                                    (TypeElement) element,
-                                    context);
-                            default -> null;
-                        };
-                    })
+                    .map(typeMirror -> TypeImpl.create(typeMirror, context).asClassDoc())
                     .filter(Objects::nonNull)
                     .toArray(ClassDoc[]::new);
         }
