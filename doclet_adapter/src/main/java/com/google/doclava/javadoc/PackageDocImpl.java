@@ -25,7 +25,6 @@
 
 package com.google.doclava.javadoc;
 
-import com.google.doclava.Converter;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotationDesc;
