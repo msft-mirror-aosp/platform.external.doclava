@@ -49,8 +49,18 @@ class ErrorTypeImpl extends ClassDocImpl {
     static ErrorTypeImpl create(javax.lang.model.type.ErrorType errorType,
             Context context) {
         var typeEl = (TypeElement) errorType.asElement();
-        return (ErrorTypeImpl) context.caches.classes.computeIfAbsent(typeEl,
+        var typeImpl = context.caches.classes.computeIfAbsent(typeEl,
                 el -> new ErrorTypeImpl(el, errorType, context));
+
+        // On rare occasions it can happen that the errorType had already been cached as a
+        // ClassDocImpl instead of ErrorTypeImpl. In that case recreate the ErrorTypeImpl and store
+        // it in the cache.
+        if (!(typeImpl instanceof ErrorTypeImpl)) {
+            typeImpl = new ErrorTypeImpl(typeEl, errorType, context);
+            context.caches.classes.put(typeEl, typeImpl);
+        }
+
+        return (ErrorTypeImpl)typeImpl;
     }
 
     @Override
