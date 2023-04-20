@@ -29,6 +29,7 @@ import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
 import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.Type;
 import javax.lang.model.type.DeclaredType;
 
@@ -70,8 +71,13 @@ class AnnotatedTypeImpl extends TypeImpl implements AnnotatedType {
     @Used(implemented = true)
     public Type underlyingType() {
         if (underlyingType == null) {
-            underlyingType = TypeImpl.create(declaredType, context);
+            underlyingType = TypeImpl.create(declaredType, context, /* underlyingType= */ true);
         }
         return underlyingType;
+    }
+
+    @Override
+    public AnnotatedType asAnnotatedType() {
+        return this;
     }
 }
