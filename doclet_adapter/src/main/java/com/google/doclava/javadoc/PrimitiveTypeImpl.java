@@ -45,7 +45,8 @@ public enum PrimitiveTypeImpl implements Type {
     INT("int"),
     LONG("long"),
     SHORT("short"),
-    VOID("void");
+    VOID("void"),
+    NULL("null");
 
     private final String name;
 
