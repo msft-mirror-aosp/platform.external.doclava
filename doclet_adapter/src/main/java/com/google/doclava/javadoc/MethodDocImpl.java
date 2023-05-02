@@ -61,13 +61,13 @@ class MethodDocImpl extends ExecutableMemberDocImpl implements MethodDoc {
     public String qualifiedName() {
         var enclosingClass = executableElement.getEnclosingElement();
         return switch (enclosingClass.getKind()) {
-            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM -> {
+            case CLASS, INTERFACE, ANNOTATION_TYPE, ENUM, RECORD -> {
                 var enclosingClassName =
                         ((TypeElement) enclosingClass).getQualifiedName().toString();
                 yield enclosingClassName + "." + name();
             }
             default -> throw new UnsupportedOperationException("Expected CLASS, INTERFACE, "
-                    + "ANNOTATION_TYPE or ENUM, but got " + enclosingClass.getKind());
+                    + "ANNOTATION_TYPE, ENUM, or RECORD, but got " + enclosingClass.getKind());
         };
     }
 
