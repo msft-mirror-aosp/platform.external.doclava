@@ -25,7 +25,6 @@
 
 package com.google.doclava.javadoc;
 
-import com.google.doclava.Converter;
 import com.google.doclava.annotation.Unused;
 import com.google.doclava.annotation.Used;
 import com.sun.javadoc.AnnotatedType;
@@ -256,12 +255,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (superclassMirror.getKind() == TypeKind.NONE) {
             return null;
         }
-        Type t = TypeImpl.create(superclassMirror, context);
-        if (t instanceof ClassDoc cls) {
-            return cls;
-        } else {
-            return null;
-        }
+        return TypeImpl.create(superclassMirror, context).asClassDoc();
     }
 
     @Override
@@ -274,14 +268,7 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         if (superclassMirror.getKind() == TypeKind.NONE) {
             return null;
         }
-        Type t = TypeImpl.create(superclassMirror, context);
-        if (t instanceof ClassDoc cls) {
-            return cls;
-        } else if (t instanceof ParameterizedType pt) {
-            return pt;
-        } else {
-            return null;
-        }
+        return TypeImpl.create(superclassMirror, context);
     }
 
     @Override
@@ -314,7 +301,14 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
     @Override
     @Used(implemented = true)
     public Type[] interfaceTypes() {
-        return interfaces();
+        if (interfaceTypes == null) {
+            interfaceTypes = typeElement.getInterfaces()
+                    .stream()
+                    .filter(typeMirror -> !typeMirror.getKind().equals(TypeKind.NONE))
+                    .map(typeMirror -> TypeImpl.create(typeMirror, context))
+                    .toArray(Type[]::new);
+        }
+        return interfaceTypes;
     }
 
     @Override

@@ -96,14 +96,16 @@ abstract class ProgramElementDocImpl<T extends Element> extends DocImpl<T> imple
         Element cur = element.getEnclosingElement();
         while (cur != null && cur.getKind() != ElementKind.ANNOTATION_TYPE
                 && cur.getKind() != ElementKind.CLASS
-                && cur.getKind() != ElementKind.ENUM && cur.getKind() != ElementKind.INTERFACE) {
+                && cur.getKind() != ElementKind.ENUM
+                && cur.getKind() != ElementKind.INTERFACE
+                && cur.getKind() != ElementKind.RECORD) {
             cur = cur.getEnclosingElement();
         }
         if (cur == null) {
             return null;
         }
         return switch (cur.getKind()) {
-            case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE -> ClassDocImpl.create((TypeElement) cur,
+            case CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, RECORD -> ClassDocImpl.create((TypeElement) cur,
                     context);
             default -> null;
         };

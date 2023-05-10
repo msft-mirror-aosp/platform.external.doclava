@@ -33,11 +33,15 @@ import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import java.util.Objects;
+import java.util.stream.Stream;
+import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.SimpleTypeVisitor8;
 
 class TypeVariableImpl extends TypeImpl implements TypeVariable {
 
     private final javax.lang.model.type.TypeVariable typeVariable;
+    private Type[] bounds;
 
     protected TypeVariableImpl(javax.lang.model.type.TypeVariable typeVariable, Context context) {
         super(typeVariable, context);
@@ -53,7 +57,19 @@ class TypeVariableImpl extends TypeImpl implements TypeVariable {
     @Override
     @Used(implemented = true)
     public Type[] bounds() {
-        return new Type[0];
+        if (bounds == null) {
+            TypeMirror bound = typeVariable.getUpperBound();
+            bounds = bound.accept(new SimpleTypeVisitor8<Stream<? extends TypeMirror>, Void>(Stream.of(bound)) {
+                        @Override
+                        public Stream<? extends TypeMirror> visitIntersection(IntersectionType t, Void o) {
+                            return t.getBounds().stream();
+                        }
+                    }, null)
+                    .map(typeMirror -> TypeImpl.create(typeMirror, context))
+                    .filter(type -> !type.qualifiedTypeName().equals("java.lang.Object"))
+                    .toArray(Type[]::new);
+        }
+        return bounds;
     }
 
     @Override
