@@ -54,6 +54,10 @@ abstract class TypeImpl implements Type {
     }
 
     protected static Type create(TypeMirror m, Context context) {
+         return create(m, context, /* underlyingType= */ false);
+    }
+
+    protected static Type create(TypeMirror m, Context context, boolean underlyingType) {
         return switch (m.getKind()) {
             // primitive types
             case BOOLEAN -> PrimitiveTypeImpl.BOOLEAN;
@@ -84,7 +88,7 @@ abstract class TypeImpl implements Type {
                 var dt = (DeclaredType) m;
                 // Order matters! AnnotatedTypeImpl goes first as it has an "underlying type"
                 // which will be constructed by this method in create() routine.
-                if (!dt.getAnnotationMirrors().isEmpty()) {
+                if (!underlyingType && !dt.getAnnotationMirrors().isEmpty()) {
                     yield AnnotatedTypeImpl.create(dt, context);
                 }
                 if (!dt.getTypeArguments().isEmpty()) {
