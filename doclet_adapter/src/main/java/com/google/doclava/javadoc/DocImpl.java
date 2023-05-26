@@ -259,6 +259,6 @@ abstract class DocImpl<T extends Element> implements Doc, Comparable<Object> {
     @Override
     @Used(implemented = true)
     public SourcePosition position() {
-        return SourcePositionImpl.STUB;
+        return SourcePositionImpl.create(context, element);
     }
 }
