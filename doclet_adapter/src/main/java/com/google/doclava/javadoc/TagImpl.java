@@ -135,7 +135,7 @@ class TagImpl implements Tag {
     @Override
     @Used(implemented = true)
     public SourcePosition position() {
-        return SourcePositionImpl.STUB;
+        return SourcePositionImpl.create(context, owner, docTree);
     }
 
     private static final SimpleDocTreeVisitor<String, Context> NAME_VISITOR =
