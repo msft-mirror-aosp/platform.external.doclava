@@ -523,8 +523,7 @@ public class Doclava implements Doclet {
                     @Override public List<String> getNames() { return names; }
                     @Override public String       getParameters() { return ""; }
                     @Override public boolean      process(String opt, List<String> arguments) {
-                        // b/270335911: disable warnings as errors until new findings are addressed.
-                        // Errors.setWarningsAreErrors(true);
+                        Errors.setWarningsAreErrors(true);
                         return true;
                     }
                 }
