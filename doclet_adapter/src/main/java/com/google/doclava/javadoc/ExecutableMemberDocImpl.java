@@ -191,6 +191,6 @@ abstract class ExecutableMemberDocImpl extends MemberDocImpl<ExecutableElement> 
     @Override
     @Used(implemented = true)
     public SourcePosition position() {
-        return SourcePositionImpl.STUB;
+        return SourcePositionImpl.create(context, executableElement);
     }
 }
