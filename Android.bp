@@ -79,17 +79,6 @@ java_library_host {
     libs: [
         "guava",
     ],
-    javacflags: [
-        "--add-modules=jdk.compiler",
-        "--add-exports jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-        "--add-modules=jdk.javadoc",
-        "--add-exports jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED",
-        "--add-exports jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED",
-    ],
 }
 
 java_library_host {
