@@ -39,6 +39,12 @@ import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 import com.sun.javadoc.WildcardType;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.comp.AttrContext;
+import com.sun.tools.javac.comp.Env;
+import com.sun.tools.javac.code.Scope;
+import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.util.Names;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.NestingKind;
@@ -47,6 +53,10 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import jdk.javadoc.internal.tool.DocEnvImpl;
+import jdk.javadoc.internal.tool.ToolEnvironment;
+
+import static com.sun.tools.javac.code.Kinds.Kind.*;
 
 class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDoc {
 
@@ -531,6 +541,40 @@ class ClassDocImpl extends ProgramElementDocImpl<TypeElement> implements ClassDo
         }
 
         //
+        if (! (typeElement instanceof ClassSymbol)) {
+            return null;
+        }
+        ClassSymbol tsym = (ClassSymbol)typeElement;
+        // make sure that this symbol has been completed
+        // TODO: do we need this anymore ?
+        if (tsym.completer != null) {
+            tsym.complete();
+        }
+
+        // search imports
+        if (tsym.sourcefile != null) {
+
+            ToolEnvironment toolEnv = ((DocEnvImpl)(context.environment)).toolEnv;
+            //### This information is available only for source classes.
+            Env<AttrContext> compenv = toolEnv.getEnv(tsym);
+            if (compenv == null) {
+                return null;
+            }
+            Names names = tsym.name.table.names;
+            Scope s = compenv.toplevel.namedImportScope;
+            for (Symbol sym : s.getSymbolsByName(names.fromString(className))) {
+                if (sym.kind == TYP) {
+                    return ClassDocImpl.create((TypeElement)sym, context);
+                }
+            }
+
+            s = compenv.toplevel.starImportScope;
+            for (Symbol sym : s.getSymbolsByName(names.fromString(className))) {
+                if (sym.kind == TYP) {
+                    return ClassDocImpl.create((TypeElement)sym, context);
+                }
+            }
+        }
 
         return null;
     }
