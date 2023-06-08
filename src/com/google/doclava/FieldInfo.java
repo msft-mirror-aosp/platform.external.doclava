@@ -256,7 +256,7 @@ public class FieldInfo extends MemberInfo {
       } else if (c >= ' ' && c <= '~') {
         result += c;
       } else {
-        result += String.format("\\u%04x", Integer.valueOf((int) c));
+        result += String.format("\\u%04x", new Integer((int) c));
       }
     }
     return result;

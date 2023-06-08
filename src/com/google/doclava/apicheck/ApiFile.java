@@ -488,7 +488,7 @@ public class ApiFile {
           return Double.valueOf(val);
         }
       } else if ("char".equals(type)) {
-        return Integer.valueOf((char)Integer.parseInt(val));
+        return new Integer((char)Integer.parseInt(val));
       } else if ("java.lang.String".equals(type)) {
         if ("null".equals(val)) {
           return null;
