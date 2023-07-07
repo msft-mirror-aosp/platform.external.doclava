@@ -53,32 +53,8 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
-// Stub doclet to be used with JDK 17 until b/240421555 is fixed
-java_library_host {
-    name: "stubdoclet",
-    srcs: [
-        "src/com/google/stubdoclet/**/*.java",
-    ],
-    javacflags: [
-        "--add-exports=jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-    ],
-    use_tools_jar: true,
-}
-
-java_library_host {
-    name: "doclava",
-    java_version: "1.8",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-    ],
-    static_libs: [
-        "jsilver",
-        "guava",
-        "antlr-runtime",
-        "tagsoup",
-    ],
-    use_tools_jar: true,
+java_defaults {
+    name: "doclava_defaults",
     java_resource_dirs: ["res"],
     errorprone: {
         javacflags: [
@@ -87,32 +63,44 @@ java_library_host {
             "-Xep:ReturnValueIgnored:WARN",
         ],
     },
+    static_libs: [
+        "jsilver",
+        "antlr-runtime",
+        "tagsoup",
+        "doclava-doclet-adapter",
+    ],
+}
+
+java_library_host {
+    name: "doclava-doclet-adapter",
+    srcs: [
+        "doclet_adapter/src/main/java/**/*.java",
+    ],
+    libs: [
+        "guava",
+    ],
+}
+
+java_library_host {
+    name: "doclava",
+    defaults: ["doclava_defaults"],
+    srcs: [
+        "src/com/google/doclava/**/*.java",
+    ],
+    static_libs: [
+        "guava",
+    ],
 }
 
 java_library_host {
     name: "doclava-no-guava",
-    java_version: "1.8",
+    defaults: ["doclava_defaults"],
     srcs: [
         "src/com/google/doclava/**/*.java",
     ],
     libs: [
         "guava",
     ],
-    static_libs: [
-        "jsilver",
-        "antlr-runtime",
-        "tagsoup",
-    ],
-    use_tools_jar: true,
-    java_resource_dirs: ["res"],
-
-    errorprone: {
-        javacflags: [
-            "-Xep:FormatString:WARN",
-            "-Xep:ComparableType:WARN",
-            "-Xep:ReturnValueIgnored:WARN",
-        ],
-    },
 }
 
 
