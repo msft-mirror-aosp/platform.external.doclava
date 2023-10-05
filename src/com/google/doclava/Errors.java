@@ -25,6 +25,7 @@ public class Errors {
   public static boolean hadError = false;
   private static boolean lintsAreErrors = false;
   private static boolean warningsAreErrors = false;
+  private static List<SourcePositionInfo> baseline;
   private static TreeSet<ErrorMessage> allErrors = new TreeSet<ErrorMessage>();
 
   public static class ErrorMessage implements Comparable<ErrorMessage> {
@@ -108,7 +109,7 @@ public class Errors {
 
     int resolvedLevel = error.getLevel();
     if (resolvedLevel == LINT && lintsAreErrors) {
-      resolvedLevel = ERROR;
+      resolvedLevel = isBaselined(where) ? LINT : ERROR;
     }
     if (resolvedLevel == WARNING && warningsAreErrors) {
       resolvedLevel = ERROR;
@@ -172,6 +173,26 @@ public class Errors {
 
   public static void setWarningsAreErrors(boolean val) {
     warningsAreErrors = val;
+  }
+
+  public static void setLintBaseline(List<SourcePositionInfo> val) {
+    baseline = val;
+  }
+
+  private static boolean isBaselined(SourcePositionInfo errorPosition) {
+    if (baseline == null) {
+      return false;
+    }
+    for (SourcePositionInfo baselinedPosition : baseline) {
+      if (errorPosition.file.endsWith(baselinedPosition.file)) {
+        // The line number information
+        // 1) seems to be wrong, at least for broken link/see tags
+        // 2) will lead to baselines not working when files are edited
+        // So we ignore that information and just allow all lint errors in the file
+        return true;
+      }
+    }
+    return false;
   }
 
   public static class Error {
