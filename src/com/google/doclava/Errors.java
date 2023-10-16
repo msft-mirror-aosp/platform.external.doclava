@@ -25,7 +25,20 @@ public class Errors {
   public static boolean hadError = false;
   private static boolean lintsAreErrors = false;
   private static boolean warningsAreErrors = false;
+  private static List<LintBaselineEntry> baseline;
   private static TreeSet<ErrorMessage> allErrors = new TreeSet<ErrorMessage>();
+
+  public static class LintBaselineEntry {
+      final String file;
+      final String message;
+      final int code;
+
+      LintBaselineEntry(String file, String message, int code) {
+          this.file = file;
+          this.message = message;
+          this.code = code;
+      }
+  }
 
   public static class ErrorMessage implements Comparable<ErrorMessage> {
     final int resolvedLevel;
@@ -47,18 +60,59 @@ public class Errors {
       return msg.compareTo(other.msg);
     }
 
+    public static LintBaselineEntry parse(String line) {
+      if (line.trim().length() == 0) {
+        return null;
+      }
+      // Format, per toString() below, is:
+      // file:row: lint: multi-word-message [code]
+      // We ignore the row number, so that edits don't invalidate baselines entries.
+      String[] words = line.split(" ");
+
+      String[] fileAndRow = words[0].split(":");
+      if (fileAndRow.length != 2) {
+        System.err.println("ignored baseline entry (no file & row): " + line);
+        return null;
+      }
+      String file = fileAndRow[0];
+
+      String lastWord = words[words.length - 1];
+      if (lastWord.length() <= 3 || lastWord.charAt(0) != '['
+          || lastWord.charAt(lastWord.length() - 1) != ']') {
+        System.err.println("ignored baseline entry (no error code): " + line);
+        return null;
+      }
+      int code = Integer.parseInt(lastWord.substring(1, lastWord.length() - 1));
+
+      int messageStart = (words[0] + " lint: ").length();
+      int messageEnd = line.length() - lastWord.length() - 1;
+      String message = line.substring(messageStart, messageEnd);
+      return new LintBaselineEntry(file, message, code);
+    }
+
+
     @Override
     public String toString() {
+      final String DEFAULT = "\033[0m";
+      final String BOLD = "\033[1m";
+      final String RED = "\033[31m";
+      final String YELLOW = "\033[33m";
+      final String CYAN = "\033[36m";
+
       StringBuilder res = new StringBuilder();
       if (Doclava.android) {
-        res.append("\033[1m").append(pos.toString()).append(": ");
-        switch (error.getLevel()) {
-          case LINT: res.append("\033[36mlint: "); break;
-          case WARNING: res.append("\033[33mwarning: "); break;
-          case ERROR: res.append("\033[31merror: "); break;
-          default: break;
+        res.append(BOLD).append(pos.toString()).append(": ");
+        switch (resolvedLevel) {
+          case LINT: res.append(CYAN); break;
+          case WARNING: res.append(YELLOW); break;
+          case ERROR: res.append(RED); break;
         }
-        res.append("\033[0m");
+        switch (error.getLevel()) {
+          case LINT: res.append("lint: "); break;
+          case WARNING: res.append("warning: "); break;
+          case ERROR: res.append("error: "); break;
+        }
+        res.append(DEFAULT);
         res.append(msg);
         res.append(" [").append(error.code).append("]");
       } else {
@@ -75,7 +129,7 @@ public class Errors {
       }
       return res.toString();
     }
-    
+
     public Error error() {
       return error;
     }
@@ -108,7 +162,7 @@ public class Errors {
 
     int resolvedLevel = error.getLevel();
     if (resolvedLevel == LINT && lintsAreErrors) {
-      resolvedLevel = ERROR;
+      resolvedLevel = isBaselined(error, where, text) ? LINT : ERROR;
     }
     if (resolvedLevel == WARNING && warningsAreErrors) {
       resolvedLevel = ERROR;
@@ -124,7 +178,7 @@ public class Errors {
       hadError = true;
     }
   }
-  
+
   public static void clearErrors() {
     hadError = false;
     allErrors.clear();
@@ -133,14 +187,14 @@ public class Errors {
   public static void printErrors() {
     printErrors(allErrors);
   }
-  
+
   public static void printErrors(Set<ErrorMessage> errors) {
     for (ErrorMessage m : errors) {
       System.err.println(m.toString());
     }
     System.err.flush();
   }
-  
+
   public static Set<ErrorMessage> getErrors() {
     return allErrors;
   }
@@ -172,6 +226,34 @@ public class Errors {
 
   public static void setWarningsAreErrors(boolean val) {
     warningsAreErrors = val;
+  }
+
+  public static void setLintBaseline(List<LintBaselineEntry> val) {
+    baseline = val;
+  }
+
+  private static boolean isBaselined(Error error, SourcePositionInfo where, String text) {
+    if (baseline == null) {
+      return false;
+    }
+    // Baselines entries have had newlines removed, so remove newlines in
+    // what we're trying to match with the baselines as well.
+    text = text.replace("\n", "");
+    for (LintBaselineEntry entry : baseline) {
+      if (where.file.endsWith(entry.file) && error.code == entry.code) {
+        if (text.equals(entry.message)) {
+          return true;
+        }
+        if (entry.message.startsWith(text.replaceAll(" in android$", ""))) {
+          // This is a hack: when we generate a compatchanges.html, we generate
+          // a bunch of comments without context, placed naively the "android" package.
+          // TODO: Remove this once all the lint violations in ChangeId constant javadoc
+          // have been cleaned up.
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   public static class Error {
