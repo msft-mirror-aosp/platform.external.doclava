@@ -1844,7 +1844,11 @@ public class Doclava implements Doclet {
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(lintBaselineFile))) {
             List<LintBaselineEntry> baseline =
-                    reader.lines().map(ErrorMessage::parse).filter(e -> e != null).collect(toList());
+                    reader.lines()
+                        .filter(l -> !l.trim().isEmpty() && !l.startsWith("//"))
+                        .map(ErrorMessage::parse)
+                        .filter(e -> e != null)
+                        .collect(toList());
             Errors.setLintBaseline(baseline);
             return true;
         } catch (IOException exception) {
