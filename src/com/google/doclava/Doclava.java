@@ -339,7 +339,7 @@ public class Doclava implements Doclet {
                         return """
                                 Javadoc output directory path relative to root, which is specified \
                                 with '-d root'
-                                
+
                                 Default value: 'reference/'""";
                     }
                     @Override public Option.Kind  getKind() { return Option.Kind.STANDARD; }
@@ -361,7 +361,7 @@ public class Doclava implements Doclet {
                                 Relative path to documentation root.
                                 If set, use <path> as a (relative or absolute) link to \
                                 documentation root in .html pages.
-                                
+
                                 If not set, an auto-generated path traversal links will be used, \
                                 e.g. “../../../”.
                                 """;
