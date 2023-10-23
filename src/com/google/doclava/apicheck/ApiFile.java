@@ -228,7 +228,7 @@ public class ApiFile {
     }
     pkg.addClass(cl);
   }
-  
+
   private static void parseConstructor(Tokenizer tokenizer, ClassInfo cl, String token)
       throws ApiParseException {
     boolean pub = false;
@@ -617,7 +617,7 @@ public class ApiFile {
       throw new ApiParseException("Expected identifier: " + token, tokenizer.getLine());
     }
   }
-  
+
   static class Tokenizer {
     char[] mBuf;
     String mFilename;
