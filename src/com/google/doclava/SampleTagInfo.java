@@ -27,17 +27,17 @@ import java.util.regex.Matcher;
 
 /*
  * SampleTagInfo copies text from a given file into the javadoc comment.
- * 
+ *
  * The @include tag copies the text verbatim from the given file.
- * 
+ *
  * The @sample tag copies the text from the given file, stripping leading and trailing whitespace,
  * and reducing the indent level of the text to the indent level of the first non-whitespace line.
- * 
+ *
  * Both tags accept either a filename and an id or just a filename. If no id is provided, the entire
  * file is copied. If an id is provided, the lines in the given file between the first two lines
  * containing BEGIN_INCLUDE(id) and END_INCLUDE(id), for the given id, are copied. The id may be
  * only letters, numbers and underscore (_).
- * 
+ *
  * Four examples: {@include samples/ApiDemos/src/com/google/app/Notification1.java} {@sample
  * samples/ApiDemos/src/com/google/app/Notification1.java} {@include
  * samples/ApiDemos/src/com/google/app/Notification1.java Bleh} {@sample

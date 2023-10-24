@@ -334,7 +334,7 @@ public class DocFile {
         hdf.setValue("page.type", "about");
         hdf.setValue("page.category", "about");
       }
-      
+
       //set metadata for this file in jd_lists_unified
       PageMetadata.setPageMetadata(docfile, relative, outfile, hdf, Doclava.sTaglist);
 
