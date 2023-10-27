@@ -71,7 +71,7 @@ public class LinkReference {
 
   /**
    * Parse and resolve a link string.
-   * 
+   *
    * @param text the original text
    * @param base the class or whatever that this link is on
    * @param pos the original position in the source document
