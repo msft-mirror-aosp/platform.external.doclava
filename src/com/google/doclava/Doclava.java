@@ -339,7 +339,7 @@ public class Doclava implements Doclet {
                         return """
                                 Javadoc output directory path relative to root, which is specified \
                                 with '-d root'
-                                
+
                                 Default value: 'reference/'""";
                     }
                     @Override public Option.Kind  getKind() { return Option.Kind.STANDARD; }
@@ -361,7 +361,7 @@ public class Doclava implements Doclet {
                                 Relative path to documentation root.
                                 If set, use <path> as a (relative or absolute) link to \
                                 documentation root in .html pages.
-                                
+
                                 If not set, an auto-generated path traversal links will be used, \
                                 e.g. “../../../”.
                                 """;
@@ -1845,7 +1845,11 @@ public class Doclava implements Doclet {
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(lintBaselineFile))) {
             List<LintBaselineEntry> baseline =
-                    reader.lines().map(ErrorMessage::parse).filter(e -> e != null).collect(toList());
+                    reader.lines()
+                        .filter(l -> !l.trim().isEmpty() && !l.startsWith("//"))
+                        .map(ErrorMessage::parse)
+                        .filter(e -> e != null)
+                        .collect(toList());
             Errors.setLintBaseline(baseline);
             return true;
         } catch (IOException exception) {
