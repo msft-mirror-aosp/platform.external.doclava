@@ -43,9 +43,9 @@ class AnnotationTypeDocImpl extends ClassDocImpl implements AnnotationTypeDoc {
     private AnnotationTypeElementDoc[] elements;
 
     static AnnotationTypeDocImpl create(TypeElement e, Context context) {
-        if (e.getKind() != ElementKind.ANNOTATION_TYPE) {
-            throw new IllegalArgumentException("Expected ElementKind.ANNOTATION_TYPE as first "
-                    + "argument, but got " + e.getKind());
+        if (e.getKind() != ElementKind.ANNOTATION_TYPE && e.getKind() != ElementKind.CLASS) {
+            throw new IllegalArgumentException("Expected ElementKind.ANNOTATION_TYPE or "
+                    + "ElementKind.CLASS as first argument, but got " + e.getKind());
         }
         return context.caches.annotations.computeIfAbsent(e, el -> new AnnotationTypeDocImpl(el,
                 context));
