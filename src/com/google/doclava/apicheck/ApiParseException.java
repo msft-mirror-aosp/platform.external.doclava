@@ -22,7 +22,7 @@ public final class ApiParseException extends Exception {
 
   public ApiParseException() {
   }
-  
+
   public ApiParseException(String message) {
     super(message);
   }
@@ -38,7 +38,7 @@ public final class ApiParseException extends Exception {
     super(message);
     this.line = line;
   }
-  
+
   public String getMessage() {
     if (line > 0) {
       return super.getMessage() + " line " + line;
