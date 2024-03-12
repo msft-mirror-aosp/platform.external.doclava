@@ -544,8 +544,7 @@ public class Doclava implements Doclet {
                     @Override public List<String> getNames() { return names; }
                     @Override public String       getParameters() { return ""; }
                     @Override public boolean      process(String opt, List<String> arguments) {
-                        // b/270335653: disable lint warnings as errors until new findings are addressed.
-                        // Errors.setLintsAreErrors(true);
+                        Errors.setLintsAreErrors(true);
                         return true;
                     }
                 }
