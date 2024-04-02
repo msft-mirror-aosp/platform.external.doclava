@@ -90,6 +90,11 @@ java_library_host {
         "--add-exports jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED",
         "--add-exports jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED",
     ],
+    errorprone: {
+        javacflags: [
+            "-Xep:ComparableType:WARN",
+        ],
+    },
 }
 
 java_library_host {
