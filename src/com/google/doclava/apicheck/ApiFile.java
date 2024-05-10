@@ -228,7 +228,7 @@ public class ApiFile {
     }
     pkg.addClass(cl);
   }
-  
+
   private static void parseConstructor(Tokenizer tokenizer, ClassInfo cl, String token)
       throws ApiParseException {
     boolean pub = false;
@@ -488,7 +488,7 @@ public class ApiFile {
           return Double.valueOf(val);
         }
       } else if ("char".equals(type)) {
-        return new Integer((char)Integer.parseInt(val));
+        return Integer.valueOf((char)Integer.parseInt(val));
       } else if ("java.lang.String".equals(type)) {
         if ("null".equals(val)) {
           return null;
@@ -617,7 +617,7 @@ public class ApiFile {
       throw new ApiParseException("Expected identifier: " + token, tokenizer.getLine());
     }
   }
-  
+
   static class Tokenizer {
     char[] mBuf;
     String mFilename;

@@ -53,22 +53,6 @@ droiddoc_exported_dir {
     path: "res/assets/templates-sdk",
 }
 
-filegroup {
-    name: "doclava_sources_jdk8",
-    srcs: ["src/com/google/doclava/**/*.java"],
-}
-
-filegroup {
-    name: "doclava_sources_jdk17",
-    srcs: [
-        "src/com/google/doclava/**/*.java",
-        "doclava17/src/main/java/**/*.java",
-    ],
-    exclude_srcs: [
-        "src/com/google/doclava/Doclava.java",
-    ],
-}
-
 java_defaults {
     name: "doclava_defaults",
     java_resource_dirs: ["res"],
@@ -83,60 +67,43 @@ java_defaults {
         "jsilver",
         "antlr-runtime",
         "tagsoup",
+        "doclava-doclet-adapter",
     ],
 }
 
-// Stub doclet to be used with JDK 17 until b/240421555 is fixed
 java_library_host {
-    name: "stubdoclet",
+    name: "doclava-doclet-adapter",
     srcs: [
-        "src/com/google/stubdoclet/**/*.java",
+        "doclet_adapter/src/main/java/**/*.java",
     ],
-    javacflags: [
-        "--add-exports=jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-    ],
-    use_tools_jar: true,
-}
-
-java_library_host {
-    name: "doclava8",
-    defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk8"],
-    java_version: "1.8",
-    static_libs: [
-        "guava",
-    ],
-    use_tools_jar: true,
-}
-
-java_library_host {
-    name: "doclava8-no-guava",
-    defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk8"],
-    java_version: "1.8",
     libs: [
         "guava",
     ],
-    use_tools_jar: true,
+    javacflags: [
+        "--add-modules=jdk.compiler",
+        "--add-exports jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-modules=jdk.javadoc",
+        "--add-exports jdk.javadoc/jdk.javadoc.internal.doclets.formats.html=ALL-UNNAMED",
+        "--add-exports jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED",
+    ],
+    errorprone: {
+        javacflags: [
+            "-Xep:ComparableType:WARN",
+        ],
+    },
 }
 
 java_library_host {
     name: "doclava",
     defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
-    java_version: "17",
-    static_libs: [
-        "guava",
+    srcs: [
+        "src/com/google/doclava/**/*.java",
     ],
-}
-
-java_library_host {
-    name: "doclava-no-guava",
-    defaults: ["doclava_defaults"],
-    srcs: [":doclava_sources_jdk17"],
-    java_version: "17",
-    libs: [
+    static_libs: [
         "guava",
     ],
 }
