@@ -33,7 +33,7 @@ import java.util.Arrays;
 public class ClearPage {
   /*
    * public ClearPage() { String templ = "templates/index.cs"; String filename = "docs/index.html";
-   * 
+   *
    * data.setValue("A.B.C", "1"); data.setValue("A.B.D", "2"); }
    */
 

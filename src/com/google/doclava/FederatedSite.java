@@ -32,11 +32,11 @@ public final class FederatedSite {
   private final String name;
   private final URL baseUrl;
   private final ApiInfo apiInfo;
-  
+
   public FederatedSite(String name, URL baseUrl) throws ApiParseException {
     this.name = name;
     this.baseUrl = baseUrl;
-    
+
     try {
       URL xmlUrl = new URL(baseUrl + "/xml/current.xml");
       this.apiInfo = new ApiCheck().parseApi(xmlUrl);
@@ -44,7 +44,7 @@ public final class FederatedSite {
       throw new AssertionError(e);
     }
   }
-  
+
   /**
    * Constructs a federated site using an api file not contained on
    * the site itself.
@@ -66,7 +66,7 @@ public final class FederatedSite {
   public ApiInfo apiInfo() {
     return apiInfo;
   }
-  
+
   public URL baseUrl() {
     return baseUrl;
   }

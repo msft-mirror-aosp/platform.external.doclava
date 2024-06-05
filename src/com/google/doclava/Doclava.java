@@ -16,12 +16,16 @@
 
 package com.google.doclava;
 
+import static java.util.stream.Collectors.toList;
+
 import com.google.clearsilver.jsilver.JSilver;
 import com.google.clearsilver.jsilver.data.Data;
 import com.google.clearsilver.jsilver.resourceloader.ClassResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.CompositeResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.FileSystemResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.ResourceLoader;
+import com.google.doclava.Errors.ErrorMessage;
+import com.google.doclava.Errors.LintBaselineEntry;
 import com.google.doclava.javadoc.RootDocImpl;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
@@ -60,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -175,6 +180,7 @@ public class Doclava implements Doclet {
     private static String proguardFile;
     private static String proofreadFile;
     private static String todoFile;
+    private static String lintBaselineFile;
     private static String stubsDir;
     private static HashSet<String> stubPackages;
     private static HashSet<String> stubImportPackages;
@@ -333,7 +339,7 @@ public class Doclava implements Doclet {
                         return """
                                 Javadoc output directory path relative to root, which is specified \
                                 with '-d root'
-                                
+
                                 Default value: 'reference/'""";
                     }
                     @Override public Option.Kind  getKind() { return Option.Kind.STANDARD; }
@@ -355,7 +361,7 @@ public class Doclava implements Doclet {
                                 Relative path to documentation root.
                                 If set, use <path> as a (relative or absolute) link to \
                                 documentation root in .html pages.
-                                
+
                                 If not set, an auto-generated path traversal links will be used, \
                                 e.g. “../../../”.
                                 """;
@@ -523,8 +529,7 @@ public class Doclava implements Doclet {
                     @Override public List<String> getNames() { return names; }
                     @Override public String       getParameters() { return ""; }
                     @Override public boolean      process(String opt, List<String> arguments) {
-                        // b/270335911: disable warnings as errors until new findings are addressed.
-                        // Errors.setWarningsAreErrors(true);
+                        Errors.setWarningsAreErrors(true);
                         return true;
                     }
                 }
@@ -539,8 +544,22 @@ public class Doclava implements Doclet {
                     @Override public List<String> getNames() { return names; }
                     @Override public String       getParameters() { return ""; }
                     @Override public boolean      process(String opt, List<String> arguments) {
-                        // b/270335653: disable lint warnings as errors until new findings are addressed.
-                        // Errors.setLintsAreErrors(true);
+                        Errors.setLintsAreErrors(true);
+                        return true;
+                    }
+                }
+        );
+
+        options.add(
+                new Option() {
+                    private final List<String> names = List.of("-lintbaseline");
+                    @Override public int          getArgumentCount() { return 1; }
+                    @Override public String       getDescription() { return "Allowed lint errors"; }
+                    @Override public Option.Kind  getKind() { return Option.Kind.STANDARD; }
+                    @Override public List<String> getNames() { return names; }
+                    @Override public String       getParameters() { return "<file>"; }
+                    @Override public boolean      process(String opt, List<String> arguments) {
+                        lintBaselineFile = arguments.get(0);
                         return true;
                     }
                 }
@@ -1565,6 +1584,9 @@ public class Doclava implements Doclet {
     if (!readManifest()) {
       return false;
     }
+    if (!readLintBaselineFile(lintBaselineFile)) {
+      return false;
+    }
 
     // Set up the data structures
     Converter.makeInfo(root);
@@ -1814,6 +1836,25 @@ public class Doclava implements Doclet {
            }
         }
         return true;
+    }
+
+    private static boolean readLintBaselineFile(String lintBaselineFile) {
+        if (lintBaselineFile == null) {
+          return true;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(lintBaselineFile))) {
+            List<LintBaselineEntry> baseline =
+                    reader.lines()
+                        .filter(l -> !l.trim().isEmpty() && !l.startsWith("//"))
+                        .map(ErrorMessage::parse)
+                        .filter(e -> e != null)
+                        .collect(toList());
+            Errors.setLintBaseline(baseline);
+            return true;
+        } catch (IOException exception) {
+            exception.printStackTrace(System.err);
+            return false;
+        }
     }
 
   private static boolean readManifest() {
