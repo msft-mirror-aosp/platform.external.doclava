@@ -187,25 +187,35 @@ public class AndroidAuxSource implements AuxSource {
       // Document required features
       if ((type == TYPE_CLASS || type == TYPE_METHOD || type == TYPE_FIELD)
           && annotation.type().qualifiedNameMatches("android", "annotation.RequiresFeature")) {
-        AnnotationValueInfo value = null;
+        ArrayList<AnnotationValueInfo> values = new ArrayList<>();
+        boolean any = false;
         for (AnnotationValueInfo val : annotation.elementValues()) {
           switch (val.element().name()) {
             case "value":
-              value = val;
+              values.add(val);
+              break;
+            case "allOf":
+              values = (ArrayList<AnnotationValueInfo>) val.value();
+              break;
+            case "anyOf":
+              any = true;
+              values = (ArrayList<AnnotationValueInfo>) val.value();
               break;
           }
         }
-        if (value == null) continue;
+        if (values.isEmpty()) continue;
 
         ClassInfo pmClass = annotation.type().findClass("android.content.pm.PackageManager");
         ArrayList<TagInfo> valueTags = new ArrayList<>();
-        final String expected = String.valueOf(value.value());
-        for (FieldInfo field : pmClass.fields()) {
-          if (field.isHiddenOrRemoved()) continue;
-          if (String.valueOf(field.constantValue()).equals(expected)) {
-            valueTags.add(new ParsedTagInfo("", "",
-                "{@link " + pmClass.qualifiedName() + "#" + field.name() + "}", null,
-                SourcePositionInfo.UNKNOWN));
+        for (AnnotationValueInfo value : values) {
+          final String expected = String.valueOf(value.value());
+          for (FieldInfo field : pmClass.fields()) {
+            if (field.isHiddenOrRemoved()) continue;
+            if (String.valueOf(field.constantValue()).equals(expected)) {
+              valueTags.add(new ParsedTagInfo("", "",
+                  "{@link " + pmClass.qualifiedName() + "#" + field.name() + "}", null,
+                  SourcePositionInfo.UNKNOWN));
+            }
           }
         }
 
@@ -215,6 +225,7 @@ public class AndroidAuxSource implements AuxSource {
             null, SourcePositionInfo.UNKNOWN));
 
         Map<String, String> args = new HashMap<>();
+        if (any) args.put("any", "true");
         tags.add(new AuxTagInfo("@feature", "@feature", SourcePositionInfo.UNKNOWN, args,
             valueTags.toArray(TagInfo.getArray(valueTags.size()))));
       }
