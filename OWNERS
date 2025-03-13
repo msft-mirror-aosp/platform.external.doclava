@@ -1,8 +1,6 @@
 # Default code reviewers picked from top 3 or more developers.
 # Please update this list if you find better candidates.
-jsharkey@android.com
 ddougherty@google.com
-tiem@google.com
 tnorbye@google.com
 
 # [temporary] some of libcore members involved in
