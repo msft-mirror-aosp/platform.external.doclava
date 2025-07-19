@@ -367,7 +367,7 @@ public class Comment {
       mDeprecatedTagsList.add(new ParsedTagInfo("@deprecated", "@deprecated", text, mBase, pos));
     } else if (name.equals("@literal")) {
       mInlineTagsList.add(new LiteralTagInfo(text, pos));
-    } else if (name.equals("@code")) {
+    } else if (name.equals("@code") || name.equals("@snippet")) {
       mInlineTagsList.add(new CodeTagInfo(text, pos));
     } else if (name.equals("@hide") || name.equals("@removed")
             || name.equals("@pending") || name.equals("@doconly")) {
