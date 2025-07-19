@@ -25,6 +25,7 @@ import com.google.clearsilver.jsilver.resourceloader.CompositeResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.FileSystemResourceLoader;
 import com.google.clearsilver.jsilver.resourceloader.ResourceLoader;
 import com.google.doclava.Errors.ErrorMessage;
+import com.google.doclava.Errors.LintBaselineEntry;
 import com.google.doclava.javadoc.RootDocImpl;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
@@ -1841,24 +1842,9 @@ public class Doclava implements Doclet {
         if (lintBaselineFile == null) {
           return true;
         }
-
-        Function<String, SourcePositionInfo> mapper = (line) -> {
-            if (line.trim().length() == 0) {
-              return null;
-            }
-            String[] words = line.split(" ");
-            String[] cols = words[0].split(":");
-            if (cols.length != 2) {
-                System.err.println("ignored baseline entry: " + line);
-                return null;
-            }
-            int row = Integer.parseInt(cols[1]);
-            return new SourcePositionInfo(cols[0], row, 0);
-
-        };
         try (BufferedReader reader = new BufferedReader(new FileReader(lintBaselineFile))) {
-            List<SourcePositionInfo> baseline =
-                    reader.lines().map(mapper).filter(line -> line != null).collect(toList());
+            List<LintBaselineEntry> baseline =
+                    reader.lines().map(ErrorMessage::parse).filter(e -> e != null).collect(toList());
             Errors.setLintBaseline(baseline);
             return true;
         } catch (IOException exception) {
