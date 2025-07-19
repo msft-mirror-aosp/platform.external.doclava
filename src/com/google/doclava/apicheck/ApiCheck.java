@@ -84,7 +84,7 @@ public class ApiCheck {
       System.exit(report.code);
     }
   }
-  
+
   /**
    * Compares two api xml files for consistency.
    */
@@ -238,16 +238,16 @@ public class ApiCheck {
   public class Report {
     private int code;
     private Set<ErrorMessage> errors;
-    
+
     private Report(int code, Set<ErrorMessage> errors) {
       this.code = code;
       this.errors = errors;
     }
-    
+
     public int code() {
       return code;
     }
-    
+
     public Set<ErrorMessage> errors() {
       return errors;
     }

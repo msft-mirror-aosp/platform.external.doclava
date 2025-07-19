@@ -49,7 +49,7 @@ public class Hierarchy {
 
     /*
      * Set<String> keys = nodes.keySet(); for (String n: keys) { System.out.println("class: " + n);
-     * 
+     *
      * TreeSet<String> values = nodes.get(n); for (String v: values) {
      * System.out.println("       - " + v); } }
      */

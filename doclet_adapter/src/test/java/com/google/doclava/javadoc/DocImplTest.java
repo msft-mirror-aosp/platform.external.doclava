@@ -117,7 +117,7 @@ public class DocImplTest extends BaseTest {
                  and text. Then goes the second sentence of class javadoc. It is followed by a third
                  sentence that has some inline tags, such as {@code some code},
                  {@link java.lang.Integer label} and {@linkplain java.lang.Byte label}.
-                                
+
                  @author someone with a very long name
                  @version version
                  @see Throws
