@@ -90,18 +90,29 @@ public class Errors {
       return new LintBaselineEntry(file, message, code);
     }
 
+
     @Override
     public String toString() {
+      final String DEFAULT = "\033[0m";
+      final String BOLD = "\033[1m";
+      final String RED = "\033[31m";
+      final String YELLOW = "\033[33m";
+      final String CYAN = "\033[36m";
+
       StringBuilder res = new StringBuilder();
       if (Doclava.android) {
-        res.append("\033[1m").append(pos.toString()).append(": ");
-        switch (error.getLevel()) {
-          case LINT: res.append("\033[36mlint: "); break;
-          case WARNING: res.append("\033[33mwarning: "); break;
-          case ERROR: res.append("\033[31merror: "); break;
-          default: break;
+        res.append(BOLD).append(pos.toString()).append(": ");
+        switch (resolvedLevel) {
+          case LINT: res.append(CYAN); break;
+          case WARNING: res.append(YELLOW); break;
+          case ERROR: res.append(RED); break;
         }
-        res.append("\033[0m");
+        switch (error.getLevel()) {
+          case LINT: res.append("lint: "); break;
+          case WARNING: res.append("warning: "); break;
+          case ERROR: res.append("error: "); break;
+        }
+        res.append(DEFAULT);
         res.append(msg);
         res.append(" [").append(error.code).append("]");
       } else {
