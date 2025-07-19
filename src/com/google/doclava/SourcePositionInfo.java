@@ -34,7 +34,7 @@ public class SourcePositionInfo implements Comparable {
   /**
    * Given this position and str which occurs at that position, as well as str an index into str,
    * find the SourcePositionInfo.
-   * 
+   *
    * @throw StringIndexOutOfBoundsException if index &gt; str.length()
    */
   public static SourcePositionInfo add(SourcePositionInfo that, String str, int index) {
@@ -80,7 +80,7 @@ public class SourcePositionInfo implements Comparable {
     if (r != 0) return r;
     return this.line - that.line;
   }
-  
+
   /**
    * Build a SourcePositionInfo from the XML source= notation
    */

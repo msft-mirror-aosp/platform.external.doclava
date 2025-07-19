@@ -43,11 +43,11 @@ public final class DoclavaDiff {
   private final String outputDir;
   private final JSilver jSilver;
   private final List<FederatedSite> sites = new ArrayList<FederatedSite>();
-  
+
   public static void main(String[] args) {
     new DoclavaDiff(args).generateSite();
   }
-  
+
   public DoclavaDiff(String[] args) {
     // TODO: options parsing
     try {
@@ -58,7 +58,7 @@ public final class DoclavaDiff {
     } catch (Exception e) {
       throw new AssertionError(e);
     }
-    
+
     // TODO: accept external templates
     List<ResourceLoader> resourceLoaders = new ArrayList<ResourceLoader>();
     resourceLoaders.add(new FileSystemResourceLoader("assets/templates"));
@@ -66,12 +66,12 @@ public final class DoclavaDiff {
     ResourceLoader compositeResourceLoader = new CompositeResourceLoader(resourceLoaders);
     jSilver = new JSilver(compositeResourceLoader);
   }
-  
-  public void generateSite() {    
+
+  public void generateSite() {
     Data data = generateHdf();
     generateHtml("diff.cs", data, new File(outputDir + "/diff.html"));
   }
-  
+
   /**
    * Creates an HDF with this structure:
    * <pre>
@@ -86,7 +86,7 @@ public final class DoclavaDiff {
    * packages.0.classes.0.qualifiedName = java.lang.Object
    * packages.0.classes.0.sites.0.hasClass = 1
    * packages.0.classes.0.sites.0.link = http://proja.domain.com/reference/java/lang/Object
-   * packages.0.classes.0.sites.1.hasClass = 0 
+   * packages.0.classes.0.sites.1.hasClass = 0
    * packages.0.classes.0.methods.0.signature = wait()
    * packages.0.classes.0.methods.0.sites.0.hasMethod = 1
    * packages.0.classes.0.methods.0.sites.0.link = http://proja.domain.com/reference/java/lang/Object#wait
@@ -95,25 +95,25 @@ public final class DoclavaDiff {
    */
   private Data generateHdf() {
     Data data = jSilver.createData();
-    
+
     data.setValue("triangle.opened", "../assets/templates/assets/images/triangle-opened.png");
     data.setValue("triangle.closed", "../assets/templates/assets/images/triangle-closed.png");
-    
+
     int i = 0;
     for (FederatedSite site : sites) {
       String base = "sites." + (i++);
       data.setValue(base + ".name", site.name());
       data.setValue(base + ".url", site.baseUrl().toString());
     }
-    
+
     List<String> allPackages = knownPackages(sites);
-    
+
     int p = 0;
     for (String pkg : allPackages) {
       PackageInfo packageInfo = new PackageInfo(pkg);
       String packageBase = "packages." + (p++);
       data.setValue(packageBase + ".name", pkg);
-      
+
       int s = 0;
       for (FederatedSite site : sites) {
         String siteBase = packageBase + ".sites." + (s++);
@@ -124,17 +124,17 @@ public final class DoclavaDiff {
           data.setValue(siteBase + ".hasPackage", "0");
         }
       }
-      
+
       if (packageUniqueToSite(pkg, sites)) {
         continue;
       }
-            
+
       List<String> packageClasses = knownClassesForPackage(pkg, sites);
       int c = 0;
       for (String qualifiedClassName : packageClasses) {
         String classBase = packageBase + ".classes." + (c++);
         data.setValue(classBase + ".qualifiedName", qualifiedClassName);
-        
+
         s = 0;
         for (FederatedSite site : sites) {
           String siteBase = classBase + ".sites." + (s++);
@@ -146,22 +146,22 @@ public final class DoclavaDiff {
             data.setValue(siteBase + ".hasClass", "0");
           }
         }
-        
+
         if (agreeOnClass(qualifiedClassName, sites)) {
           continue;
         }
-        
+
         if (classUniqueToSite(qualifiedClassName, sites)) {
           continue;
         }
-        
+
         int m = 0;
         List<MethodInfo> methods = knownMethodsForClass(qualifiedClassName, sites);
         for (MethodInfo method : methods) {
           if (agreeOnMethod(qualifiedClassName, method, sites)) {
             continue;
           }
-          
+
           String methodBase = classBase + ".methods." + (m++);
           data.setValue(methodBase + ".signature", method.prettySignature());
           int k = 0;
@@ -183,10 +183,10 @@ public final class DoclavaDiff {
         }
       }
     }
-    
+
     return data;
   }
-  
+
   /**
    * Returns a list of all known packages from all sites.
    */
@@ -198,12 +198,12 @@ public final class DoclavaDiff {
         allPackages.add(pkg);
       }
     }
-    
+
     List<String> packages = new ArrayList<String>(allPackages);
     Collections.sort(packages);
     return packages;
   }
-  
+
   /**
    * Returns all known classes from all sites for a given package.
    */
@@ -219,35 +219,35 @@ public final class DoclavaDiff {
         allClasses.add(entry.getValue().qualifiedName());
       }
     }
-    
+
     List<String> classes = new ArrayList<String>(allClasses);
     Collections.sort(classes);
     return classes;
   }
-  
+
   /**
    * Returns all known methods from all sites for a given class.
    */
   private List<MethodInfo> knownMethodsForClass(String qualifiedClassName,
       List<FederatedSite> sites) {
-    
+
     Map<String, MethodInfo> allMethods = new HashMap<String, MethodInfo>();
     for (FederatedSite site : sites) {
       ClassInfo classInfo = site.apiInfo().findClass(qualifiedClassName);
       if (classInfo == null) {
         continue;
       }
-      
+
       for (Map.Entry<String, MethodInfo> entry: classInfo.allMethods().entrySet()) {
         allMethods.put(entry.getKey(), entry.getValue());
       }
     }
-    
+
     List<MethodInfo> methods = new ArrayList<MethodInfo>();
     methods.addAll(allMethods.values());
     return methods;
   }
-  
+
   /**
    * Returns true if the list of sites all completely agree on the given
    * package. All sites must possess the package, all classes it contains, and
@@ -259,7 +259,7 @@ public final class DoclavaDiff {
         return false;
       }
     }
-    
+
     List<String> classes = knownClassesForPackage(pkg, sites);
     for (String clazz : classes) {
       if (!agreeOnClass(clazz, sites)) {
@@ -268,7 +268,7 @@ public final class DoclavaDiff {
     }
     return true;
   }
-  
+
   /**
    * Returns true if the list of sites all agree on the given class. Each site
    * must have the class and agree on its methods.
@@ -282,26 +282,26 @@ public final class DoclavaDiff {
     }
     return true;
   }
-  
+
   /**
    * Returns true if the list of sites all contain the given method.
    */
   private boolean agreeOnMethod(String qualifiedClassName, MethodInfo method,
       List<FederatedSite> sites) {
-    
+
     for (FederatedSite site : sites) {
       ClassInfo siteClass = site.apiInfo().findClass(qualifiedClassName);
       if (siteClass == null) {
         return false;
       }
-      
+
       if (!siteClass.supportsMethod(method)) {
         return false;
       }
     }
     return true;
   }
-  
+
   /**
    * Returns true if the given package is known to exactly one of the given sites.
    */
@@ -314,7 +314,7 @@ public final class DoclavaDiff {
     }
     return numSites == 1;
   }
-  
+
   /**
    * Returns true if the given class is known to exactly one of the given sites.
    */
@@ -327,10 +327,10 @@ public final class DoclavaDiff {
     }
     return numSites == 1;
   }
-  
+
   private void generateHtml(String template, Data data, File file) {
     ClearPage.ensureDirectory(file);
-    
+
     OutputStreamWriter stream = null;
     try {
       stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");

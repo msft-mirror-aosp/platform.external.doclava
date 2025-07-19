@@ -46,7 +46,7 @@ class XmlApiFile extends DefaultHandler {
   private ClassInfo mCurrentClass;
   private AbstractMethodInfo mCurrentMethod;
   private Stack<ClassInfo> mClassScope = new Stack<ClassInfo>();
-  
+
   public static ApiInfo parseApi(InputStream xmlStream) throws ApiParseException {
     try {
       XMLReader xmlreader = XMLReaderFactory.createXMLReader();
@@ -78,14 +78,14 @@ class XmlApiFile extends DefaultHandler {
       // push the old outer scope for later recovery, then set
       // up the new current class object
       mClassScope.push(mCurrentClass);
-      
+
       ClassDoc classDoc = null;
       String rawCommentText = "";
       SourcePositionInfo position = SourcePositionInfo.fromXml(attributes.getValue("source"));
       String visibility = attributes.getValue("visibility");
       boolean isPublic = "public".equals(visibility);
       boolean isProtected = "protected".equals(visibility);
-      boolean isPrivate = "private".equals(visibility); 
+      boolean isPrivate = "private".equals(visibility);
       boolean isPackagePrivate = !isPublic && !isPrivate && !isProtected;
       boolean isStatic = Boolean.valueOf(attributes.getValue("static"));
       boolean isInterface = qName.equals("interface");
@@ -101,23 +101,23 @@ class XmlApiFile extends DefaultHandler {
       String qualifiedName = qualifiedName(mCurrentPackage.name(), name, mCurrentClass);
       String qualifiedTypeName = null; // TODO: not sure
       boolean isPrimitive = false;
-      
+
       mCurrentClass =
-          new ClassInfo(classDoc, rawCommentText, position, isPublic, isProtected, 
-          isPackagePrivate, isPrivate, isStatic, isInterface, isAbstract, isOrdinaryClass, 
+          new ClassInfo(classDoc, rawCommentText, position, isPublic, isProtected,
+          isPackagePrivate, isPrivate, isStatic, isInterface, isAbstract, isOrdinaryClass,
           isException, isError, isEnum, isAnnotation, isFinal, isIncluded, name, qualifiedName,
           qualifiedTypeName, isPrimitive);
-      
+
       mCurrentClass.setDeprecated("deprecated".equals(attributes.getValue("deprecated")));
       mCurrentClass.setContainingPackage(mCurrentPackage);
       String superclass = attributes.getValue("extends");
       if (superclass == null && !isInterface && !"java.lang.Object".equals(qualifiedName)) {
         throw new AssertionError("no superclass known for class " + name);
       }
-      
+
       // Resolve superclass after .xml completely parsed.
       mApi.mapClassToSuper(mCurrentClass, superclass);
-      
+
       TypeInfo typeInfo = Converter.obtainTypeFromString(qualifiedName) ;
       mCurrentClass.setTypeInfo(typeInfo);
       mCurrentClass.setAnnotations(new ArrayList<AnnotationInstanceInfo>());
@@ -131,7 +131,7 @@ class XmlApiFile extends DefaultHandler {
       String visibility = attributes.getValue("visibility");
       boolean isPublic = "public".equals(visibility);
       boolean isProtected = "protected".equals(visibility);
-      boolean isPrivate = "private".equals(visibility); 
+      boolean isPrivate = "private".equals(visibility);
       boolean isPackagePrivate = !isPublic && !isPrivate && !isProtected;
       boolean isFinal = Boolean.valueOf(attributes.getValue("final"));
       boolean isStatic = Boolean.valueOf(attributes.getValue("static"));
@@ -149,14 +149,14 @@ class XmlApiFile extends DefaultHandler {
       ArrayList<ClassInfo> thrownExceptions = new ArrayList<ClassInfo>();
       SourcePositionInfo position = SourcePositionInfo.fromXml(attributes.getValue("source"));
       ArrayList<AnnotationInstanceInfo> annotations = new ArrayList<AnnotationInstanceInfo>(); // TODO
-      
-      mCurrentMethod = 
+
+      mCurrentMethod =
           new MethodInfo(rawCommentText, typeParameters, name, signature, containingClass,
           realContainingClass, isPublic, isProtected, isPackagePrivate, isPrivate, isFinal,
           isStatic, isSynthetic, isAbstract, isSynchronized, isNative, isDefault,
           isAnnotationElement, kind, flatSignature, overriddenMethod, returnType, parameters,
           thrownExceptions, position, annotations);
-      
+
       mCurrentMethod.setDeprecated("deprecated".equals(attributes.getValue("deprecated")));
     } else if (qName.equals("constructor")) {
       final boolean pub = "public".equals(attributes.getValue("visibility"));
@@ -181,7 +181,7 @@ class XmlApiFile extends DefaultHandler {
       boolean isPackagePrivate = visibility.equals("");
       String typeName = attributes.getValue("type");
       TypeInfo type = Converter.obtainTypeFromString(typeName);
-      
+
       Object value;
       try {
           value = ApiFile.parseValue(typeName, attributes.getValue("value"));
@@ -196,7 +196,7 @@ class XmlApiFile extends DefaultHandler {
           getValue("transient")), Boolean.valueOf(attributes.getValue("volatile")), false,
           type, "", value, SourcePositionInfo.fromXml(attributes.getValue("source")),
           new ArrayList<AnnotationInstanceInfo>());
-      
+
       fInfo.setDeprecated("deprecated".equals(attributes.getValue("deprecated")));
       mCurrentClass.addField(fInfo);
     } else if (qName.equals("parameter")) {
@@ -235,7 +235,7 @@ class XmlApiFile extends DefaultHandler {
   public ApiInfo getApi() {
     return mApi;
   }
-  
+
   private String qualifiedName(String pkg, String className, ClassInfo parent) {
     String parentQName = (parent != null) ? (parent.qualifiedName() + ".") : "";
       return pkg + "." + parentQName + className;
