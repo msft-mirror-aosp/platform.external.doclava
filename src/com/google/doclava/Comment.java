@@ -243,9 +243,10 @@ public class Comment {
       //       otherwise, we're in the middle of a block, keep looking
       int index = text.indexOf('@', start);
 
-      // no @ in text or index at first position
+      // no @ in text or index at first position or last position
       if (index == -1 ||
-              (index == 0 && text.length() > 1 && !isWhitespaceChar(text.charAt(index+1)))) {
+              (index == 0 && text.length() > 1 && !isWhitespaceChar(text.charAt(index+1))) ||
+              (index == text.length() - 1)) {
           return index;
       }
 
