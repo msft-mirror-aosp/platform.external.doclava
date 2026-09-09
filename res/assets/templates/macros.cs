@@ -266,7 +266,13 @@ def:see_also_tags(also) ?><?cs
 # print the API Level ?><?cs
 def:since_tags(obj) ?><?cs
 if:reference.apilevels && obj.since ?><?cs
-  if:string.slice(obj.since,0,1) > 0 ?>
+  if:obj.since == "10000" ?><?cs
+    if:obj.sdkextsince ?>Added in <a href="<?cs
+      var:toroot ?>sdkExtensions"><?cs var:obj.sdkextsince ?></a><?cs
+    else ?><a href="<?cs
+      var:toroot ?>guide/topics/manifest/uses-sdk-element.html#ApiLevels">API under development</a><?cs
+    /if ?><?cs
+  elif:string.slice(obj.since,0,1) > 0 ?>
     Added in <?cs
       if:string.find(obj.since,'.') > -1
         ?><a href="<?cs var:toroot ?>topic/libraries/support-library/revisions.html">version<?cs
