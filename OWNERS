@@ -3,6 +3,8 @@
 ddougherty@google.com
 tnorbye@google.com
 
+include platform/frameworks/base:/SDK_OWNERS
+
 # [temporary] some of libcore members involved in
 # Doclava migration to Java 17.
 # See http://b/260694901
